@@ -3,4 +3,6 @@ module ChemicalComponents
 
 using ChemicalElements
 
+const ElementalQuantity = Pair{Symbol, <:Number}
+
 end # (module ChemicalComponents)
