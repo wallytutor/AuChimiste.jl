@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 module ChemicalElements
 
+using ChemicalExceptions
+
 #######################################################################
 # INTERNALS: data
 #######################################################################
@@ -144,42 +146,6 @@ const ELEMENTS = let
 end
 
 const USER_ELEMENTS = deepcopy(ELEMENTS)
-
-#######################################################################
-# INTERNALS: errors
-#######################################################################
-
-abstract type ChemicalElementsError <: Exception end
-
-struct NoSuchElementError <: ChemicalElementsError
-    message::String
-
-    function NoSuchElementError(e)
-        return new("""\
-            No such element $(e) in the elements dictionary. If you are \
-            trying to access an isotope, please make sure you create it \
-            before.
-            """)
-    end
-end
-
-struct NoIsotopeProvidedError <: ChemicalElementsError
-    message::String
-
-    function NoIsotopeProvidedError(e)
-        return new("""\
-            Accessing the atomic mass of unstable element $(e) is not \
-            supported. Please consider creating a named isotope of \
-            this element with `add_isotope`.
-            """)
-    end
-end
-
-function Base.show(io::IO, err::ChemicalElementsError)
-    print(io, "$(nameof(typeof(err))): $(err.message)")
-end
-
-Base.showerror(io::IO, err::ChemicalElementsError) = Base.show(io, err)
 
 #######################################################################
 # INTERNALS: helpers

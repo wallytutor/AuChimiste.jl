@@ -4,13 +4,13 @@
 CurrentModule = ChemicalElements
 ```
 
-This is an extremely simple module used as the base brick of `AuChimiste`. Below we go through the whole of its functionalities in just a few lines of code. In general you only need to worry about using `ChemicalElements` directly if your calculations require isotopes to be added. The default table of elements provides access only to stable elements.
-
-## Database manipulation
-
 ```@setup 1
 using ChemicalElements
 ```
+
+This is an extremely simple module used as the base brick of `AuChimiste`. Below we go through the whole of its functionalities in just a few lines of code. In general you only need to worry about using `ChemicalElements` directly if your calculations require isotopes to be added. The default table of elements provides access only to stable elements.
+
+## Database manipulation
 
 You can get a list of available atomic symbols with [`list_elements`](@ref). Suppose you want to check if deuterium *D* is present in the list, you can use its [symbol](https://docs.julialang.org/en/v1/base/base/#Core.Symbol) for inspection:
 
