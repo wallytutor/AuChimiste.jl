@@ -8,7 +8,7 @@ Please read the [docs](https://wallytutor.github.io/AuChimiste.jl/dev/).
 
 - [ ] Provide chemical elements with symbolic support and built-in data; utilities are expected to allow users to define their own elements (*e.g.* isotopes) and retrieve data. This is all implemented in [ChemicalElements.jl](src/ChemicalElements.jl).
 
-- [ ] By making use of `ChemicalElements` we provide [ChemicalComponents.jl](src/ChemicalComponents.jl). This module is called this way because it is intended to include anything from species, compounds, solids, etc., so no other named suited its ends. It is responsible by:
+- [ ] By making use of `ChemicalElements` we provide [ChemicalComponents.jl](src/ChemicalComponents.jl). This module is called this way because it is intended to include anything from species, compounds, solids, etc., so no other name suited its ends. It is responsible by:
 
     - [ ] Provide creation of arbitrary compounds from mass or molar composition (try to understand this term in the broader sense) with the other composition being computed, *i.e.* if mass fractions were provided, the compound can access its molar composition, and molecular mass.
 
