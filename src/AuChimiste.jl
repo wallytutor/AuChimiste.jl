@@ -13,7 +13,7 @@ function __init__()
     return nothing
 end
 
-include("ChemicalElements.jl")
-@reexport using .ChemicalElements
+# include("ChemicalElements.jl")
+# @reexport using .ChemicalElements
 
 end # (module AuChimiste)
