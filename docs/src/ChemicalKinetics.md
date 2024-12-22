@@ -1,0 +1,5 @@
+# ChemicalKinetics
+
+```@meta
+CurrentModule = ChemicalKinetics
+```

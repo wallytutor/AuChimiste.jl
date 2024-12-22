@@ -1,2 +1,9 @@
+name = "AuChimiste"
+uuid = "2417a9ef-3fc8-4114-8f40-9dca8bc29aaf"
+authors = ["Walter Dal'Maz Silva <walter.dalmazsilva@gmail.com>"]
+version = "0.1.0"
+
 [deps]
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
