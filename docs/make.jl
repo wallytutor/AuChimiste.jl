@@ -12,6 +12,7 @@ using ChemicalElements
 using ChemicalComponents
 using ChemicalKinetics
 using ChemicalReactors
+using ChemicalThermodynamics
 using CombustionChemistry
 using PhysicalChemistry
 
@@ -25,6 +26,7 @@ modules = [
     ChemicalElements,
     ChemicalKinetics,
     ChemicalReactors,
+    ChemicalThermodynamics,
     CombustionChemistry,
     PhysicalChemistry,
 ]
@@ -37,6 +39,7 @@ pages = [
     "ChemicalReactors.md",
     "PhysicalChemistry.md",
     "CombustionChemistry.md",
+    "ChemicalThermodynamics.md",
 ]
 
 format = Documenter.HTML(
