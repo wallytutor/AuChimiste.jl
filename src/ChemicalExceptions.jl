@@ -41,6 +41,17 @@ struct EmptyCompositionError <: ChemicalComponentsError
     end
 end
 
+struct InvalidScalerError <: ChemicalComponentsError
+    message::String
+
+    function InvalidScalerError(s, e)
+        return new("""\
+            Scaling configuration must be a valid element from the \
+            system. Could not find $(s) among $(e).
+            """)
+    end
+end
+
 function Base.show(io::IO, err::ChemicalException)
     print(io, "$(nameof(typeof(err))): $(err.message)")
 end
@@ -52,5 +63,6 @@ end
 export NoSuchElementError
 export NoIsotopeProvidedError
 export EmptyCompositionError
+export InvalidScalerError
 
 end # (module ChemicalExceptions)
