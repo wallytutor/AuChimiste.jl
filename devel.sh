@@ -2,7 +2,6 @@
 
 SCRIPT="
 using AuChimiste;
-using ChemicalElements;
 using ChemicalComponents;
 using ChemicalKinetics;
 using ChemicalReactors;

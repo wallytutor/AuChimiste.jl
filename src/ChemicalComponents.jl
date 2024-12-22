@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 module ChemicalComponents
 
-using ChemicalComponents
+using ChemicalElements
 
 end # (module ChemicalComponents)
