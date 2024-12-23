@@ -196,10 +196,12 @@ end
 # INTERNALS
 #######################################################################
 
-function Base.show(io::IO, e::AtomicData)
-    print(io, "$(e.symbol) ($(e.number), $(e.name)) $(e.mass) kg/kmol")
-end
-
+"""
+Default table of elements. This table should not be modified by any
+internal or external operation. Although it is declared as constant,
+that means simply that `ELEMENTS` cannot be attributed to, but the
+resulting dictionary may be accidentally modified.
+"""
 const ELEMENTS = let
     mapping(e) = Symbol(e[1]) => AtomicData(e...)
 
@@ -327,14 +329,31 @@ const ELEMENTS = let
     Dict(data)
 end
 
+"""
+Runtime modifiable table of elements. All operations must be performed
+in this table so that user-defined elements (isothopes) can be made
+available. This is the table to be internally modified and read by all
+functions requiring to access data.
+"""
 const USER_ELEMENTS = deepcopy(ELEMENTS)
 
+"""
+    handle_element(f, e)
+
+Applies function `f` to element `e`. This function wraps the call of
+`f` with a standardized error-handling used accross the module.
+"""
 function handle_element(f, e)
     e = (e isa String) ? Symbol(e) : e
     !has_element(e) && throw(NoSuchElementError(e))
     return f(USER_ELEMENTS[e])
 end
 
+"""
+    find_element(v, prop)
+
+Find element for which property `prop` has value `v`.
+"""
 function find_element(v, prop)
     selector(kv) = getproperty(kv[2], prop) == v
     return filter(selector, USER_ELEMENTS) |> values |> first

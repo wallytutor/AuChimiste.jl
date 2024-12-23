@@ -36,7 +36,11 @@ md"""
 # AuChimiste Sandbox
 """
 
+# ╔═╡ c56fc68f-f2c7-42dc-9501-884668c81fdb
+
+
 # ╔═╡ Cell order:
 # ╟─fd0a3399-8589-428c-9036-0d8a57ae6a92
 # ╟─3aeadbf4-c14d-11ef-3fd8-09cedaa2b25d
 # ╟─72358599-fbdc-49c5-af59-b69c9ce3d0dd
+# ╠═c56fc68f-f2c7-42dc-9501-884668c81fdb

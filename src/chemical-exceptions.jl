@@ -5,10 +5,7 @@ export NoIsotopeProvidedError
 export EmptyCompositionError
 export InvalidScalerError
 
-abstract type ChemicalException       <: Exception end
-abstract type ChemicalElementsError   <: ChemicalException end
-abstract type ChemicalComponentsError <: ChemicalException end
-
+"Element (or isotope) was not found in user database."
 struct NoSuchElementError <: ChemicalElementsError
     message::String
 
@@ -21,6 +18,7 @@ struct NoSuchElementError <: ChemicalElementsError
     end
 end
 
+"Unstable elements do not provide atomic mass."
 struct NoIsotopeProvidedError <: ChemicalElementsError
     message::String
 
@@ -33,6 +31,7 @@ struct NoIsotopeProvidedError <: ChemicalElementsError
     end
 end
 
+"A composition set is missing for the given component."
 struct EmptyCompositionError <: ChemicalComponentsError
     message::String
 
@@ -45,6 +44,7 @@ struct EmptyCompositionError <: ChemicalComponentsError
     end
 end
 
+"The provided scaler targets an unspecified element."
 struct InvalidScalerError <: ChemicalComponentsError
     message::String
 
@@ -54,12 +54,4 @@ struct InvalidScalerError <: ChemicalComponentsError
             system. Could not find $(s) among $(e).
             """)
     end
-end
-
-function Base.show(io::IO, err::ChemicalException)
-    print(io, "$(nameof(typeof(err))): $(err.message)")
-end
-
-function Base.showerror(io::IO, err::ChemicalException)
-    Base.show(io, err)
 end

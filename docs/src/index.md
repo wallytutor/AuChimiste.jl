@@ -28,14 +28,6 @@ If this module was useful in your work, please consider citing us [auchimistejl]
 
 - **WIP:** Going one step further, [chemical-thermodynamics.jl](https://github.com/wallytutor/AuChimiste.jl/tree/main/src/chemical-thermodynamics.jl) makes use of some of the above to provide chemical thermodynamics computations, with focus in phase equilibria and [CALPHAD](https://calphad.org/) approaches.
 
-## Development rules
-
-- Code written, code documented, code tested.
-- Code lines make 72 characters, never more than 79.
-- Code is not cluttered and comments are minimal.
-- Code abuses of multiple dispatch if needed.
-- Code is Julia, nothing else.
-
 ## Related tools
 
 Searching for [chemistry](https://juliapackages.com/packages?search=chemistry), [kinetics](https://juliapackages.com/packages?search=kinetics), or [thermodynamics](https://juliapackages.com/packages?search=thermodynamics) in Julia Packages does not lead to any convincing package or ecosystem in competition with what is aimed here, justifying its existence. 

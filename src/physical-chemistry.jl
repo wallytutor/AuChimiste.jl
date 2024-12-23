@@ -49,10 +49,20 @@ end
 # INTERNALS
 #######################################################################
 
+"""
+    mean_molecular_mass_y(Y, W)
+
+Mean molecular mass computed from mass fractions.
+"""
 function mean_molecular_mass_y(Y, W)
     return sum(@. Y / W)^(-1.0)
 end
 
+"""
+    mean_molecular_mass_x(X, W)
+
+Mean molecular mass computed from mole fractions.
+"""
 function mean_molecular_mass_x(X, W)
     return sum(@. X * W)
 end
