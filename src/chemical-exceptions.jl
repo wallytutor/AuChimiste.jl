@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
 
-export NoSuchElementError
-export NoIsotopeProvidedError
-export EmptyCompositionError
-export InvalidScalerError
-
 "Element (or isotope) was not found in user database."
 struct NoSuchElementError <: ChemicalElementsError
     message::String
