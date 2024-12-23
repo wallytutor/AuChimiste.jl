@@ -30,7 +30,7 @@ function Base.:+(ca::ChemicalComponent, cb::ChemicalComponent)::ChemicalComponen
     da = Dict(zip(ca.elements, ca.coefficients))
     db = Dict(zip(cb.elements, cb.coefficients))
 
-    f(e) = get(da, e, 0.0)+get(db, e, 0.0)
+    f(e) = get(da, e, 0.0) + get(db, e, 0.0)
     newcomp = map(e->Pair(e, f(e)), elements)
 
     return component(:stoichiometry; newcomp...)
@@ -55,4 +55,32 @@ function Base.:-(ca::ChemicalComponent, cb::ChemicalComponent)::ChemicalComponen
     end
 
     return tmp
+end
+
+function Base.:*(scale::Number, qty::ComponentQuantity)
+    return ComponentQuantity(scale * qty.mass, qty.composition)
+end
+
+function Base.:*(qty::ComponentQuantity, scale::Number)
+    return scale * qty
+end
+
+function Base.:+(qa::ComponentQuantity, qb::ComponentQuantity)
+    ma, mb = qa.mass, qb.mass
+    mass = ma + mb
+
+    ca, cb = qa.composition, qb.composition
+    elements = sort(union(ca.elements, cb.elements))
+
+    # TODO: this is probably faster and more readable than using an
+    # index look-up approach, but I need to test that too because
+    # it avoids creating intermediate elements (memory footprint).
+    da = Dict(zip(ca.elements, ca.mass_fractions))
+    db = Dict(zip(cb.elements, cb.mass_fractions))
+
+    f(e) = ma * get(da, e, 0.0) + mb * get(db, e, 0.0)
+    newcomp = map(e->Pair(e, f(e)), elements)
+
+    c = component(:mass_proportions; newcomp...)
+    return ComponentQuantity(mass, c)
 end

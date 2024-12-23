@@ -7,6 +7,7 @@ export mass_proportions
 export stoichiometry_map
 export mole_fractions_map
 export mass_fractions_map
+export quantity
 
 """
 Represents a chemical component.
@@ -47,6 +48,11 @@ struct ChemicalComponent
 
     "Molar mass of corresponding stoichiometry."
     molar_mass::Float64
+end
+
+struct ComponentQuantity
+	mass::Float64
+	composition::ChemicalComponent
 end
 
 """
@@ -123,6 +129,14 @@ Returns component map of elemental mass fractions.
 """
 function mass_fractions_map(c::ChemicalComponent)
    return NamedTuple(zip(c.elements, c.mass_fractions))
+end
+
+function quantity(c::ChemicalComponent, mass::Float64)
+    return ComponentQuantity(mass, c)
+end
+
+function quantity(spec::Symbol, mass::Float64; kw...)
+    return quantity(component(spec; kw...), mass)
 end
 
 #######################################################################
