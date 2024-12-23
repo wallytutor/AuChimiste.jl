@@ -157,7 +157,6 @@ end
 
 const USER_ELEMENTS = deepcopy(ELEMENTS)
 
-
 function handle_element(f, e)
     e = (e isa String) ? Symbol(e) : e
     !has_element(e) && throw(NoSuchElementError(e))
