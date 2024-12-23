@@ -3,8 +3,18 @@ module ChemicalElements
 
 using ChemicalExceptions
 
+export has_element
+export list_elements
+export reset_elements_table
+export add_element
+export add_isotope
+export atomic_mass
+export atomic_number
+export element_name
+export element
+
 #######################################################################
-# INTERNALS: data
+# INTERNALS
 #######################################################################
 
 struct AtomicData
@@ -147,9 +157,6 @@ end
 
 const USER_ELEMENTS = deepcopy(ELEMENTS)
 
-#######################################################################
-# INTERNALS: helpers
-#######################################################################
 
 function handle_element(f, e)
     e = (e isa String) ? Symbol(e) : e
@@ -157,22 +164,56 @@ function handle_element(f, e)
     return f(USER_ELEMENTS[e])
 end
 
+function find_element(v, prop)
+    selector(kv) = getproperty(kv[2], prop) == v
+    return filter(selector, USER_ELEMENTS) |> values |> first
+end
+
 #######################################################################
-# FUNCTIONS: data related
+# API
 #######################################################################
 
-has_element(e::Union{String, Symbol}) = haskey(USER_ELEMENTS, Symbol(e))
+"""
+    has_element(e::Union{String, Symbol})
 
+Check if element exists in list of atomic symbols.
+"""
+function has_element(e::Union{String, Symbol})
+    return haskey(USER_ELEMENTS, Symbol(e))
+end
+
+"""
+    list_elements()
+
+Provides access to the list of atomic symbols.
+"""
 function list_elements()
     return Vector{Symbol}([keys(USER_ELEMENTS)...])
 end
 
+"""
+    reset_elements_table()
+
+Remove any user-defined element.
+"""
 function reset_elements_table()
     empty!(USER_ELEMENTS)
     merge!(USER_ELEMENTS, ELEMENTS)
     return
 end
 
+"""
+    add_element(
+        symbol::String,
+        name::String,
+        number::Int64,
+        mass::Float64;
+        verbose = true
+    )
+
+Create chemical element `name` with associated `symbol` and atomic
+`number`. The value of atomic `mass` is given in grams per mole.
+"""
 function add_element(
         symbol::Union{Symbol,String},
         name::String,
@@ -199,6 +240,18 @@ function add_element(
     return USER_ELEMENTS[key]
 end
 
+"""
+    add_isotope(
+        symbol::String,
+        mass::Float64;
+        name = nothing,
+        verbose = true
+    )
+
+Create isotope of element `symbol` with provided `mass` in grams per
+mole. If isothope is known by a specific `name` then use it instead
+of a *name-mass* naming scheme.
+"""
 function add_isotope(
         symbol::Union{Symbol,String},
         mass::Float64;
@@ -220,135 +273,62 @@ function add_isotope(
     return add_element(iso_symbol, iso_name, e.number, mass; verbose)
 end
 
-#######################################################################
-# FUNCTIONS: atomic_mass
-#######################################################################
+@doc """
+    atomic_mass(e::Union{String,Symbol})
+
+Atomic mass of element [g/mol].
+""" atomic_mass
 
 function atomic_mass(e::AtomicData)
     (e.mass < 0.0) && throw(NoIsotopeProvidedError(e.symbol))
     return e.mass
 end
 
-atomic_mass(e::Union{String,Symbol}) = handle_element(atomic_mass, e)
-
-#######################################################################
-# FUNCTIONS: atomic_number
-#######################################################################
-
-atomic_number(e::AtomicData) = e.number
-
-atomic_number(e::Union{String,Symbol}) = handle_element(atomic_number, e)
-
-#######################################################################
-# FUNCTIONS: element_name
-#######################################################################
-
-element_name(e::AtomicData) = e.name
-
-element_name(e::Union{String,Symbol}) = handle_element(element_name, e)
-
-#######################################################################
-# FUNCTIONS: element
-#######################################################################
-
-function find_element(v, prop)
-    selector(kv) = getproperty(kv[2], prop) == v
-    return filter(selector, USER_ELEMENTS) |> values |> first
+function atomic_mass(e::Union{String,Symbol})
+    return handle_element(atomic_mass, e)
 end
 
-element(e::Int64) = find_element(e, :number)
-
-element(e::Union{String,Symbol}) = find_element(String(e), :symbol)
-
-#######################################################################
-# API
-#######################################################################
-
-@doc """\
-
-    has_element(e::Union{String, Symbol})
-
-Check if element exists in list of atomic symbols.
-""" has_element
-export has_element
-
-@doc """\
-    
-    list_elements()
-
-Provides access to the list of atomic symbols.
-""" list_elements
-export list_elements
-
-@doc """\
-
-    reset_elements_table()
-
-Remove any user-defined element.
-""" reset_elements_table
-export reset_elements_table
-
-@doc """\
-
-    add_element(
-        symbol::String,
-        name::String,
-        number::Int64,
-        mass::Float64;
-        verbose = true
-    )
-
-Create chemical element `name` with associated `symbol` and atomic
-`number`. The value of atomic `mass` is given in grams per mole.
-""" add_element
-export add_element
-
-@doc """\
-
-    add_isotope(
-        symbol::String,
-        mass::Float64;
-        name = nothing,
-        verbose = true
-    )
-
-Create isotope of element `symbol` with provided `mass` in grams per
-mole. If isothope is known by a specific `name` then use it instead
-of a *name-mass* naming scheme.
-""" add_isotope
-export add_isotope
-
-@doc """\
-
-    atomic_mass(e::Union{String,Symbol})
-
-Atomic mass of element [g/mol].
-""" atomic_mass
-export atomic_mass
-
-@doc """\
-
+@doc """
     atomic_number(e::Union{String,Symbol})
 
 Atomic number of element.
 """ atomic_number
-export atomic_number
 
-@doc """\
+function atomic_number(e::AtomicData)
+    return e.number
+end
 
+function atomic_number(e::Union{String,Symbol})
+    return handle_element(atomic_number, e)
+end
+
+@doc """
     element_name(e::Union{String,Symbol})
 
 Element name from atomic symbol.
 """ element_name
-export element_name
 
-@doc """\
+function element_name(e::AtomicData)
+    return e.name
+end
 
+function element_name(e::Union{String,Symbol})
+    return handle_element(element_name, e)
+end
+
+@doc """
     element(e::Int64)
     element(e::Union{String,Symbol})
 
 Element data from symbol or number.
 """ element
-export element
+
+function element(e::Int64)
+    return find_element(e, :number)
+end
+
+function element(e::Union{String,Symbol})
+    return find_element(String(e), :symbol)
+end
 
 end # (module ChemicalElements)
