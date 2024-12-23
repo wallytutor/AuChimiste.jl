@@ -1,5 +1,0 @@
-# ChemicalReactors
-
-```@meta
-CurrentModule = ChemicalReactors
-```

@@ -1,5 +1,0 @@
-# CombustionChemistry
-
-```@meta
-CurrentModule = CombustionChemistry
-```

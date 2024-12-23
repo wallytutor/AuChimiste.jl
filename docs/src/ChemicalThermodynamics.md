@@ -1,5 +1,0 @@
-# ChemicalThermodynamics
-
-```@meta
-CurrentModule = ChemicalThermodynamics
-```

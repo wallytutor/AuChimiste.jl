@@ -1,16 +1,33 @@
-# ChemicalElements
+# Getting Started
 
-```@meta
-CurrentModule = ChemicalElements
-```
+## Importing tools
 
-```@setup 1
+Rather than providing a single package with exported functionalities and sub-modules, `AuChimiste` uses a different approach of *toolbox* package. By that it is meant that a main package is available and upon its import other packages become exposed to the import path. This strongly decreases development time as pre-compilation becomes much faster, specially in the early stages of development. 
+
+```@example 1
+import AuChimiste
+
+# Then you can import one (or all) of the following:
 using ChemicalElements
+using ChemicalComponents
+using ChemicalKinetics
+using ChemicalReactors
+using CombustionChemistry
+using PhysicalChemistry
+using ChemicalThermodynamics
 ```
 
-This is an extremely simple module used as the base brick of `AuChimiste`. Below we go through the whole of its functionalities in just a few lines of code. In general you only need to worry about using `ChemicalElements` directly if your calculations require isotopes to be added. The default table of elements provides access only to stable elements.
+!!! warning "Beware!"
 
-## Database manipulation
+    In the future it is already planned to merge all sub-modules into a single namespace, but as stated above, for the current early development days it is considered faster to proceed this way.
+
+## Elements database
+
+A built-in elements database is provied by `ChemicalElements`, which is the base building block of `AuChimiste`. It is an extremely simple module and below we go through the whole of its exposed functionalities in just a few lines of code
+
+!!! note "Database extent"
+
+    In general you only need to worry about using `ChemicalElements` directly if your calculations require isotopes to be added. The default table of elements provides access only to stable elements.
 
 You can get a list of available atomic symbols with [`list_elements`](@ref). Suppose you want to check if deuterium *D* is present in the list, you can use its [symbol](https://docs.julialang.org/en/v1/base/base/#Core.Symbol) for inspection:
 
@@ -65,16 +82,13 @@ To have an unstable element listed, you need to [`add_isotope`](@ref) before. Fo
 add_isotope(:Po, 187.003030)
 ```
 
-## API
+## Creating components
 
-```@docs
-ChemicalElements.has_element
-ChemicalElements.list_elements
-ChemicalElements.reset_elements_table
-ChemicalElements.add_element
-ChemicalElements.add_isotope
-ChemicalElements.atomic_mass
-ChemicalElements.atomic_number
-ChemicalElements.element_name
-ChemicalElements.element
+```julia
+m = component(:stoichiometry; Al=2, O=3)
 ```
+
+## Combining components
+
+
+## Quantities of matter

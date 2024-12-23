@@ -4,21 +4,9 @@ From elements to plain gold (and kinetics), all in plain Julia.
 
 *AuChimiste* is an *alchimiste* wordplay meaning *to the chemist* in French.
 
-## Usage
+Please check the [Getting Started](getting-started.md) guide in the sidebar.
 
-Rather than providing a single package with exported functionalities and sub-modules, `AuChimiste` uses a different approach of *toolbox* package. By that it is meant that a main package is available and upon its import other packages become exposed to the import path. This strongly decreases development time as pre-compilation becomes much faster, specially in the early stages of development. Each toolbox package has its own documentation that you find in the sidebar.
-
-```julia
-import AuChemist
-
-# Then you can import one (or all) of the following:
-using ChemicalElements
-using ChemicalComponents
-using ChemicalKinetics
-using ChemicalReactors
-using CombustionChemistry
-using PhysicalChemistry
-```
+If this module was useful in your work, please consider citing us [auchimistejl](@cite).
 
 ## Development rules
 

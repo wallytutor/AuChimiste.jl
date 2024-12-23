@@ -33,13 +33,12 @@ modules = [
 
 pages = [
     "index.md",
-    "ChemicalElements.md",
-    "ChemicalComponents.md",
-    "ChemicalKinetics.md",
-    "ChemicalReactors.md",
-    "PhysicalChemistry.md",
-    "CombustionChemistry.md",
-    "ChemicalThermodynamics.md",
+    "getting-started.md",
+    "Tutorials" => [
+
+    ],
+    "public-api.md",
+    "references.md",
 ]
 
 format = Documenter.HTML(
