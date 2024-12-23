@@ -22,10 +22,14 @@ AuChimiste.AtomicData
 ## Chemical Components
 
 ```@docs
+AuChimiste.ChemicalComponent
+AuChimiste.component
 AuChimiste.stoichiometry
 AuChimiste.mole_proportions
 AuChimiste.mass_proportions
-AuChimiste.component
+AuChimiste.stoichiometry_map
+AuChimiste.mole_fractions_map
+AuChimiste.mass_fractions_map
 ```
 
 ## Chemical Kinetics
