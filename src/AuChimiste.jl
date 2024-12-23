@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
 module AuChimiste
 
-using Reexport
+__init__() = nothing
 
-function __init__()
-    # Path to annex modules (add it only if not already there)
-    let CHIMISTE_PATH = abspath(@__DIR__)
-        (CHIMISTE_PATH in LOAD_PATH) && return nothing
-        push!(LOAD_PATH, CHIMISTE_PATH)
-    end
+using DocStringExtensions: TYPEDFIELDS
 
-    return nothing
-end
-
-# include("ChemicalElements.jl")
-# @reexport using .ChemicalElements
+include("chemical-exceptions.jl")
+include("chemical-elements.jl")
+include("chemical-components.jl")
+include("chemical-kinetics.jl")
+include("chemical-reactors.jl")
+include("combustion-chemistry.jl")
+include("physical-chemistry.jl")
+include("chemical-thermodynamics.jl")
 
 end # (module AuChimiste)

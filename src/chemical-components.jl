@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-module ChemicalComponents
 
-using ChemicalExceptions
-using ChemicalElements
-using PhysicalChemistry
 
 #######################################################################
 # INTERNALS:
@@ -92,9 +88,11 @@ function component(c::T) where {T <: Composition{Stoichiometry}}
 end
 
 function component(c::T) where {T <: Composition{MoleProportion}}
+    c
 end
 
 function component(c::T) where {T <: Composition{MassProportion}}
+    c
 end
 
 function component(spec; kw...)
@@ -110,6 +108,44 @@ function component(spec; kw...)
 
     return component(c)
 end
+
+# function Base.:*(c::Number, s::Stoichiometry)::Stoichiometry
+#     return Stoichiometry(map(x->x[1]=>c*x[2], s.amounts))
+# end
+
+# function Base.:*(s::Stoichiometry, c::Number)::Stoichiometry
+#     return c * s
+# end
+
+# function Base.:+(a::Stoichiometry, b::Stoichiometry)::Stoichiometry
+#     da, db = Dict(a.amounts), Dict(b.amounts)
+#     allkeys = [union(keys(da), keys(db))...]
+#     return Stoichiometry(map(k->k=>get(da, k, 0)+get(db, k, 0), allkeys))
+# end
+
+# struct MassQuantity
+#     amounts::Vector{ElementalQuantity}
+# end
+
+# MassQuantity(d::Dict) = MassQuantity([n=>v for (n, v) in d])
+
+# function Base.:*(c::Number, s::ChemicalCompound)::MassQuantity
+#     return MassQuantity(map(Pair, s.elements, c * s.Y))
+# end
+
+# function Base.:*(c::Number, s::MassQuantity)::MassQuantity
+#     return MassQuantity(map((e)->e.first => c * e.second, s.amounts))
+# end
+
+# Base.:*(s::ChemicalCompound, c::Number)::MassQuantity = c * s
+
+# Base.:*(s::MassQuantity, c::Number)::MassQuantity = c * s
+
+# function Base.:+(a::MassQuantity, b::MassQuantity)::MassQuantity
+#     da, db = Dict(a.amounts), Dict(b.amounts)
+#     allkeys = [union(keys(da), keys(db))...]
+#     return MassQuantity(map(k->k=>get(da, k, 0)+get(db, k, 0), allkeys))
+# end
 
 #######################################################################
 # API
@@ -146,5 +182,3 @@ export mass_proportions
 Compile component from given composition specification.
 """ component
 export component
-
-end # (module ChemicalComponents)

@@ -1,68 +1,48 @@
 # Public API
 
-## ChemicalElements
-
 ```@meta
-CurrentModule = ChemicalElements
+CurrentModule = AuChimiste
 ```
+
+## Chemical Elements
 
 ```@docs
-ChemicalElements.has_element
-ChemicalElements.list_elements
-ChemicalElements.reset_elements_table
-ChemicalElements.add_element
-ChemicalElements.add_isotope
-ChemicalElements.atomic_mass
-ChemicalElements.atomic_number
-ChemicalElements.element_name
-ChemicalElements.element
+AuChimiste.has_element
+AuChimiste.list_elements
+AuChimiste.reset_elements_table
+AuChimiste.add_element
+AuChimiste.add_isotope
+AuChimiste.atomic_mass
+AuChimiste.atomic_number
+AuChimiste.element_name
+AuChimiste.element
+AuChimiste.AtomicData
 ```
 
-## ChemicalComponents
-
-```@meta
-CurrentModule = ChemicalComponents
-```
+## Chemical Components
 
 ```@docs
-ChemicalComponents.stoichiometry
-ChemicalComponents.mole_proportions
-ChemicalComponents.mass_proportions
-ChemicalComponents.component
+AuChimiste.stoichiometry
+AuChimiste.mole_proportions
+AuChimiste.mass_proportions
+AuChimiste.component
 ```
 
-# ChemicalKinetics
+## Chemical Kinetics
 
-```@meta
-CurrentModule = ChemicalKinetics
-```
 
-# ChemicalReactors
+## Chemical Reactors
 
-```@meta
-CurrentModule = ChemicalReactors
-```
 
-# CombustionChemistry
+## Combustion Chemistry
 
-```@meta
-CurrentModule = CombustionChemistry
-```
 
-# PhysicalChemistry
-
-```@meta
-CurrentModule = PhysicalChemistry
-```
+## Physical Chemistry
 
 ```@docs
-PhysicalChemistry.mean_molecular_mass
-PhysicalChemistry.get_mole_fractions
-PhysicalChemistry.get_mass_fractions
+AuChimiste.mean_molecular_mass
+AuChimiste.get_mole_fractions
+AuChimiste.get_mass_fractions
 ```
 
-# ChemicalThermodynamics
-
-```@meta
-CurrentModule = ChemicalThermodynamics
-```
+## Chemical Thermodynamics

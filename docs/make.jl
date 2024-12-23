@@ -8,28 +8,12 @@ let src = joinpath(dirname(@__DIR__), "src")
 end
 
 using AuChimiste
-using ChemicalElements
-using ChemicalComponents
-using ChemicalKinetics
-using ChemicalReactors
-using ChemicalThermodynamics
-using CombustionChemistry
-using PhysicalChemistry
 
 user = "wallytutor"
 
 sitename = "AuChimiste.jl"
 
-modules = [
-    AuChimiste,
-    ChemicalComponents,
-    ChemicalElements,
-    ChemicalKinetics,
-    ChemicalReactors,
-    ChemicalThermodynamics,
-    CombustionChemistry,
-    PhysicalChemistry,
-]
+modules = [AuChimiste]
 
 pages = [
     "index.md",

@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-module ChemicalExceptions
+
+export NoSuchElementError
+export NoIsotopeProvidedError
+export EmptyCompositionError
+export InvalidScalerError
 
 abstract type ChemicalException       <: Exception end
 abstract type ChemicalElementsError   <: ChemicalException end
@@ -59,10 +63,3 @@ end
 function Base.showerror(io::IO, err::ChemicalException)
     Base.show(io, err)
 end
-
-export NoSuchElementError
-export NoIsotopeProvidedError
-export EmptyCompositionError
-export InvalidScalerError
-
-end # (module ChemicalExceptions)

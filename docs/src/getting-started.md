@@ -2,24 +2,11 @@
 
 ## Importing tools
 
-Rather than providing a single package with exported functionalities and sub-modules, `AuChimiste` uses a different approach of *toolbox* package. By that it is meant that a main package is available and upon its import other packages become exposed to the import path. This strongly decreases development time as pre-compilation becomes much faster, specially in the early stages of development. 
+Let's start by a global import; everything that is intended to be accessible to the end user is found here:
 
 ```@example 1
-import AuChimiste
-
-# Then you can import one (or all) of the following:
-using ChemicalElements
-using ChemicalComponents
-using ChemicalKinetics
-using ChemicalReactors
-using CombustionChemistry
-using PhysicalChemistry
-using ChemicalThermodynamics
+using AuChimiste
 ```
-
-!!! warning "Beware!"
-
-    In the future it is already planned to merge all sub-modules into a single namespace, but as stated above, for the current early development days it is considered faster to proceed this way.
 
 ## Elements database
 
