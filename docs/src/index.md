@@ -4,7 +4,7 @@ From elements to plain gold (and kinetics), all in plain Julia.
 
 *AuChimiste* is an *alchimiste* wordplay meaning *to the chemist* in French.
 
-Please check the [Getting Started](getting-started.md) guide in the sidebar if it is your first time here.
+Please check the [Getting Started](basics/elements.md) (and the whole suit) in the sidebar if it is your first time here.
 
 If this module was useful in your work, please consider citing us [auchimistejl](@cite).
 
