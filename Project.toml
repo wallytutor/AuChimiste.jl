@@ -6,7 +6,18 @@ version = "0.1.0"
 [deps]
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 ModelingToolkit = "961ee093-0014-501f-94e3-6117800e7a78"
-Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+Pluto = "c3e4b0f8-55cb-11ea-2926-15256bba5781"
+PlutoLinks = "0ff47ea0-7a50-410d-8455-4348d5de0420"
+PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
+
+[compat]
+ModelingToolkit = "9.59.0"
+Symbolics = "6.22.0"
+
+[extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
