@@ -155,3 +155,25 @@ C12A7 - C
 ```
 
 ## Quantities of matter
+
+An arbitrary amount of matter can be constructed with [`quantity`](@ref). The resulting [`AuChimiste.ComponentQuantity`](@ref) object supports both scaling (multiplication) and additive (summation) operations. A trivial example would be:
+
+```@example getting-started-1
+3quantity(A, 1.0)
+```
+
+Well, there is nothing special there, the mass was scaled by *three* with no composition change. The next example is maybe more instructive: we mix one mole of `A` with one mole of `C` by providing their molar masses as the mass of each component. This is interesting because one can quickly verify the correctness of the results.
+
+```@example getting-started-1
+ma = quantity(A, 0.001A.molar_mass)
+mc = quantity(C, 0.001C.molar_mass)
+ma + mc
+```
+
+Because in many situations one may be interested in mixing quantities directly, a wrapper is provided for eliminating the need of and explicit creation of a [`component`](@ref).
+
+```@example getting-started-1
+ma = quantity(:stoichiometry, 1.0; Al=2, O=3)
+mc = quantity(:stoichiometry, 1.0; Ca=1, O=1)
+ma + mc
+```

@@ -50,8 +50,18 @@ struct ChemicalComponent
     molar_mass::Float64
 end
 
+"""
+Represents a quantity of component.
+
+Fields
+======
+$(TYPEDFIELDS)
+"""
 struct ComponentQuantity
+    "Mass of component in arbitrary units."
 	mass::Float64
+
+    "Elemental composition of component."
 	composition::ChemicalComponent
 end
 
@@ -130,6 +140,16 @@ Returns component map of elemental mass fractions.
 function mass_fractions_map(c::ChemicalComponent)
    return NamedTuple(zip(c.elements, c.mass_fractions))
 end
+
+@doc """
+    quantity(c::ChemicalComponent, mass::Float64)
+    quantity(spec::Symbol, mass::Float64; kw...)
+
+Creates a quantity of chemical component. It may be explicit, *i.e.*
+by providing directly a [`ChemicalComponent`](@ref), or implicit, that
+means, by creating a component directly from its chemical composition
+and specification method (wrapping [`component`](@ref)).
+""" quantity
 
 function quantity(c::ChemicalComponent, mass::Float64)
     return ComponentQuantity(mass, c)

@@ -23,6 +23,7 @@ AuChimiste.AtomicData
 
 ```@docs
 AuChimiste.ChemicalComponent
+AuChimiste.ComponentQuantity
 AuChimiste.component
 AuChimiste.stoichiometry
 AuChimiste.mole_proportions
@@ -30,6 +31,7 @@ AuChimiste.mass_proportions
 AuChimiste.stoichiometry_map
 AuChimiste.mole_fractions_map
 AuChimiste.mass_fractions_map
+AuChimiste.quantity
 ```
 
 ## Chemical Kinetics
