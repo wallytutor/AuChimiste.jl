@@ -260,18 +260,8 @@ end
 #     return MassQuantity(map((e)->e.first => c * e.second, s.amounts))
 # end
 
-# Base.:*(s::ChemicalCompound, c::Number)::MassQuantity = c * s
-
-# Base.:*(s::MassQuantity, c::Number)::MassQuantity = c * s
-
 # function Base.:+(a::MassQuantity, b::MassQuantity)::MassQuantity
 #     da, db = Dict(a.amounts), Dict(b.amounts)
 #     allkeys = [union(keys(da), keys(db))...]
 #     return MassQuantity(map(k->k=>get(da, k, 0)+get(db, k, 0), allkeys))
 # end
-
-#######################################################################
-# API
-#######################################################################
-
-
