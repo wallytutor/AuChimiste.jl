@@ -17,7 +17,10 @@ modules = [AuChimiste]
 
 pages = [
     "index.md",
-    "getting-started.md",
+    "Getting Started" => [
+        "basics/elements.md",
+        "basics/components.md",
+    ],
     "Tutorials" => [
 #         "tutorials/empirical-fuel-for-cfd.md",
 #         "tutorials/kinetics-from-scratch.md",
