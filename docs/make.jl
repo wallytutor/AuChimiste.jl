@@ -19,9 +19,20 @@ pages = [
     "index.md",
     "getting-started.md",
     "Tutorials" => [
-
+#         "tutorials/empirical-fuel-for-cfd.md",
+#         "tutorials/kinetics-from-scratch.md",
+#         "tutorials/simulating-kinetics.md",
+#         "tutorials/chain-of-reactors.md",
+#         "tutorials/plug-flow-reactor.md",
+#         "tutorials/countercurrent-reactors.md",
+#         "tutorials/fluid-properties.md",
+#         "tutorials/adiabatic-flame.md",
+#         "tutorials/process-flowsheet.md",
+#         "tutorials/oxide-systems.md",
+#         "tutorials/solid-solution.md",
     ],
     "public-api.md",
+    "private-api.md",
     "references.md",
 ]
 
@@ -29,11 +40,6 @@ format = Documenter.HTML(
     prettyurls = get(ENV, "CI", nothing) == "true",
     canonical  = "https://$(user).github.io/$(sitename)",
     repolink   = "https://github.com/$(user)/$(sitename)",
-    # edit_link  = "main",
-    # assets     = String[],
-    # size_threshold_warn    = 1_000_000,
-    # size_threshold         = 2_000_000,
-    # example_size_threshold = 2_000_000
 )
 
 plugins = [
