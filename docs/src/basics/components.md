@@ -97,6 +97,10 @@ An arbitrary amount of matter can be constructed with [`quantity`](@ref). The re
 3quantity(A, 1.0)
 ```
 
+!!! warning "Meaning of operations"
+
+    On the other hand, operations performed on [`AuChimiste.ComponentQuantity`](@ref) entities are scaled by the elemental mass fractions. That is mostly intuitive in the context of application of this structure.
+    
 Well, there is nothing special there, the mass was scaled by *three* with no composition change. The next example is maybe more instructive: we mix one mole of `A` with one mole of `C` by providing their molar masses as the mass of each component. This is interesting because one can quickly verify the correctness of the results.
 
 ```@example getting-started-1

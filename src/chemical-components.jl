@@ -235,22 +235,3 @@ function component(c::Composition{MassProportion})
     coefs, M = component_close(c, idx, X, W)
     return ChemicalComponent(elems, coefs, X, Y, M)
 end
-
-# Create Quantity
-# Operations in quantities act on masses
-
-# MassQuantity(d::Dict) = MassQuantity([n=>v for (n, v) in d])
-
-# function Base.:*(c::Number, s::ChemicalCompound)::MassQuantity
-#     return MassQuantity(map(Pair, s.elements, c * s.Y))
-# end
-
-# function Base.:*(c::Number, s::MassQuantity)::MassQuantity
-#     return MassQuantity(map((e)->e.first => c * e.second, s.amounts))
-# end
-
-# function Base.:+(a::MassQuantity, b::MassQuantity)::MassQuantity
-#     da, db = Dict(a.amounts), Dict(b.amounts)
-#     allkeys = [union(keys(da), keys(db))...]
-#     return MassQuantity(map(k->k=>get(da, k, 0)+get(db, k, 0), allkeys))
-# end
