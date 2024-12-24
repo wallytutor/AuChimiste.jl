@@ -60,4 +60,9 @@ AuChimiste.get_mass_fractions
 ```@docs
 AuChimiste.ELECTRON_MASS
 AuChimiste.AVOGADRO
+AuChimiste.GAS_CONSTANT
+AuChimiste.STEFAN_BOLTZMANN
+AuChimiste.P_NORMAL
+AuChimiste.T_NORMAL
+AuChimiste.T_STANDARD
 ```
