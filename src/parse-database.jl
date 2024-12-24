@@ -11,7 +11,7 @@ const DATA_PATH = joinpath(dirname(@__DIR__), "data")
 const USER_PATH = [DATA_PATH, pwd(), expanduser("~")]
 
 function load_path()
-    return deepcopy(USER_PATH)
+    return sort(deepcopy(USER_PATH))
 end
 
 function add_load_path(path)
