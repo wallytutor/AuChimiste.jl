@@ -1,7 +1,42 @@
 # -*- coding: utf-8 -*-
 
-"List of search paths to thermodynamics and kinetics databases."
-const DATA_PATH = [joinpath(dirname(@__DIR__), "data")]
+export load_path
+export add_load_path
+export reset_load_path
 
-"List of search paths to thermodynamics and kinetics databases."
-const USER_PATH = [joinpath(dirname(@__DIR__), "data")]
+"Default search path for thermodynamics and kinetics databases."
+const DATA_PATH = joinpath(dirname(@__DIR__), "data")
+
+"List of search paths for thermodynamics and kinetics databases."
+const USER_PATH = [DATA_PATH, pwd(), expanduser("~")]
+
+function load_path()
+    return deepcopy(USER_PATH)
+end
+
+function add_load_path(path)
+    path = abspath(path)
+    !isdir(path) && error("Missing directory $(path)")
+    !(path in USER_PATH) && push!(USER_PATH, path)
+    return
+end
+
+function reset_load_path()
+    empty!(USER_PATH)
+    push!(USER_PATH, DATA_PATH, pwd(), expanduser("~"))
+end
+
+#######################################################################
+# INTERNALS
+#######################################################################
+
+function get_data_file(name)
+    for path in USER_PATH
+        tentative = joinpath(path, name)
+        isfile(tentative) && return tentative
+    end
+
+    path =  join(map(n->"- $(n)", USER_PATH), "\n")
+    @warn("Data file `$(name)` not in load path:\n$(path)")
+    return
+end
