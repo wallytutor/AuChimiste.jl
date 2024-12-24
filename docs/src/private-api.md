@@ -46,6 +46,17 @@ AuChimiste.mean_molecular_mass_x
 
 ## Chemical Thermodynamics
 
+
+## Database parsing
+
+```@docs
+AuChimiste.DATA_PATH
+AuChimiste.USER_PATH
+```
+
+## Constants
+
+
 ## Exception types
 
 ```@docs
