@@ -20,6 +20,7 @@ pages = [
     "Getting Started" => [
         "basics/elements.md",
         "basics/components.md",
+        "basics/kinetics.md",
     ],
     "Tutorials" => [
 #         "tutorials/empirical-fuel-for-cfd.md",
