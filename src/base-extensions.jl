@@ -14,7 +14,8 @@ end
 
 function Base.:*(scale::Number, comp::ChemicalComponent)::ChemicalComponent
     newcomp = zip(comp.elements, scale * comp.coefficients)
-    return component(:stoichiometry; newcomp...)
+    newchrg = scale * comp.charge
+    return component(:stoichiometry; charge = newchrg, newcomp...)
 end
 
 function Base.:*(comp::ChemicalComponent, scale::Number)::ChemicalComponent
@@ -33,7 +34,9 @@ function Base.:+(ca::ChemicalComponent, cb::ChemicalComponent)::ChemicalComponen
     f(e) = get(da, e, 0.0) + get(db, e, 0.0)
     newcomp = map(e->Pair(e, f(e)), elements)
 
-    return component(:stoichiometry; newcomp...)
+    charge = ca.charge + cb.charge
+
+    return component(:stoichiometry; charge, newcomp...)
 end
 
 function Base.:-(ca::ChemicalComponent, cb::ChemicalComponent)::ChemicalComponent

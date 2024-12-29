@@ -48,6 +48,9 @@ struct ChemicalComponent
 
     "Molar mass of corresponding stoichiometry."
     molar_mass::Float64
+
+    "Global charge of component."
+    charge::Number
 end
 
 """
@@ -73,10 +76,10 @@ is a wrapper eliminating the need of calling [`stoichiometry`](@ref),
 [`mole_proportions`](@ref) or [`mass_proportions`](@ref) directly. The
 value of `spec` must be the symbol representing one of their names.
 """
-function component(spec::Symbol; kw...)
+function component(spec::Symbol; charge = 0, kw...)
     valid = [:stoichiometry, :mole_proportions, :mass_proportions]
     spec in valid || error("Invalid composition specification $(spec)")
-    return component(getfield(AuChimiste, spec)(; kw...))
+    return component(getfield(AuChimiste, spec)(; kw...), charge)
 end
 
 """
@@ -163,6 +166,15 @@ end
 # INTERNALS
 #######################################################################
 
+"""
+Provides specification of allowed chemical composition types, which
+are used to declare compositions in terms of one of the following
+specification methods:
+
+- `Stoichiometry`: stoichiometric coefficients
+- `MoleProportion`: molar proportions of elements
+- `MassProportion`: mass proportions of elements
+"""
 @enum CompositionTypes begin
     Stoichiometry
     MoleProportion
@@ -215,23 +227,23 @@ function component_close(c, idx, X, W)
     return coefs, coefs' * W
 end
 
-function component(c::Composition{Stoichiometry})
+function component(c::Composition{Stoichiometry}, charge)
     elems, coefs, X, W, idx = component_core(c)
     Y = get_mass_fractions(X, W)
     coefs, M = component_close(c, idx, coefs, W)
-    return ChemicalComponent(elems, coefs, X, Y, M)
+    return ChemicalComponent(elems, coefs, X, Y, M, charge)
 end
 
-function component(c::Composition{MoleProportion})
+function component(c::Composition{MoleProportion}, charge)
     elems, coefs, X, W, idx = component_core(c)
     Y = get_mass_fractions(X, W)
     coefs, M = component_close(c, idx, X, W)
-    return ChemicalComponent(elems, coefs, X, Y, M)
+    return ChemicalComponent(elems, coefs, X, Y, M, charge)
 end
 
-function component(c::Composition{MassProportion})
+function component(c::Composition{MassProportion}, charge)
     elems, coefs, Y, W, idx = component_core(c)
     X = get_mole_fractions(Y, W)
     coefs, M = component_close(c, idx, X, W)
-    return ChemicalComponent(elems, coefs, X, Y, M)
+    return ChemicalComponent(elems, coefs, X, Y, M, charge)
 end

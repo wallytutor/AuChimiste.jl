@@ -12,10 +12,10 @@ Component creation is a trivial task with `AuChimiste`. All you need to do is ca
 A = component(:stoichiometry; Al=2, O=3)
 ```
 
-The above is a syntactic sugar to providing a [`stoichiometry`](@ref) as argument:
+The above is a syntactic sugar to providing a [`stoichiometry`](@ref) as argument. Please notice that this form requires the overall charge of the component to be specified.
 
 ```@example getting-started-1
-A = component(stoichiometry(Al=2, O=3))
+A = component(stoichiometry(Al=2, O=3), 0)
 ```
 
 The other composition specification methods are [`mass_proportions`](@ref) and [`mole_proportions`](@ref). Let' s see their use in a more elaborate example with naphthalene ``C_{10}H_{8}``:
@@ -89,6 +89,31 @@ On the other hand, if the left component has *enough* of what is being subtracte
 C12A7 - C
 ```
 
+## Charged components
+
+For the sake of generality, charged components are also supported. This is required so that ions can be considered in reactions. For instance, to create a sodium chloride formula one can proceed as follows:
+
+```@example getting-started-1
+Na₊ = component(:stoichiometry; charge=+1, Na=1)
+Cl₋ = component(:stoichiometry; charge=-1, Cl=1)
+
+NaCl = Na₊ + Cl₋
+```
+
+The user must be aware of a few caveats; first, molecular mass is not corrected for the missing/extra electrons. Electron and mass balance are handled separately, as this makes more sense from a physical standpoint. Scaling of a component also scales its charge. This is required for proper balance of chemical equations.
+
+```@example getting-started-1
+(3Na₊).charge
+```
+
+So the formation of calcium hydroxide can be stated as:
+
+```@example getting-started-1
+Ca₊₂ = component(:stoichiometry; charge=+2, Ca=1)
+OH₋ = component(:stoichiometry; charge=-1, O=1, H=1)
+
+Ca₊₂ + 2OH₋
+```
 ## Quantities of matter
 
 An arbitrary amount of matter can be constructed with [`quantity`](@ref). The resulting [`AuChimiste.ComponentQuantity`](@ref) object supports both scaling (multiplication) and additive (summation) operations. A trivial example would be:
@@ -116,3 +141,7 @@ ma = quantity(:stoichiometry, 1.0; Al=2, O=3)
 mc = quantity(:stoichiometry, 1.0; Ca=1, O=1)
 ma + mc
 ```
+
+!!! warning "Charge operations"
+
+	Operations on electrical charges of quantities of matter are currently not supported. This functionality was initially conceived for balancing macroscopic amounts of matter and may in the future be extended for ionic substances.
