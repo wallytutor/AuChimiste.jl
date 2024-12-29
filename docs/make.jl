@@ -35,8 +35,10 @@ pages = [
 #         "tutorials/oxide-systems.md",
 #         "tutorials/solid-solution.md",
     ],
-    "public-api.md",
-    "private-api.md",
+    "Documentation" => [
+        "public-api.md",
+        "private-api.md",
+    ],
     "references.md",
 ]
 
