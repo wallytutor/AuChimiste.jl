@@ -26,6 +26,7 @@ AuChimiste.find_element
 ## Chemical Components
 
 ```@docs
+AuChimiste.CompositionTypes
 ```
 
 ## Chemical Kinetics
