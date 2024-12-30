@@ -544,10 +544,10 @@ $(TYPEDFIELDS)
 """
 struct ComponentQuantity
     "Mass of component in arbitrary units."
-	mass::Float64
+    mass::Float64
 
     "Elemental composition of component."
-	composition::ChemicalComponent
+    composition::ChemicalComponent
 end
 
 """
@@ -624,31 +624,46 @@ is a wrapper eliminating the need of calling [`stoichiometry`](@ref),
 value of `spec` must be the symbol representing one of their names.
 """ component
 
+macro component(func, comp, charge)
+    quote
+        comp  = $(esc(comp))
+
+        # Values that can be retrieved directly from `c`:
+        elems = vcat(keys(comp.data)...)
+        coefs = vcat(values(comp.data)...)
+        W     = atomic_mass.(elems)
+        idx   = findfirst(x->x==comp.scale.first, elems)
+
+        # No matter what is the input type, normalize coefficients:
+        U     = coefs ./ sum(coefs)
+
+        # Function `f` converts unit and sort arguments
+        X, Y = $(func)(U, W)
+
+        coefs = (comp.scale.second / X[idx]) .* X
+        M     = coefs' * W
+
+        ChemicalComponent(elems, coefs, X, Y, M, $(esc(charge)))
+    end
+end
+
 function component(spec::Symbol; charge = 0, kw...)
     valid = [:stoichiometry, :mole_proportions, :mass_proportions]
     spec in valid || error("Invalid composition specification $(spec)")
-    return component(getfield(AuChimiste, spec)(; kw...), charge)
+    c = getfield(AuChimiste, spec)(; kw...)
+    return component(c, charge)
 end
 
 function component(c::Composition{Stoichiometry}, charge)
-    elems, coefs, X, W, idx = component_core(c)
-    Y = get_mass_fractions(X, W)
-    coefs, M = component_close(c, idx, coefs, W)
-    return ChemicalComponent(elems, coefs, X, Y, M, charge)
+    return @component((X, W)->(X, get_mass_fractions(X, W)), c, charge)
 end
 
 function component(c::Composition{MoleProportion}, charge)
-    elems, coefs, X, W, idx = component_core(c)
-    Y = get_mass_fractions(X, W)
-    coefs, M = component_close(c, idx, X, W)
-    return ChemicalComponent(elems, coefs, X, Y, M, charge)
+    return @component((X, W)->(X, get_mass_fractions(X, W)), c, charge)
 end
 
 function component(c::Composition{MassProportion}, charge)
-    elems, coefs, Y, W, idx = component_core(c)
-    X = get_mole_fractions(Y, W)
-    coefs, M = component_close(c, idx, X, W)
-    return ChemicalComponent(elems, coefs, X, Y, M, charge)
+    return @component((Y, W)->(get_mole_fractions(Y, W), Y), c, charge)
 end
 
 """
@@ -729,30 +744,6 @@ end
 
 function quantity(spec::Symbol, mass::Float64; kw...)
     return quantity(component(spec; kw...), mass)
-end
-
-#######################################################################
-# COMPONENTS (INTERNALS)
-#######################################################################
-
-function component_core(c)
-    # Values that can be retrieved directly from `c`:
-    elems = vcat(keys(c.data)...)
-    coefs = vcat(values(c.data)...)
-    W     = atomic_mass.(elems)
-    idx   = findfirst(x->x==c.scale.first, elems)
-
-    # No matter what is the input type, normalize coefficients:
-    U     = coefs ./ sum(coefs)
-
-    return elems, coefs, U, W, idx
-end
-
-function component_close(c, idx, X, W)
-    # Scaling is always applied over `X` so that molecular mass
-    # is evaluated based on the created stoichiometry.
-    coefs = (c.scale.second / X[idx]) .* X
-    return coefs, coefs' * W
 end
 
 #######################################################################
