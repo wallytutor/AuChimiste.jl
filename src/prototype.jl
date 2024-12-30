@@ -105,75 +105,86 @@ end
 
 # ╔═╡ ec1619aa-1749-42e3-87ca-d685c2372d38
 begin
-	data = load_mechanism("nasa_condensed.yaml").raw_data
+	data = load_mechanism("nasa_gas.yaml").raw_data
 	species = data["species"]
 	data
 end;
 
 # ╔═╡ 7d255703-661b-4e13-af46-05f2bbdf0a7a
 begin
-	s = species[3]
+	s = species[530]
 	
 	name = s["name"]
 	comp = s["composition"]
+	thermo = s["thermo"]
+
+	trans = get(s, "transport", nothing)
+	note = get(s, "note", "")
+	
+	thermo_rngs = thermo["temperature-ranges"]
+	thermo_data = vcat(thermo["data"]'...)
+
+	Nr, Nc = size(thermo_data)
+
+	if Nr != (Np = length(thermo_rngs)-1)
+		error("""\
+			Invalid number of ranges, $(Nr) rows in data while \
+			$(Np) temperature jumps where provided.
+			""")
+	end
 end
 
-# ╔═╡ 6821267a-0676-4779-a8f1-22559ba1c61d
-unique([s["thermo"]["model"] for s in species])
-
 # ╔═╡ 58d1cc29-3d43-4ae9-bfa4-357ee9e078eb
-Species(name, comp)
+the_species = Species(name, comp)
 
 # ╔═╡ 20b8438c-73e5-41cd-a5b5-0be94e7fb6f0
-
+thermo
 
 # ╔═╡ d5d8dc66-d70d-4753-b4c5-5e0b0bc61056
 begin
-	Nr = 2
-	Nc = 7
-	
-	T = Symbolics.variable(:T)
-	r = Symbolics.variables(:r, 1:Nr-1)
-	c = Symbolics.variables(:c, 1:Nr, 1:Nc)
+	@variables T r[1:Nr] c[1:Nr, 1:Nc]
+
+	jumps = collect(r)
+	coefs = collect(c)
 end
 
 # ╔═╡ 53d8a5e0-7918-4e08-84bb-cfa125c1865f
-function nasa7_specific_heat(a)
-	return a[1] + T * (a[2] + T * (a[3] + T * (a[4] + a[5] * T)))
+begin
+	function nasa7_specific_heat(a)
+		return a[1] + T * (a[2] + T * (a[3] + T * (a[4] + a[5] * T)))
+	end
+	
+	function heaviside(T, r)
+	   return 0.5 * (sign(T - r) + 1)
+	end
 end
 
 # ╔═╡ 54593c11-8aa5-483c-ab7b-c67a0d1794eb
-function heaviside(T, r)
-   return 0.5 * (sign(T - r) + 1)
-end
-
-# ╔═╡ 7d97b694-4177-4e48-89f3-6ff57d0ea21b
-# a[1] + a[2] * T + a[3] * T^2 + a[4] * T^3 + a[5] * T^4
-
-# ╔═╡ 988eb100-5468-4bf7-ba47-215fdbd0d8c7
 to_compute = let
-	cp = nasa7_specific_heat(c[1, :])
+	CP_COEFS = 5
+	f = nasa7_specific_heat(coefs[1, 1:CP_COEFS])
 
 	for k in range(2, Nr)
-		Δcp = nasa7_specific_heat(c[k, :]) - cp
-		cp += heaviside(T, r[k-1]) * Δcp
+		Δ = nasa7_specific_heat(coefs[k, 1:CP_COEFS]) - f
+		f += heaviside(T, jumps[k]) * Δ
 	end
 
-	simplify(cp; expand = false)
+	simplify(f; expand = false)
 end
 
-# ╔═╡ ad59dee5-a6cf-4f99-961d-9776b0ba8d5f
-begin
-	a_expr = [T, r, c]
-	f_expr = build_function(to_compute, a_expr)
-	Base.remove_linenums!(f_expr)
+# ╔═╡ 2a352eff-a327-4537-b6ea-f4c8cab39c20
+specific_heat = let
+	a_expr = (T, r, c)
+	f_expr = build_function(to_compute, a_expr; expression = Val{false})
+
+	r_num = thermo_rngs[1:end-1]
+	c_num = thermo_data
+	
+	f(T) = GAS_CONSTANT * f_expr((T, r_num, c_num))
 end
-
-# ╔═╡ 89c6f6a4-4beb-4bd0-98ec-481bf8f6337e
-
 
 # ╔═╡ f26e82e6-f243-4025-8306-a3514a968680
-
+specific_heat.(300:100:3000)
 
 # ╔═╡ Cell order:
 # ╟─fd0a3399-8589-428c-9036-0d8a57ae6a92
@@ -189,14 +200,10 @@ end
 # ╠═bb42b7c6-63f7-49bf-b314-2df8b19fd749
 # ╠═ec1619aa-1749-42e3-87ca-d685c2372d38
 # ╠═7d255703-661b-4e13-af46-05f2bbdf0a7a
-# ╠═6821267a-0676-4779-a8f1-22559ba1c61d
 # ╠═58d1cc29-3d43-4ae9-bfa4-357ee9e078eb
 # ╠═20b8438c-73e5-41cd-a5b5-0be94e7fb6f0
-# ╠═d5d8dc66-d70d-4753-b4c5-5e0b0bc61056
 # ╠═53d8a5e0-7918-4e08-84bb-cfa125c1865f
+# ╠═d5d8dc66-d70d-4753-b4c5-5e0b0bc61056
 # ╠═54593c11-8aa5-483c-ab7b-c67a0d1794eb
-# ╠═7d97b694-4177-4e48-89f3-6ff57d0ea21b
-# ╠═988eb100-5468-4bf7-ba47-215fdbd0d8c7
-# ╠═ad59dee5-a6cf-4f99-961d-9776b0ba8d5f
-# ╠═89c6f6a4-4beb-4bd0-98ec-481bf8f6337e
+# ╠═2a352eff-a327-4537-b6ea-f4c8cab39c20
 # ╠═f26e82e6-f243-4025-8306-a3514a968680
