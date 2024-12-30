@@ -1,4 +1,4 @@
-# Private API
+# Development
 
 ```@meta
 CurrentModule = AuChimiste
@@ -6,7 +6,7 @@ CurrentModule = AuChimiste
 
 This part of the documentation is intended for developers. It might also be useful for standard users trying to understand bugs or propose features. `AuChimiste` aims at having 100% first-level entities documented so that design features can be understood in the future.
 
-## Development rules
+## General guidelines
 
 - Code written, code documented, code tested.
 - Code lines make 72 characters, never more than 79.
@@ -14,7 +14,9 @@ This part of the documentation is intended for developers. It might also be usef
 - Code abuses of multiple dispatch if needed.
 - Code is Julia, nothing else.
 
-## Chemical Elements
+## Internals
+
+Chemical Elements
 
 ```@docs
 AuChimiste.ELEMENTS
@@ -23,46 +25,9 @@ AuChimiste.handle_element
 AuChimiste.find_element
 ```
 
-## Chemical Components
-
-```@docs
-AuChimiste.CompositionTypes
-```
-
-## Chemical Kinetics
-
-
-## Chemical Reactors
-
-
-## Combustion Chemistry
-
-
-## Physical Chemistry
-
-```@docs
-AuChimiste.mean_molecular_mass_y
-AuChimiste.mean_molecular_mass_x
-```
-
-## Chemical Thermodynamics
-
-
-## Database parsing
+ Database parsing
 
 ```@docs
 AuChimiste.DATA_PATH
 AuChimiste.USER_PATH
-```
-
-## Constants
-
-
-## Exception types
-
-```@docs
-AuChimiste.NoSuchElementError
-AuChimiste.NoIsotopeProvidedError
-AuChimiste.EmptyCompositionError
-AuChimiste.InvalidScalerError
 ```
