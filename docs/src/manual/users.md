@@ -61,7 +61,13 @@ AuChimiste.get_mole_fractions
 AuChimiste.get_mass_fractions
 ```
 
-## Chemical Thermodynamics
+## Thermodynamics
+
+```@docs
+AuChimiste.ThermoData
+AuChimiste.NASAThermo
+AuChimiste.ShomateThermo
+```
 
 ## Database parsing
 

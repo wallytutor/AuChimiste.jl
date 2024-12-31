@@ -4,8 +4,11 @@ module AuChimiste
 __init__() = nothing
 
 using DocStringExtensions: TYPEDFIELDS
+using Polynomials
 # using Latexify
 # using ModelingToolkit
+using StaticArrays
+using Symbolics
 # using Symbolics: scalarize
 # using YAML
 
@@ -53,6 +56,7 @@ export get_mass_fractions
 abstract type ChemicalException       <: Exception end
 abstract type ChemicalElementsError   <: ChemicalException end
 abstract type ChemicalComponentsError <: ChemicalException end
+abstract type ThermodynamicModelData end
 
 #######################################################################
 # CONSTANT
@@ -817,11 +821,11 @@ end
 # MODELS
 #######################################################################
 
+include("thermodynamics.jl")
 include("database.jl")
 include("kinetics.jl")
 include("reactors.jl")
 include("combustion.jl")
-include("thermodynamics.jl")
 
 #######################################################################
 # EXTENSIONS
