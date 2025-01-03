@@ -2,11 +2,6 @@
 
 using Documenter
 using DocumenterCitations
-
-let src = joinpath(dirname(@__DIR__), "src")
-    push!(LOAD_PATH, src)
-end
-
 using AuChimiste
 
 user = "wallytutor"
