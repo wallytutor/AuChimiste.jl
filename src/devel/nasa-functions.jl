@@ -34,7 +34,7 @@ begin
     using CairoMakie
     # using Polynomials
     # using StaticArrays
-    # using Symbolics
+    using Symbolics
     # using Symbolics: scalarize
 end
 
@@ -50,9 +50,11 @@ md"""
 """
 
 # ╔═╡ 6b2dc796-0627-40da-a70b-aa8a64aab4e2
-nasa7 = let
+nasa7 = begin
     @info("Sample data for NASA7")
-    
+
+	mw = 0.001component(:stoichiometry; N=2).molar_mass
+	
     bounds = [200.0, 1000.0, 6000.0]
     
     data = [
@@ -71,13 +73,16 @@ nasa7
 # ╔═╡ a4918698-eb1c-40d9-b78a-25b3212ed234
 funcs7 = CompiledThermoFunctions(nasa7)
 
+# ╔═╡ 67908034-837a-4deb-b2db-e584488feaad
+funcs7.specific_heat(298.15) / mw
+
 # ╔═╡ 5a7902d5-92c6-4911-8d50-85987dc41461
 @btime funcs7.specific_heat.(300:0.01:3000)
 
 # ╔═╡ a0bb5537-f9c6-4fb9-835a-0ab6c69eb9b2
 with_theme() do
     T = LinRange(300, 3000, 100)
-    c = funcs7.specific_heat.(T)
+    c = funcs7.specific_heat.(T) ./ mw
 
     f = Figure(size = (650, 400))
     ax = Axis(f[1, 1])
@@ -86,7 +91,7 @@ with_theme() do
     ax.xticks = 300:300:3000
     xlims!(ax, extrema(ax.xticks.val))
 
-    ax.yticks = 28:2:38
+    ax.yticks = 1000:50:1350
     ylims!(ax, extrema(ax.yticks.val))
 
     ax.xlabel = "Temperature [K]"
@@ -103,5 +108,6 @@ end
 # ╟─6b2dc796-0627-40da-a70b-aa8a64aab4e2
 # ╟─f60ee05c-7164-4cc9-917a-df04b0ff50ef
 # ╠═a4918698-eb1c-40d9-b78a-25b3212ed234
+# ╠═67908034-837a-4deb-b2db-e584488feaad
 # ╠═5a7902d5-92c6-4911-8d50-85987dc41461
 # ╟─a0bb5537-f9c6-4fb9-835a-0ab6c69eb9b2

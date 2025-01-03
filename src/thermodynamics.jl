@@ -162,7 +162,8 @@ function enthalpy_nasa(T, c::SVector{7, Float64})
     f = c[3] / 3 + T * f
     f = c[2] / 2 + T * f
     f = c[1] / 1 + T * f
-    return c[6] + T * f
+    f = c[6] + T * f
+    return f
 end
 
 function enthalpy_nasa(T, c::SVector{9, Float64})
@@ -177,7 +178,8 @@ function entropy_nasa(T, c::SVector{7, Float64})
     f = c[4] / 3 + T * c[5] / 4
     f = c[3] / 2 + T * f
     f = c[2] / 1 + T * f
-    return c[7] + c[1] * log(T) + T * f
+    f = c[7] + c[1] * log(T) + T * f
+    return f
 end
 
 function entropy_nasa(T, c::SVector{9, Float64})
