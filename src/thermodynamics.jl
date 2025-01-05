@@ -47,7 +47,7 @@ end
 
 function heaviside(T, r)
     return 0.5 * (sign(T - r) + 1)
- end
+end
 
 #######################################################################
 # TYPES
