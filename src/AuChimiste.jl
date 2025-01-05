@@ -5,12 +5,12 @@ __init__() = nothing
 
 using DocStringExtensions: TYPEDFIELDS
 using Polynomials
-# using Latexify
-# using ModelingToolkit
+using Latexify
+using ModelingToolkit
 using StaticArrays
 using Symbolics
-# using Symbolics: scalarize
-# using YAML
+using Symbolics: scalarize
+using YAML
 
 # For constants:
 export ELECTRON_MASS
@@ -42,12 +42,23 @@ export mole_fractions_map
 export mass_fractions_map
 export quantity
 
+# For interfaces
+export specific_heat
+export thermal_conductivity
+export viscosity
+
 # For physical chemistry:
 export mean_molecular_mass_y
 export mean_molecular_mass_x
 export mean_molecular_mass
 export get_mole_fractions
 export get_mass_fractions
+
+# For thermodynamics:
+export NASAThermo
+export ShomateThermo
+export thermo_factory
+export CompiledThermoFunctions
 
 #######################################################################
 # ABSTRACT
@@ -821,11 +832,13 @@ end
 # MODELS
 #######################################################################
 
+include("interfaces.jl")
 include("thermodynamics.jl")
 include("database.jl")
 include("kinetics.jl")
 include("reactors.jl")
 include("combustion.jl")
+include("hardcoded.jl")
 
 #######################################################################
 # EXTENSIONS

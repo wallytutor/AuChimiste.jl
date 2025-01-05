@@ -4,7 +4,7 @@
 CurrentModule = AuChimiste
 ```
 
-## Chemical Elements
+## Elements
 
 ```@docs
 AuChimiste.has_element
@@ -19,7 +19,7 @@ AuChimiste.element
 AuChimiste.AtomicData
 ```
 
-## Chemical Components
+## Components
 
 ```@docs
 AuChimiste.ChemicalComponent
@@ -42,13 +42,21 @@ AuChimiste.CompositionTypes
 AuChimiste.Composition
 ```
 
-## Chemical Kinetics
+## Interfaces
+
+```@docs
+AuChimiste.specific_heat
+AuChimiste.thermal_conductivity
+AuChimiste.viscosity
+```
+
+## Kinetics
 
 
-## Chemical Reactors
+## Reactors
 
 
-## Combustion Chemistry
+## Combustion
 
 
 ## Physical Chemistry
@@ -67,6 +75,12 @@ AuChimiste.get_mass_fractions
 AuChimiste.ThermoData
 AuChimiste.NASAThermo
 AuChimiste.ShomateThermo
+```
+
+## Hardcoded
+
+```@docs
+AuChimiste.MujumdarFlueProperties
 ```
 
 ## Database parsing
