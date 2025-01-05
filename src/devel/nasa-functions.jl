@@ -77,7 +77,7 @@ funcs7 = CompiledThermoFunctions(nasa7)
 funcs7.specific_heat(298.15) / mw
 
 # ╔═╡ 5a7902d5-92c6-4911-8d50-85987dc41461
-@btime funcs7.specific_heat.(300:0.01:3000)
+@benchmark funcs7.specific_heat.(300:0.01:3000)
 
 # ╔═╡ a0bb5537-f9c6-4fb9-835a-0ab6c69eb9b2
 with_theme() do
