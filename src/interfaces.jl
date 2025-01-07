@@ -1,34 +1,49 @@
 # -*- coding: utf-8 -*-
 
 """
+    density(args...; kwargs...)
+
+Evaluation of the density of a substance.
+Its return value must be in ``kg\\cdotp{}m^{-3}``.
+"""
+function density end
+
+"""
     specific_heat(args...; kwargs...)
 
-Common interface for evaluation of the specific heat of a substance.
-Generally this function will take an object with the type for which it
-implements the specific heat, a temperature, and maybe an array of
-mass fractions. Its return value must be provided in standard SI units
-of ``J\\cdotp{}kg^{-1}\\cdotp{}K^{-1}``.
+Evaluation of the specific heat of a substance.
+Its return value must be in ``J\\cdotp{}kg^{-1}\\cdotp{}K^{-1}``.
 """
 function specific_heat end
 
 """
+    enthalpy(args...; kwargs...)
+
+Evaluation of the enthalpy of a substance.
+Its return value must be in ``J\\cdotp{}kg^{-1}``.
+"""
+function enthalpy end
+
+"""
+    entropy(args...; kwargs...)
+
+Evaluation of the entropy of a substance.
+Its return value must be in ``J\\cdotp{}K^{-1}``.
+"""
+function entropy end
+
+"""
     thermal_conductivity(args...; kwargs...)
 
-Common interface for evaluation of the thermal conductivity of a
-substance. Generally this function will take an object with the type
-for which it implements the thermal conductivity, a temperature, and
-maybe an array of mass fractions. Its return value must be provided
-in standard SI units of ``W\\cdotp{}m^{-1}\\cdotp{}K^{-1}``.
+Evaluation of the thermal conductivity of a substance.
+Its return value must be in ``W\\cdotp{}m^{-1}\\cdotp{}K^{-1}``.
 """
 function thermal_conductivity end
 
 """
     viscosity(args...; kwargs...)
 
-Common interface for evaluation of the viscosity of a substance.
-Generally this function will take an object with the type for which it
-implements the viscosity, a temperature, and maybe an array of mass
-fractions. Its return value must be provided in standard SI units of
-``Pa\\cdotp{}s``.
+Evaluation of the viscosity of a substance.
+Its return value must be in ``Pa\\cdotp{}s``.
 """
 function viscosity end
