@@ -45,8 +45,12 @@ struct ThermoData{K, N, M}
     end
 end
 
-function heaviside(T, r)
-    return 0.5 * (sign(T - r) + 1)
+function heaviside(T, T₀)
+    return 1//2 * (sign(T - T₀) + 1)
+end
+
+function heaviside(T, T₀, k)
+    return 1//2 * (tanh(k * (T - T₀)) + 1)
 end
 
 #######################################################################
@@ -95,7 +99,7 @@ end
 # INTERNALS
 #######################################################################
 
-function factory_piecewise(data::ThermoData{K, N, M}, properties) where {K, N, M}
+function factory_symbolic(data::ThermoData{K, N, M}, properties) where {K, N, M}
     @variables T
 
     jumps = data.bounds[1:N]
@@ -110,42 +114,34 @@ function factory_piecewise(data::ThermoData{K, N, M}, properties) where {K, N, M
         funs = properties(T, SVector{K}(coefs[1:end, k]))
         new_cp, new_hm, new_sm = funs
         
-        Δcp = new_cp - fun_cp
-        Δhm = new_hm - fun_hm
-        Δsm = new_sm - fun_hm
+        Δcp = simplify(new_cp - fun_cp; expand = true)
+        Δhm = simplify(new_hm - fun_hm; expand = true)
+        Δsm = simplify(new_sm - fun_hm; expand = true)
 
         fun_cp += δ * Δcp
         fun_hm += δ * Δhm
         fun_sm += δ * Δsm
     end
 
-    fun_cp = simplify(fun_cp; expand = false)
-    fun_hm = simplify(fun_hm; expand = false)
-    fun_sm = simplify(fun_sm; expand = false)
+    # XXX: this is producing identically zero results in some cases
+    # for Shomate models of specific heat and entropy. Why? Probably
+    # due to some overflow due to the T/1000 factor. Keep this note
+    # as this is a weak point of the implementation. It was also
+    # observed that this breaks the management of the heaviside
+    # intended behavior.
+    # fun_cp = simplify(fun_cp; expand = true)
+    # fun_hm = simplify(fun_hm; expand = true)
+    # fun_sm = simplify(fun_sm; expand = true)
 
     return fun_cp, fun_hm, fun_sm
 end
 
 function factory_symbolic(m::NASAThermo{K, N}) where {K, N}
-    function properties(T, c)
-        eval_cp = GAS_CONSTANT * specific_heat_nasa(T, c)
-        eval_hm = GAS_CONSTANT * enthalpy_nasa(T, c)
-        eval_sm = GAS_CONSTANT * entropy_nasa(T, c)
-        return eval_cp, eval_hm, eval_sm
-    end
-
-    return factory_piecewise(m.data, properties)
+    return factory_symbolic(m.data, properties_nasa)
 end
 
 function factory_symbolic(m::ShomateThermo{K, N}) where {K, N}
-    function properties(T, c)
-        eval_cp = specific_heat_shomate(T, c)
-        eval_hm = enthalpy_shomate(T, c)
-        eval_sm = entropy_shomate(T, c)
-        return eval_cp, eval_hm, eval_sm
-    end
-
-    return factory_piecewise(m.data, properties)
+    return factory_symbolic(m.data, properties_shomate)
 end
 
 function factory_numeric(m::NASAThermo{K, N}) where {K, N}
@@ -176,10 +172,9 @@ function specific_heat_nasa(T, c::Nasa9Coefs)
     error("not implemented")
 end
 
-function specific_heat_shomate(T, c::ShomateCoefs)
-    t = T / 1000
-    p = c[5] + t^2 * (c[1] + t * (c[2] + t * (c[3] + t * c[4])))
-    return p / t^2
+function specific_heat_shomate(t, c::ShomateCoefs)
+    p = c[1] + t * (c[2] + t * (c[3] + t * c[4]))
+    return p + c[5] / t^2
 end
 
 function enthalpy_nasa(T, c::Nasa7Coefs)
@@ -195,10 +190,9 @@ function enthalpy_nasa(T, c::Nasa9Coefs)
     error("not implemented")
 end
 
-function enthalpy_shomate(T, c::ShomateCoefs)
-    t = 0.001T
-    p = c[1] + t * (c[2]/2 + t * (c[3]/3 + t * c[4]/4))
-    return (-c[5] + t * (c[6] - c[8]) + t^2 * p) / t
+function enthalpy_shomate(t, c::ShomateCoefs)
+    p = t * (c[1] + t * (c[2]/2 + t * (c[3]/3 + t * c[4]/4)))
+    return p - c[5] / t + c[6] - c[8]
 end
 
 function entropy_nasa(T, c::Nasa7Coefs)
@@ -213,10 +207,23 @@ function entropy_nasa(T, c::Nasa9Coefs)
     error("not implemented")
 end
 
-function entropy_shomate(T, c::ShomateCoefs)
-    t = 0.001T
-    p = c[7] + t * c[2] + log(t) * c[1] + t^2 * (c[3]/2 + t * c[4]/3)
-    return (-c[5] + 2 * t^2 * p) / (2 * t^2)
+function entropy_shomate(t, c::ShomateCoefs)
+    p = log(t) * c[1] + t * (c[2] + t * (c[3]/2 + t * c[4]/3))
+    return p - c[5] / (2 * t^2) + c[7]
+end
+
+function properties_nasa(T, c)
+    eval_cp = GAS_CONSTANT * specific_heat_nasa(T, c)
+    eval_hm = GAS_CONSTANT * enthalpy_nasa(T, c)
+    eval_sm = GAS_CONSTANT * entropy_nasa(T, c)
+    return eval_cp, eval_hm, eval_sm
+end
+
+function properties_shomate(T, c)
+    eval_cp = specific_heat_shomate(T/1000, c)
+    eval_hm = enthalpy_shomate(T/1000, c)
+    eval_sm = entropy_shomate(T/1000, c)
+    return eval_cp, eval_hm, eval_sm
 end
 
 #######################################################################

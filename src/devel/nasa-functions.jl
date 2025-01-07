@@ -119,48 +119,48 @@ md"""
 
 # ╔═╡ 94f9de28-5986-49df-ab71-ceb790264ada
 shomate_eqs, shomate_subs = let
-	@info("Hard-coding Shomate expressions...")
-	
-	@variables t α[1:8]
+    @info("Hard-coding Shomate expressions...")
+    
+    @variables t α[1:8]
 
-	# Variables with same letters as NIST:
-	ps = @variables a b c d e f g h
+    # Variables with same letters as NIST:
+    ps = @variables a b c d e f g h
 
-	# Create replacement dictionary for later:
-	shomate_subs = Dict(zip(scalarize(α), ps))
+    # Create replacement dictionary for later:
+    shomate_subs = Dict(zip(scalarize(α), ps))
 
-	# Retrieve aliases for building expressions:
-	A, B, C, D, E, F, G, H = scalarize(α)
+    # Retrieve aliases for building expressions:
+    A, B, C, D, E, F, G, H = scalarize(α)
 
-	# Standard form for verification:
-	# cp = A + B*t + C*t^2 + D*t^3 + E/t^2
-	# hm =  A*t + B/2*t^2 + C/3*t^3 + D/4*t^4 - E/t + F - H
-	# sm = A*log(t) + B*t + C/2*t^2 + D/3*t^3 - E/(2t^2) + G
+    # Standard form for verification:
+    # cp = A + B*t + C*t^2 + D*t^3 + E/t^2
+    # hm =  A*t + B/2*t^2 + C/3*t^3 + D/4*t^4 - E/t + F - H
+    # sm = A*log(t) + B*t + C/2*t^2 + D/3*t^3 - E/(2t^2) + G
 
-	# Optimized expressions:
-	cp = (E + t^2 * (A + t * (B + t * (C + D * t)))) / t^2
-	hm = (-E + (F-H)*t + t^2 * (A + t*(B/2 + t * (C/3 + D/4*t)))) / t
-	sm = (-E + 2t^2 * (G + A*log(t) + B*t + t^2*(C/2 + D/3*t))) / (2t^2)
-	
-	(c = cp, h = hm, s = sm), shomate_subs
+    # Optimized expressions:
+    cp = (E + t^2 * (A + t * (B + t * (C + D * t)))) / t^2
+    hm = (-E + (F-H)*t + t^2 * (A + t*(B/2 + t * (C/3 + D/4*t)))) / t
+    sm = (-E + 2t^2 * (G + A*log(t) + B*t + t^2*(C/2 + D/3*t))) / (2t^2)
+    
+    (c = cp, h = hm, s = sm), shomate_subs
 end;
 
 # ╔═╡ 63642731-d720-467a-8a6d-9a7aa526fca4
 let
-	c = simplify(shomate_eqs.c; expand = true)
-	substitute(c, shomate_subs), shomate_eqs.c
+    c = simplify(shomate_eqs.c; expand = true)
+    substitute(c, shomate_subs), shomate_eqs.c
 end
 
 # ╔═╡ 19b59189-cebc-4e60-b8b1-ddb72ac62c25
 let
-	h = simplify(shomate_eqs.h; expand = true)
-	substitute(h, shomate_subs), shomate_eqs.h
+    h = simplify(shomate_eqs.h; expand = true)
+    substitute(h, shomate_subs), shomate_eqs.h
 end
 
 # ╔═╡ 67c7a97a-3e70-420e-a5cd-8810161413ab
 let
-	s = simplify(shomate_eqs.s; expand = true)
-	substitute(s, shomate_subs), shomate_eqs.s
+    s = simplify(shomate_eqs.s; expand = true)
+    substitute(s, shomate_subs), shomate_eqs.s
 end
 
 # ╔═╡ 852eb370-3b73-4a59-ab26-4fe55f13ec56
@@ -172,13 +172,13 @@ Sample properties from [NIST Webbook of Chemistry](https://webbook.nist.gov/cgi/
 shomate = let
     @info("Sample data for Shomate")
     
-    bounds = [200.0, 2327.0]#, 6000.0]
+    bounds = [200.0, 2327.0, 6000.0]
     
     data = [
         [ 1.02429000e+02,  3.87498000e+01, -1.59109000e+01,  2.62818100e+00,
          -3.00755100e+00, -1.71793000e+03,  1.46997000e+02, -1.67569000e+03],
-        # [ 1.92464000e+02,  9.51985600e-08, -2.85892800e-08,  2.92914700e-09,
-        #   5.59940500e-08, -1.75771100e+03,  1.77100800e+02, -1.62056900e+03]
+        [ 1.92464000e+02,  9.51985600e-08, -2.85892800e-08,  2.92914700e-09,
+          5.59940500e-08, -1.75771100e+03,  1.77100800e+02, -1.62056900e+03]
     ]
 
     thermo_factory("Shomate", data, bounds)
@@ -202,8 +202,8 @@ with_theme() do
     ax.xticks = 300:300:3000
     xlims!(ax, extrema(ax.xticks.val))
 
-    # ax.yticks = 1000:50:1350
-    # ylims!(ax, extrema(ax.yticks.val))
+    ax.yticks = 80:20:200
+    ylims!(ax, extrema(ax.yticks.val))
 
     ax.xlabel = "Temperature [K]"
     ax.ylabel = "Specific heat [J/(mol.K)]"
@@ -213,7 +213,7 @@ end
 
 # ╔═╡ 0407c9b1-804b-43c4-87f0-f0070d2f9628
 with_theme() do
-    T = LinRange(300, 3000, 100)
+    T = LinRange(300, 4000, 1000)
     c = funcs_shomate.enthalpy.(T)
 
     f = Figure(size = (650, 400))
@@ -223,8 +223,8 @@ with_theme() do
     ax.xticks = 300:300:3000
     xlims!(ax, extrema(ax.xticks.val))
 
-    # ax.yticks = 1000:50:1350
-    # ylims!(ax, extrema(ax.yticks.val))
+    ax.yticks = 0:50:450
+    ylims!(ax, extrema(ax.yticks.val))
 
     ax.xlabel = "Temperature [K]"
     ax.ylabel = "Enthalpy [kJ/mol]"
@@ -232,8 +232,8 @@ with_theme() do
     f
 end
 
-# ╔═╡ 28fedb75-686f-4dcf-8593-0f6d6a1fa0d4
-
+# ╔═╡ c58f0820-39c3-4dbf-bbc4-a01c79f35fc6
+funcs_shomate.enthalpy.([300, 400, 2300, 2326, 2328, 2400, 3000, 4000])
 
 # ╔═╡ Cell order:
 # ╟─7b19aed6-c6d8-11ef-2182-f7c12eee2ab3
@@ -253,9 +253,9 @@ end
 # ╟─19b59189-cebc-4e60-b8b1-ddb72ac62c25
 # ╟─67c7a97a-3e70-420e-a5cd-8810161413ab
 # ╟─852eb370-3b73-4a59-ab26-4fe55f13ec56
-# ╠═16cfb23c-f5e4-4a83-a369-7ada1f258934
+# ╟─16cfb23c-f5e4-4a83-a369-7ada1f258934
 # ╟─c9980b72-4930-427c-bd28-a374b663b6f9
 # ╟─335034a8-b4a6-4368-9542-20588092b5ce
-# ╠═69724ddf-18ee-4726-9082-09809d12ba57
-# ╠═0407c9b1-804b-43c4-87f0-f0070d2f9628
-# ╠═28fedb75-686f-4dcf-8593-0f6d6a1fa0d4
+# ╟─69724ddf-18ee-4726-9082-09809d12ba57
+# ╟─0407c9b1-804b-43c4-87f0-f0070d2f9628
+# ╟─c58f0820-39c3-4dbf-bbc4-a01c79f35fc6
