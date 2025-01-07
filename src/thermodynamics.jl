@@ -72,36 +72,42 @@ end
 
 """
 Stores data for Shomate parametrization with `N` temperature ranges.
+Model equations are as provided by [Shomate1954](@cite).
 """
 struct ShomateThermo{K, N} <: ThermodynamicModelData
+    data::ThermoData{K, N}
+    h_ref::Float64
+    s_ref::Float64
+
+    function ShomateThermo(data::ThermoData{K, N}) where {K, N}
+        return new{K, N}(data, data.params[end-1, 1], data.params[end, 1])
+    end
+
+    function ShomateThermo(data::Vector{Vector{Float64}}, bounds::Vector{Float64})
+        return ShomateThermo(ThermoData(data, bounds))
+    end
 end
 
+# struct MaierKelleyThermo <: ThermodynamicModelData end
 # struct EinsteinThermo <: ThermodynamicModelData end
 
 #######################################################################
 # INTERNALS
 #######################################################################
 
-function factory_symbolic(m::NASAThermo{K, N}) where {K, N}
+function factory_piecewise(data::ThermoData{K, N, M}, properties) where {K, N, M}
     @variables T
 
-    function thermo_nasa(c)
-        eval_cp = specific_heat_nasa(T, c)
-        eval_hm = enthalpy_nasa(T, c)
-        eval_sm = entropy_nasa(T, c)
-        return eval_cp, eval_hm, eval_sm
-    end
+    jumps = data.bounds[1:N]
+    coefs = data.params
 
-    jumps = m.data.bounds[1:N]
-    coefs = m.data.params
-
-    funs = thermo_nasa(SVector{K}(coefs[1:end, 1]))
+    funs = properties(T, SVector{K}(coefs[1:end, 1]))
     fun_cp, fun_hm, fun_sm = funs
     
     for k in range(2, N)
         δ = heaviside(T, jumps[k])
 
-        funs = thermo_nasa(SVector{K}(coefs[1:end, k]))
+        funs = properties(T, SVector{K}(coefs[1:end, k]))
         new_cp, new_hm, new_sm = funs
         
         Δcp = new_cp - fun_cp
@@ -120,8 +126,26 @@ function factory_symbolic(m::NASAThermo{K, N}) where {K, N}
     return fun_cp, fun_hm, fun_sm
 end
 
-function factory_symbolic(m::ShomateThermo)
-    error("not implemented")
+function factory_symbolic(m::NASAThermo{K, N}) where {K, N}
+    function properties(T, c)
+        eval_cp = GAS_CONSTANT * specific_heat_nasa(T, c)
+        eval_hm = GAS_CONSTANT * enthalpy_nasa(T, c)
+        eval_sm = GAS_CONSTANT * entropy_nasa(T, c)
+        return eval_cp, eval_hm, eval_sm
+    end
+
+    return factory_piecewise(m.data, properties)
+end
+
+function factory_symbolic(m::ShomateThermo{K, N}) where {K, N}
+    function properties(T, c)
+        eval_cp = specific_heat_shomate(T, c)
+        eval_hm = enthalpy_shomate(T, c)
+        eval_sm = entropy_shomate(T, c)
+        return eval_cp, eval_hm, eval_sm
+    end
+
+    return factory_piecewise(m.data, properties)
 end
 
 function factory_numeric(m::NASAThermo{K, N}) where {K, N}
@@ -136,7 +160,11 @@ end
 # IMPLEMENTATIONS
 #######################################################################
 
-function specific_heat_nasa(T, c::SVector{7, Float64})
+const Nasa7Coefs   = SVector{7, Float64}
+const Nasa9Coefs   = SVector{9, Float64}
+const ShomateCoefs = SVector{8, Float64}
+
+function specific_heat_nasa(T, c::Nasa7Coefs)
     f = c[4] + T * c[5]
     f = c[3] + T * f
     f = c[2] + T * f
@@ -144,15 +172,17 @@ function specific_heat_nasa(T, c::SVector{7, Float64})
     return f
 end
 
-function specific_heat_nasa(T, c::SVector{9, Float64})
+function specific_heat_nasa(T, c::Nasa9Coefs)
     error("not implemented")
 end
 
-function specific_heat_shomate(T, c::SVector{7, Float64})
-    error("not implemented")
+function specific_heat_shomate(T, c::ShomateCoefs)
+    t = T / 1000
+    p = c[5] + t^2 * (c[1] + t * (c[2] + t * (c[3] + t * c[4])))
+    return p / t^2
 end
 
-function enthalpy_nasa(T, c::SVector{7, Float64})
+function enthalpy_nasa(T, c::Nasa7Coefs)
     f = c[4] / 4 + T * c[5] / 5
     f = c[3] / 3 + T * f
     f = c[2] / 2 + T * f
@@ -161,15 +191,17 @@ function enthalpy_nasa(T, c::SVector{7, Float64})
     return f
 end
 
-function enthalpy_nasa(T, c::SVector{9, Float64})
+function enthalpy_nasa(T, c::Nasa9Coefs)
     error("not implemented")
 end
 
-function enthalpy_shomate(T, c::SVector{7, Float64})
-    error("not implemented")
+function enthalpy_shomate(T, c::ShomateCoefs)
+    t = 0.001T
+    p = c[1] + t * (c[2]/2 + t * (c[3]/3 + t * c[4]/4))
+    return (-c[5] + t * (c[6] - c[8]) + t^2 * p) / t
 end
 
-function entropy_nasa(T, c::SVector{7, Float64})
+function entropy_nasa(T, c::Nasa7Coefs)
     f = c[4] / 3 + T * c[5] / 4
     f = c[3] / 2 + T * f
     f = c[2] / 1 + T * f
@@ -177,12 +209,14 @@ function entropy_nasa(T, c::SVector{7, Float64})
     return f
 end
 
-function entropy_nasa(T, c::SVector{9, Float64})
+function entropy_nasa(T, c::Nasa9Coefs)
     error("not implemented")
 end
 
-function entropy_shomate(T, c::SVector{7, Float64})
-    error("not implemented")
+function entropy_shomate(T, c::ShomateCoefs)
+    t = 0.001T
+    p = c[7] + t * c[2] + log(t) * c[1] + t^2 * (c[3]/2 + t * c[4]/3)
+    return (-c[5] + 2 * t^2 * p) / (2 * t^2)
 end
 
 #######################################################################
@@ -193,16 +227,18 @@ function thermo_models()
     return Dict(
         :NASA7 => NASAThermo,
         :NASA9 => NASAThermo,
+        :SHOMATE => ShomateThermo,
     )
 end
 
 function get_thermo_model(name::String)
+    name = uppercase(name)
     symb = Symbol(name)
     models = thermo_models()
 
     if !haskey(models, symb)
         error("""\
-        Unknown thermodynamic model $(name); model name must be \
+        Unknown thermodynamic model `$(name)`; model name must be \
         among the following: $(keys(models))
         """)
     end
@@ -238,6 +274,6 @@ struct CompiledThermoFunctions
     entropy::Function
 
     function CompiledThermoFunctions(funcs; expression = Val{false})
-        return new(compile_function.(GAS_CONSTANT .* funcs, expression)...)
+        return new(compile_function.(funcs, expression)...)
     end
 end
