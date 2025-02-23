@@ -12,7 +12,6 @@ begin
     open("pluto_init.log", "w") do logs
         root = abspath(joinpath(@__DIR__, "..", ".."))
         Pkg.activate(dirname(root); io=logs)
-		Pkg.resolve()
         Pkg.instantiate(; io=logs)
     end
 
