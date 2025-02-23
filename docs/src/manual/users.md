@@ -92,6 +92,7 @@ AuChimiste.MujumdarFlueProperties
 
 ```@docs
 AuChimiste.DrumMediumKramersSolution
+AuChimiste.DrumDrumMediumKramersChunk
 ```
 
 ## Database parsing

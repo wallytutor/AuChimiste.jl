@@ -45,6 +45,9 @@ struct DrumMediumKramersSolution <: AbstractDrumBedModel
     Η::Float64
 end
 
+""" 
+Represents a chunk of a rotary drum bed model with Kramers equation.
+"""
 struct DrumMediumKramersChunk
     model::ODESystem
     

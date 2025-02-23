@@ -60,9 +60,6 @@ md"""
 The goal of this workbook is to provide the basis for development of drum transport models for process simulation; this aims at providing the basic building blocks for complex models built by assemblying the blocks constructed here.
 """
 
-# ╔═╡ 40678b63-f6dc-4340-b539-94f91f25fe41
-
-
 # ╔═╡ 7d2d1295-9ec1-405b-bd2b-ecb0b2bd6937
 md"""
 ## Vahl's equation
@@ -152,9 +149,6 @@ md"""
 ## Kramers equation
 """
 
-# ╔═╡ fff17198-f199-42d7-be1f-67b1f92805bb
-
-
 # ╔═╡ eb39c0c7-4fcb-4c2e-980a-315e5af34f98
 let
 	# Kiln length [u"m"]
@@ -192,28 +186,196 @@ let
 end
 
 # ╔═╡ a6851cfc-261b-415d-b991-e8ed9af22747
-
+function Base.show(io::IO, obj::RotaryKilnBedSolution)
+    τ = @sprintf("%.6f min", obj.τ/60)
+    ηₘ = @sprintf("%.6f", obj.ηₘ)
+    print(io, "RotaryKilnBedSolution(τ = $(τ), ηₘ = $(ηₘ) %)")
+end
 
 # ╔═╡ c9ee664b-ab85-4407-a5ab-f90141982f77
+"""
 
+
+## Arguments
+
+Internal elements are initialized through the following constructor:
+
+```julia
+RotaryKilnBedSolution(z, h, β, R, Φ)
+```
+
+Where parameters are given as:
+
+- `z`: solution coordinates over length, [m].
+- `h`: bed profile solution over length, [m].
+- `R`: kiln internal radius, [m].
+- `Φ`: kiln feed rate, [m³/s].
+
+An outer constructor is also provided for managing the integration of an
+instance of `SymbolicLinearKramersModel`. This is the recommended usage
+that is illustrated below.
+
+**Important:** inputs must be provided in international system (SI) units
+as a better physical practice. The only exception is the rotation rate `ω`
+provided in revolution multiples. If the discharge end is held by a dam,
+its height must be provided instead of the particle size, as it is used
+as the ODE initial condition.
+
+- `model`: a symbolic kiln model.
+- `L`: kiln length, [m].
+- `R`: kiln internal radius, [m].
+- `Φ`: kiln feed rate, [m³/s].
+- `ω`: kiln rotation rate, [rev/s].
+- `β`: kiln slope, [rad].
+- `γ`: solids repose angle, [rad].
+- `d`: particle size or dam height, [m].
+- `solver`: Solver for `DifferentialEquations`. Defaults to `Tsit5`.
+- `rtol`: Relative integration tolerance. Defaults to 1.0e-08.
+- `atol`: Absolute integration tolerance. Defaults to 1.0e-08.
+
+## Examples
+
+Data in next example is an SI conversion of an example from
+([[@Kramers1952]]).
+
+```jldoctest
+julia> L = 13.715999999999998;  # Kiln length [m]
+
+julia> D = 1.8897599999999999;  # Kiln diameter [m]
+
+julia> β = 2.3859440303888126;  # Kiln slope [°]
+
+julia> γ = 45.0;                # Repose angle [°]
+
+julia> d = 1.0;                 # Particle/dam size [mm]
+
+julia> Φ = 10.363965852671996;  # Feed rate [m³/h]
+
+julia> ω = 3.0300000000000002;  # Rotation rate [rev/min]
+
+julia> bed = RotaryKilnBedSolution(;
+            model = SymbolicLinearKramersModel(),
+            L     = L,
+            R     = D / 2.0,
+            Φ     = Φ / 3600.0,
+            ω     = ω / 60.0,
+            β     = deg2rad(β),
+            γ     = deg2rad(γ),
+            d     = d / 1000.0
+        );
+
+julia> bed
+RotaryKilnBedSolution(τ = 13.169938 min, ηₘ = 5.913271 %)
+
+julia> bed.τ
+790.1963002674551
+```
+
+In the following dummy example we force a very thick *analytical* bed
+solution, filling the radius of the rotary drum. Next we confirm the
+*internal* evaluations of the model match the expected *analytical*
+values.
+
+```jldoctest; setup=:(using Statistics: mean)
+julia> R = 1.0e+00;
+
+julia> Φ = 1.0e-02;
+
+julia> z = collect(0.0:0.1:10.0);
+
+julia> h = R * ones(size(z));
+
+julia> Aₐ = π * R^2 / 2;
+
+julia> Vₐ = Aₐ * z[end];
+
+julia> bed = RotaryKilnBedSolution(z, h, 0, R, Φ)
+RotaryKilnBedSolution(τ = 26.179939 min, ηₘ = 50.000000 %)
+
+julia> mean(bed.θ) ≈ π
+true
+
+julia> mean(bed.l) ≈ 2R
+true
+
+julia> mean(bed.A) ≈ Aₐ
+true
+
+julia> mean(bed.η) ≈ 0.5
+true
+
+julia> bed.ηₘ ≈ 50.0
+true
+
+julia> bed.V ≈ Vₐ
+true
+
+julia> bed.τ ≈ Vₐ / Φ
+true
+```
+"""
 
 # ╔═╡ 91f9ff20-6ebe-481c-8e26-de4aa3f6fc64
 
 
 # ╔═╡ 9ab25ae3-7758-4b0f-9f89-dd85af98e331
+    ###############
+    ## Geometry
+    ###############
+    
+    # Kiln length [m]
+    L = 1.5
+    
+    # Kiln diameter [m]
+    D = 0.2
+    
+    # Kiln slope [°]
+    β = 1.0
+    
+    ###############
+    ## Material
+    ###############
+    
+    # Repose angle [°]
+    γ = 35.0
+    
+    # Particle/dam size [mm]
+    d = 0.1
+    
+    # Random packed density [kg/m³]
+    ρ = 1000.0
 
+    ###############
+    # Process
+    ###############
+
+    # Feed rate [kg/h]
+    ṁ = 1.0
+    
+    # Rotation rate [rev/min]
+    ω = 2.0
+
+    bed = RotaryKilnBedSolution(;
+        model = SymbolicLinearKramersModel(),
+        L = L,
+        R = D / 2.0,
+        Φ = ṁ / (3600ρ),
+        ω = ω / 60.0,
+        β = deg2rad(β),
+        γ = deg2rad(γ),
+        d = d / 1000.0,
+    )
+    plotlinearkramersmodel(bed, normz = false, normh = false)
 
 # ╔═╡ Cell order:
 # ╟─fe8dcc89-421b-4064-a582-e966f5f05cb5
 # ╟─cc67bb98-5bcf-4d9d-993f-3589d1e593dd
-# ╠═86063fd5-1d38-4561-a03e-a5fc339ea010
-# ╠═2db58f70-eea6-11ef-3178-5df5e9711a8a
-# ╠═d7b5c97f-e090-43d5-ae36-9907b5ea3187
-# ╠═40678b63-f6dc-4340-b539-94f91f25fe41
+# ╟─86063fd5-1d38-4561-a03e-a5fc339ea010
+# ╟─2db58f70-eea6-11ef-3178-5df5e9711a8a
+# ╟─d7b5c97f-e090-43d5-ae36-9907b5ea3187
 # ╟─7d2d1295-9ec1-405b-bd2b-ecb0b2bd6937
 # ╟─5d10dd7e-9300-4387-a70f-5ab0acf9b34d
 # ╟─55b3636f-838c-4f3e-b084-a802ea6210e0
-# ╠═fff17198-f199-42d7-be1f-67b1f92805bb
 # ╠═eb39c0c7-4fcb-4c2e-980a-315e5af34f98
 # ╠═a6851cfc-261b-415d-b991-e8ed9af22747
 # ╠═c9ee664b-ab85-4407-a5ab-f90141982f77

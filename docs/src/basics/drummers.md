@@ -8,7 +8,7 @@ using AuChimiste
 
 ## Solving Kramers equation
 
-Kramers equation [Kramers1952](@cite) describes the slope of bed height $h$ over rotary kiln axis $z$. It accounts for rotation speed $\omega$, volumetric flow rate $\Phi_v$, kiln slope $\alpha$, kiln internal radius $R$, and solids dynamic repose angle $\beta$. In Auchimiste its implementation is decomposed as provided in the following equation:
+Kramers equation [Kramers1952](@cite) describes the slope of bed height $h$ over rotary kiln axis $z$, with discharge being given at $z=0$ where initial condition of granule size is expected to be provided. It accounts for rotation speed $\omega$, volumetric flow rate $\Phi_v$, kiln slope $\alpha$, kiln internal radius $R$, and solids dynamic repose angle $\beta$. In `Auchimiste` its implementation is done by [`DrumMediumKramersChunk`](@ref) and is decomposed as provided in the following equation:
 
 $$
 \begin{align*}
@@ -25,5 +25,11 @@ $$
 Because thermal effects may impact solids dynamic repose angle $\beta$, it can be provided as a function of coordinate $z$ (it is expected the user has solved the thermal model elsewhere and solution can be retrieved in terms of this coordinate); the same applies to volumetric flow $\Phi_v$. For modeling transitions of radius, $R$ is also to be provided as a function of $z$, but that must be done with care to provide a suitable discretization that is compatible with the provided transitions.
 
 ```@example getting-started-1
+x=1
+```
 
+Standardized plotting of [`DrumMediumKramersSolution`](@ref) bed profile is provided bellow. It supports normalization of axes throught keywords `normz` for axial coordinate and `normh` for bed depth.
+
+```@example getting-started-1
+x=1
 ```
