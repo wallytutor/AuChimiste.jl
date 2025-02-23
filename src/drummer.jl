@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+"""
+Geometric description of a rotary drum bed from Kramers equation solution.
+
+## Fields
+
+$(TYPEDFIELDS)
+"""
 struct DrumMediumKramersSolution <: AbstractDrumBedModel
     "Solution coordinates [m]"
     z::Vector{Float64}
@@ -174,7 +181,7 @@ function drum_post(sol)
              τ = drum_residence(z, ϕ, A) )
 end
 
-function CairoMakie.plot(model::DrumMediumKramersSolution; kwargs...)
+function plot(model::DrumMediumKramersSolution; kwargs...)
     defaults = (normz = true, normh = true, simple = true)
     options = merge(defaults, kwargs)
 

@@ -88,6 +88,12 @@ AuChimiste.ShomateThermo
 AuChimiste.MujumdarFlueProperties
 ```
 
+## Drummers
+
+```@docs
+AuChimiste.DrumMediumKramersSolution
+```
+
 ## Database parsing
 
 ## Constants
