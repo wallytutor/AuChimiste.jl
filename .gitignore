@@ -5,6 +5,11 @@
 # Obsidian vaults (used sometimes to edit docs/)
 .obsidian
 
+# Jupyter(lab) notebooks
+*.virtual_documents/
+.ipynb_checkpoints/
+*.ipynb
+
 # Log files
 *.log
 

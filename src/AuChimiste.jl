@@ -3,13 +3,20 @@ module AuChimiste
 
 __init__() = nothing
 
+using CairoMakie
+using CommonSolve
+using DifferentialEquations
 using DocStringExtensions: TYPEDFIELDS
-using Polynomials
+using DynamicQuantities
 using Latexify
 using ModelingToolkit
+using Polynomials
+using Printf
+using SciMLBase
 using StaticArrays
 using Symbolics
 using Symbolics: scalarize
+using Trapz
 using YAML
 
 # For constants:
@@ -68,6 +75,8 @@ abstract type ChemicalException       <: Exception end
 abstract type ChemicalElementsError   <: ChemicalException end
 abstract type ChemicalComponentsError <: ChemicalException end
 abstract type ThermodynamicModelData end
+abstract type AbstractReactorModel end
+abstract type AbstractDrumBedModel <: AbstractReactorModel end
 
 #######################################################################
 # CONSTANT
@@ -839,6 +848,7 @@ include("kinetics.jl")
 include("reactors.jl")
 include("combustion.jl")
 include("hardcoded.jl")
+include("drummer.jl")
 
 #######################################################################
 # EXTENSIONS
