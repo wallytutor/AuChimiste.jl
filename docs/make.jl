@@ -34,6 +34,7 @@ pages = [
     ],
     "Manual" => [
         "manual/users.md",
+        "manual/drummers.md",
         "manual/development.md",
     ],
     "references.md",
