@@ -148,53 +148,8 @@ md"""
 ## Kramers equation
 """
 
-# ╔═╡ eb39c0c7-4fcb-4c2e-980a-315e5af34f98
-let
-	# Kiln length [u"m"]
-    L = 13.7
-
-	# Kiln diameter [u"m"]
-    R = 0.95
-
-	# Kiln slope [rad]
-    α = ustrip(atan(0.5u"inch/ft"))
-
-    # Dynamic repose angle
-    β = deg2rad(45.0)
-
-	# Particle/dam size [u"m"]
-    h = 1.0e-03
-
-    # Feed rate [u"m^3/s"]
-    ϕ = 2.88e-03
-
-	# Rotation rate [u"1/s"]
-    ω̇ = 0.05
-	
-	beta(z) = β
-	phiv(z) = ϕ
-	radius(z) = R
-	
-	grid = LinRange(0, 2, 50)
-	grid = vcat(grid, LinRange(1.7, L, 12))
-	
-	sol = AuChimiste.solve_stack(grid, radius, beta, phiv, h, ω̇, α)
-	fig, ax = AuChimiste.plot(sol)
-	resize!(fig.scene, 650, 350)
-	fig
-end
-
-# ╔═╡ a6851cfc-261b-415d-b991-e8ed9af22747
-function Base.show(io::IO, obj::RotaryKilnBedSolution)
-    τ = @sprintf("%.6f min", obj.τ/60)
-    ηₘ = @sprintf("%.6f", obj.ηₘ)
-    print(io, "RotaryKilnBedSolution(τ = $(τ), ηₘ = $(ηₘ) %)")
-end
-
 # ╔═╡ c9ee664b-ab85-4407-a5ab-f90141982f77
 """
-
-
 ## Arguments
 
 Internal elements are initialized through the following constructor:
@@ -377,8 +332,6 @@ end
 # ╟─7d2d1295-9ec1-405b-bd2b-ecb0b2bd6937
 # ╟─5d10dd7e-9300-4387-a70f-5ab0acf9b34d
 # ╟─55b3636f-838c-4f3e-b084-a802ea6210e0
-# ╠═eb39c0c7-4fcb-4c2e-980a-315e5af34f98
-# ╠═a6851cfc-261b-415d-b991-e8ed9af22747
 # ╠═c9ee664b-ab85-4407-a5ab-f90141982f77
 # ╠═91f9ff20-6ebe-481c-8e26-de4aa3f6fc64
 # ╠═9ab25ae3-7758-4b0f-9f89-dd85af98e331

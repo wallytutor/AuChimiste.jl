@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+export DrumMediumKramersSolution
+export DrumMediumKramersChunk
+export solve_kramers_stack
+
 """
 Geometric description of a rotary drum bed from Kramers equation solution.
 
@@ -109,7 +113,33 @@ function CommonSolve.solve(chunk::DrumMediumKramersChunk;
     return solve(prob, solver; options...)
 end
 
-function solve_stack(grid, radius, beta, phiv, h, ω̇, α; kwargs...)
+"""
+    solve_kramers_stack(; kwargs...)
+
+Solves a rotary drum bed model with Kramers equation in a stack of chunks.
+The minimum set of parameters are the following:
+
+- `grid`: grid of coordinates given in meters; this must include both the
+    start and end points of the drum bed.
+
+- `radius`: radius of the drum bed as a function of the coordinate `z`;
+    no checks are performed with respect to grid consistency.
+
+- `beta`: local dynamic repose angle as a function of the coordinate `z`;
+    this is expected to handle the effects of temperaraure and moisture as
+    treated by an external model.
+
+- `phiv`: volumetric flow rate as a function of the coordinate `z`; this
+    is expected to handle the effects of temperature and moisture as treated
+    by an external model.
+
+- `h`: initial bed height in meters at discharge position `z=0`.
+
+- `ω̇`: angular velocity of the drum in radians per second.
+
+- `α`: drum inclination angle in radians.
+"""
+function solve_kramers_stack(; grid, radius, beta, phiv, h, ω̇, α, kwargs...)
     zbounds = zip(grid[1:end-1], grid[2:end])
     solution = ODESolution[]
     
@@ -121,6 +151,8 @@ function solve_stack(grid, radius, beta, phiv, h, ω̇, α; kwargs...)
             @warn("While solving at z = [$(zspan)] got $(sol.retcode)")
         end
         
+        # TODO consider testing for steps in radius here! The grid might
+        # be a sequence of different radii.
         h = sol[:h][end]
         push!(solution, sol)
     end
