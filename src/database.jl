@@ -42,5 +42,5 @@ function get_data_file(name)
 
     path =  join(map(n->"- $(n)", USER_PATH), "\n")
     @warn("Data file `$(name)` not in load path:\n$(path)")
-    return
+    return nothing
 end
