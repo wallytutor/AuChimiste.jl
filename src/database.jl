@@ -10,6 +10,10 @@ const DATA_PATH = joinpath(dirname(@__DIR__), "data")
 "List of search paths for thermodynamics and kinetics databases."
 const USER_PATH = [DATA_PATH, pwd(), expanduser("~")]
 
+# XXX: until I get to understand artifacts...
+# const THERMO_COMPOUND_DATA = artifact"thermo_compounds"
+const THERMO_COMPOUND_DATA = joinpath(DATA_PATH, "thermo_compounds.yaml")
+
 function load_path()
     return sort(deepcopy(USER_PATH))
 end

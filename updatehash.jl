@@ -3,17 +3,21 @@ using Pkg.GitTools
 using SHA
 using TOML
 
-TREE_HASH = bytes2hex(Pkg.GitTools.tree_hash(joinpath(@__DIR__, "artifacts")))
+# TREE_HASH = bytes2hex(Pkg.GitTools.tree_hash(joinpath(@__DIR__, "artifacts")))
 
-function file_hash(artifacts, fpath)
+function file_hash(artifacts, fpath; lazy = false)
     base = basename(fpath)
     name = join(split(base, ".")[1:end-1], "_")
     hash = bytes2hex(sha256(read(fpath)))
     
     artifacts[name] = Dict(
+        "lazy"          => lazy,
         "files"         => [base], 
         "hash"          => hash,
-        "git-tree-sha1" => TREE_HASH
+        "git-tree-sha1" => hash
+
+        # THIS IS ACTUALLY FOR A GZ FILE BEFORE EXTRACTION!
+        # "git-tree-sha1" => TREE_HASH
     )
     
     @info("""\
@@ -27,7 +31,7 @@ function update_sha256(; artifacts, files)
     artifacts_data = TOML.parsefile(artifacts)
 
     for fpath in files
-        file_hash(artifacts_data, joinpath(@__DIR__, "artifacts", fpath))
+        file_hash(artifacts_data, joinpath(@__DIR__, "data", fpath))
     end
 
     open(artifacts, "w") do fp
@@ -35,7 +39,7 @@ function update_sha256(; artifacts, files)
     end
 end
 
-update_sha256(; artifacts = joinpath(@__DIR__, "Artifacts.toml"), 
-                files     = [
-                    "thermo_compounds.yaml",
-                ])
+# update_sha256(; artifacts = joinpath(@__DIR__, "Artifacts.toml"), 
+#                 files     = [
+#                     "thermo_compounds.yaml",
+#                 ])

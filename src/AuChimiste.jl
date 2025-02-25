@@ -10,6 +10,7 @@ using DocStringExtensions: TYPEDFIELDS
 using DynamicQuantities
 using Latexify
 using ModelingToolkit
+using Pkg.Artifacts
 using Polynomials
 using Printf
 using SciMLBase
