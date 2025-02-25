@@ -13,7 +13,7 @@ function Base.showerror(io::IO, err::ChemicalException)
 end
 
 function Base.show(io::IO, obj::DrumMediumKramersSolution)
-    τ = @sprintf("%.1f", obj.τ[end])
+    τ = @sprintf("%.1f", obj.τ[end] / 60.0)
     η = @sprintf("%.2f", obj.Η)
     print(io, "DrumMediumKramersSolution(τ = $(τ) min, η = $(η) %)")
 end

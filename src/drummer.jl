@@ -1,58 +1,20 @@
 # -*- coding: utf-8 -*-
 
-export DrumMediumKramersSolution
 export DrumMediumKramersChunk
+export DrumMediumKramersSolution
 export solve_kramers_stack
 
 """
-Geometric description of a rotary drum bed from Kramers equation solution.
+    DrumMediumKramersChunk(; kwargs...)
+
+Represents a chunk of a rotary drum bed model with Kramers equation.
 
 ## Fields
 
 $(TYPEDFIELDS)
 """
-struct DrumMediumKramersSolution <: AbstractDrumBedModel
-    "Solution coordinates [m]"
-    z::Vector{Float64}
-
-    "Solution bed height [m]"
-    h::Vector{Float64}
-
-    "Internal drum radius [m]"
-    R::Vector{Float64}
-
-    "Local dynamic repose angle [°]"
-    β::Vector{Float64}
-
-    "Local volume flow rate [m³/s]"
-    ϕ::Vector{Float64}
-
-    "View angle from drum center [°]"
-    θ::Vector{Float64}
-
-    "Bed-freeboard cord length [m]"
-    l::Vector{Float64}
-
-    "Local bed cross section area [m²]"
-    A::Vector{Float64}
-
-    "Local loading based on height [-]"
-    η::Vector{Float64}
-
-    "Coordinates of cell limits [m]"
-    Ζ::Vector{Float64}
-    
-    "Cumulative residence time of [min]"
-    τ::Vector{Float64}
-    
-    "Mean loading of kiln [%]"
-    Η::Float64
-end
-
-""" 
-Represents a chunk of a rotary drum bed model with Kramers equation.
-"""
 struct DrumMediumKramersChunk
+    "Instance of ODE system to be solved."
     model::ODESystem
     
     function DrumMediumKramersChunk(; radius, beta, phiv)
@@ -95,6 +57,87 @@ struct DrumMediumKramersChunk
     end
 end
 
+"""
+Geometric description of a rotary drum bed from Kramers equation solution.
+
+## Fields
+
+$(TYPEDFIELDS)
+"""
+struct DrumMediumKramersSolution
+    "Solution coordinates [m]"
+    z::Vector{Float64}
+
+    "Solution bed height [m]"
+    h::Vector{Float64}
+
+    "Internal drum radius [m]"
+    R::Vector{Float64}
+
+    "Local dynamic repose angle [rad]"
+    β::Vector{Float64}
+
+    "Local volume flow rate [m³/s]"
+    ϕ::Vector{Float64}
+
+    "View angle from drum center [rad]"
+    θ::Vector{Float64}
+
+    "Bed-freeboard cord length [m]"
+    l::Vector{Float64}
+
+    "Local bed cross section area [m²]"
+    A::Vector{Float64}
+
+    "Local loading based on height [-]"
+    η::Vector{Float64}
+
+    "Cumulative residence time of [s]"
+    τ::Vector{Float64}
+    
+    "Mean loading of kiln [%]"
+    Η::Float64
+
+    function DrumMediumKramersSolution(z, h, R, β, ϕ)
+        θ = drum_view_angle.(h, R)
+        l = drum_bed_cord.(R, θ)
+        A = drum_bed_section.(h, R, l, θ)
+        η = drum_local_load.(θ)
+
+        τ = drum_residence(z, ϕ, A)
+        Η = drum_mean_load(z, η)
+
+        return new(z, h, R, β, ϕ, θ, l, A, η, τ, Η)
+    end
+    
+    function DrumMediumKramersSolution(sol)
+        return DrumMediumKramersSolution(drum_solution(sol)...)
+    end
+end
+
+"""
+    CommonSolve.solve(chunk::DrumMediumKramersChunk; kwargs...)
+
+Provide the integration of `DrumMediumKramersChunk` by creating a problem
+(`ODEProblem`) and the base `Common.solve` implementation. The keyword
+arguments must include:
+
+- zspan: a tuple indicating the initial and final coordinates in meters of
+    the interval of integration for the present drum chunk.
+
+- h: initial (discharge) bed height in meters. If the discharge end is held
+    by a dam, its height plus the particle size must be provided instead of
+    the particle size, as it is used as the ODE initial condition.
+
+- ω̇: drum rotation rate in revolutions per second.
+
+- α: drum inclination angle in radians.
+
+- solver: solver to be used, defaults to `Tsit5()`.
+        
+Other arguments provided to `Common.solve` interface for `ODEProblem` are
+passed directly to the solver without any check.
+"""
 function CommonSolve.solve(chunk::DrumMediumKramersChunk;
         zspan::Tuple{Float64, Float64},
         h::Float64,
@@ -122,22 +165,25 @@ The minimum set of parameters are the following:
 - `grid`: grid of coordinates given in meters; this must include both the
     start and end points of the drum bed.
 
-- `radius`: radius of the drum bed as a function of the coordinate `z`;
-    no checks are performed with respect to grid consistency.
+- `radius`: radius of the drum in meters as a function of the coordinate
+    `z`; no checks are performed with respect to grid consistency.
 
-- `beta`: local dynamic repose angle as a function of the coordinate `z`;
-    this is expected to handle the effects of temperaraure and moisture as
-    treated by an external model.
+- `beta`: local dynamic repose angle in radians as a function of the
+    coordinate `z`; this is expected to handle the effects of temperaraure
+    and moisture as treated by an external model.
 
-- `phiv`: volumetric flow rate as a function of the coordinate `z`; this
-    is expected to handle the effects of temperature and moisture as treated
-    by an external model.
+- `phiv`: volumetric flow rate in cubic meters per second as a function of
+    the coordinate `z`; this is expected to handle the effects of 
+    temperature and moisture as treated by an external model.
 
 - `h`: initial bed height in meters at discharge position `z=0`.
 
 - `ω̇`: angular velocity of the drum in radians per second.
 
 - `α`: drum inclination angle in radians.
+
+Keyword arguments are provided to `Common.solve` implementation for the
+solution of `DrumMediumKramersChunk`.
 """
 function solve_kramers_stack(; grid, radius, beta, phiv, h, ω̇, α, kwargs...)
     zbounds = zip(grid[1:end-1], grid[2:end])
@@ -160,62 +206,6 @@ function solve_kramers_stack(; grid, radius, beta, phiv, h, ω̇, α, kwargs...)
     return DrumMediumKramersSolution(solution)
 end
 
-function DrumMediumKramersSolution(solutions::Vector{ODESolution})
-    z, h, R, β, ϕ, θ, l, A, η, Ζ, τ = drum_post(solutions[1])
-
-    coord = [0.0, Ζ]
-    timez = [0.0, τ]
-    
-    for sol in solutions[2:end]
-        post = drum_post(sol)
-
-        z = vcat(z, post.z[2:end])
-        h = vcat(h, post.h[2:end])
-        R = vcat(R, post.R[2:end])
-        β = vcat(β, post.β[2:end])
-        ϕ = vcat(ϕ, post.ϕ[2:end])
-        l = vcat(l, post.l[2:end])
-        A = vcat(A, post.A[2:end])
-        η = vcat(η, post.η[2:end])
-
-        push!(coord, post.Ζ)
-        push!(timez, post.τ)
-    end
-
-    Η = 100trapz(z, η) / z[end]
-
-    Ζ = coord
-    τ = cumsum(timez) / 60
-    
-    β = rad2deg.(β)
-    θ = rad2deg.(θ)
-
-    return DrumMediumKramersSolution(z, h, R, β, ϕ, θ, l, A, η, Ζ, τ, Η)
-end
-
-drum_view_angle(h, R)        = 2acos(1 - h / R)
-drum_bed_cord(R, θ)          = 2R * sin(θ / 2)
-drum_bed_section(h, R, l, θ) = (θ * R^2 - l * (R - h)) / 2
-drum_local_load(θ)           = (θ - sin(θ)) / 2π
-drum_residence(z, ϕ, A)      = trapz(z .- z[1], A ./ ϕ)
-
-function drum_post(sol)
-    z = sol.t
-    h = sol[:h]
-    R = sol[:R]
-    β = sol[:β]
-    ϕ = sol[:ϕ]
-    
-    θ = drum_view_angle.(h, R)
-    l = drum_bed_cord.(R, θ)
-    A = drum_bed_section.(h, R, l, θ)
-    η = drum_local_load.(θ)
-
-    return ( z = z, h = h, R = R, β = β, ϕ = ϕ, 
-             θ = θ, l = l, A = A, η = η, Ζ = z[end],
-             τ = drum_residence(z, ϕ, A) )
-end
-
 function plot(model::DrumMediumKramersSolution; kwargs...)
     defaults = (normz = true, normh = true, simple = true)
     options = merge(defaults, kwargs)
@@ -235,7 +225,7 @@ function plot_simple(model::DrumMediumKramersSolution, options)
     h = options.normh ? (100h / maximum(h[end])) : 100h
 
     η = @sprintf("%.1f", model.Η)
-    τ = @sprintf("%.0f", model.τ[end])
+    τ = @sprintf("%.1f", model.τ[end] / 60.0)
 
     xlims = (options.normz) ? (0.0, 100.0) : (0.0, model.z[end])
     ylims = (options.normh) ? (0.0, 100.0) : (0.0, round(maximum(h)+1))
@@ -256,3 +246,30 @@ function plot_simple(model::DrumMediumKramersSolution, options)
         fig, ax
     end
 end
+
+function drum_solution(sol::ODESolution)
+    return sol.t, sol[:h], sol[:R], sol[:β], sol[:ϕ]
+end
+
+function drum_solution(solutions::Vector{ODESolution})
+    z, h, R, β, ϕ = drum_solution(solutions[1])
+    
+    for sol in solutions[2:end]
+        zk, hk, Rk, βk, ϕk = drum_solution(sol)
+
+        append!(z, zk[2:end])
+        append!(h, hk[2:end])
+        append!(R, Rk[2:end])
+        append!(β, βk[2:end])
+        append!(ϕ, ϕk[2:end])
+    end
+    
+    return z, h, R, β, ϕ
+end
+
+drum_view_angle(h, R)        = 2acos(1 - h / R)
+drum_bed_cord(R, θ)          = 2R * sin(θ / 2)
+drum_bed_section(h, R, l, θ) = (θ * R^2 - l * (R - h)) / 2
+drum_local_load(θ)           = (θ - sin(θ)) / 2π
+drum_residence(z, ϕ, A)      = cumtrapz(z, A ./ ϕ)
+drum_mean_load(z, η)         = 100trapz(z, η) / (z[end] - z[1])

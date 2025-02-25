@@ -841,6 +841,7 @@ end
 # MODELS
 #######################################################################
 
+include("utilities.jl")
 include("interfaces.jl")
 include("thermodynamics.jl")
 include("database.jl")
