@@ -15,6 +15,7 @@
 
 # Ignore external copied YAML
 data/*.yaml
+!data/thermo_compounds.yaml
 
 #######################################################################
 # JULIA
