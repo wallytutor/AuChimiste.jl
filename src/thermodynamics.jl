@@ -227,6 +227,8 @@ function thermo_models()
         :NASA7 => NASAThermo,
         :NASA9 => NASAThermo,
         :SHOMATE => ShomateThermo,
+        # :MAIERKELLEY => MaierKelleyThermo,
+        # :EINSTEIN => EinsteinThermo,
     )
 end
 
@@ -275,4 +277,10 @@ struct CompiledThermoFunctions
     function CompiledThermoFunctions(funcs; expression = Val{false})
         return new(compile_function.(funcs, expression)...)
     end
+end
+
+function CompiledThermoFunctions(model::String, data, bounds; 
+        how = :symbolic, expression = Val{false})
+    funcs = thermo_factory(model, data, bounds; how)
+    return new(compile_function.(funcs, expression)...)
 end

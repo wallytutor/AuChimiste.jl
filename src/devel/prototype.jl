@@ -71,7 +71,7 @@ md"""
 """
 
 # ╔═╡ 362cba82-dc54-4e20-a328-d8c41604840b
-nasa7 = let
+nasa7, funcs7 = let
     @info("Sample data for NASA7")
 
     bounds = [200.0, 1000.0, 6000.0]
@@ -83,14 +83,23 @@ nasa7 = let
          -4.60755321e-15, -9.23948645e+02,  5.87189252e+00]
     ]
 
-    thermo_factory("NASA7", data, bounds)
+    nasa = thermo_factory("NASA7", data, bounds)
+	funcs = CompiledThermoFunctions(nasa)
+
+	nasa, funcs
 end;
 
 # ╔═╡ 6a890274-86b4-4851-8364-207be7c676a8
 nasa7
 
+# ╔═╡ 39c04419-fa06-460c-96a9-0af85c4e41fe
+funcs7
+
+# ╔═╡ 86f697e2-215c-4bdf-b714-7f4cf39b767a
+funcs7.specific_heat
+
 # ╔═╡ 6cef9a19-20f6-4161-9a72-b346eb4d097d
-funcs7 = CompiledThermoFunctions(nasa7)
+# funcs7 = CompiledThermoFunctions(nasa7)
 
 # ╔═╡ 9ee0c758-bb33-408e-b388-bcdfe38b8a99
 # ╠═╡ disabled = true
@@ -609,9 +618,11 @@ the_species = Species(name, comp)
 # ╟─aad33446-8805-4a21-8aa5-a3cc68066ed4
 # ╟─f065648f-475a-422d-99e2-a75551a792ab
 # ╟─bcbcd94e-3925-4f1d-95ac-75625005dc4c
-# ╟─362cba82-dc54-4e20-a328-d8c41604840b
-# ╟─6a890274-86b4-4851-8364-207be7c676a8
-# ╟─6cef9a19-20f6-4161-9a72-b346eb4d097d
+# ╠═362cba82-dc54-4e20-a328-d8c41604840b
+# ╠═6a890274-86b4-4851-8364-207be7c676a8
+# ╠═39c04419-fa06-460c-96a9-0af85c4e41fe
+# ╠═86f697e2-215c-4bdf-b714-7f4cf39b767a
+# ╠═6cef9a19-20f6-4161-9a72-b346eb4d097d
 # ╠═9ee0c758-bb33-408e-b388-bcdfe38b8a99
 # ╟─53d9c6d8-b728-45c2-a49a-51595bd9e542
 # ╟─dfe2a3be-ab62-44d7-9a82-d9c49dbc8dc0
