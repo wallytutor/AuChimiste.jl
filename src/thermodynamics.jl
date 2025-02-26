@@ -45,14 +45,6 @@ struct ThermoData{K, N, M}
     end
 end
 
-function heaviside(T, T₀)
-    return 1//2 * (sign(T - T₀) + 1)
-end
-
-function heaviside(T, T₀, k)
-    return 1//2 * (tanh(k * (T - T₀)) + 1)
-end
-
 #######################################################################
 # TYPES
 #######################################################################
