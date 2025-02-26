@@ -65,30 +65,6 @@ md"""
 ## Thermodynamics
 """
 
-# ╔═╡ bcbcd94e-3925-4f1d-95ac-75625005dc4c
-md"""
-### NASA 7
-"""
-
-# ╔═╡ 42ac0731-63a8-47a0-8781-0d69f1b8bd22
-
-
-# ╔═╡ 4a03e2c9-363a-4ac4-9db5-d6b1f9a3e194
-
-
-# ╔═╡ 362cba82-dc54-4e20-a328-d8c41604840b
-
-
-# ╔═╡ 53d9c6d8-b728-45c2-a49a-51595bd9e542
-
-
-# ╔═╡ dfe2a3be-ab62-44d7-9a82-d9c49dbc8dc0
-md"""
-### NASA 9
-
-**TODO**
-"""
-
 # ╔═╡ 09ed98ba-d47d-44ea-a0d3-9647a2bec6d1
 md"""
 ### Shomate
@@ -139,78 +115,6 @@ let
     s = simplify(shomate_eqs.s; expand = true)
     substitute(s, shomate_subs), shomate_eqs.s
 end
-
-# ╔═╡ 0bcbfc67-1800-41ce-8f10-a79b76805527
-md"""
-Sample properties from [NIST Webbook of Chemistry](https://webbook.nist.gov/cgi/cbook.cgi?ID=C1344281&Mask=2#Thermo-Condensed).
-"""
-
-# ╔═╡ 7dfb5133-5cae-4277-9a0d-31e6218bc3cc
-shomate = let
-    @info("Sample data for Shomate")
-    
-    bounds = [200.0, 2327.0, 6000.0]
-    
-    data = [
-        [ 1.02429000e+02,  3.87498000e+01, -1.59109000e+01,  2.62818100e+00,
-         -3.00755100e+00, -1.71793000e+03,  1.46997000e+02, -1.67569000e+03],
-        [ 1.92464000e+02,  9.51985600e-08, -2.85892800e-08,  2.92914700e-09,
-          5.59940500e-08, -1.75771100e+03,  1.77100800e+02, -1.62056900e+03]
-    ]
-
-    thermo_factory("Shomate", data, bounds)
-end;
-
-# ╔═╡ 5504b594-4413-4815-95cd-2110fd823127
-shomate
-
-# ╔═╡ 1abc26d2-0c12-420e-a32f-b157c755c734
-funcs_shomate = CompiledThermoFunctions(shomate)
-
-# ╔═╡ 06f78fdf-c8bf-44b2-9378-5dc8a6f3a6bd
-with_theme() do
-    T = LinRange(300, 3000, 100)
-    c = funcs_shomate.specific_heat.(T)
-
-    f = Figure(size = (650, 400))
-    ax = Axis(f[1, 1])
-    lines!(ax, T, c)
-
-    ax.xticks = 300:300:3000
-    xlims!(ax, extrema(ax.xticks.val))
-
-    ax.yticks = 80:20:200
-    ylims!(ax, extrema(ax.yticks.val))
-
-    ax.xlabel = "Temperature [K]"
-    ax.ylabel = "Specific heat [J/(mol.K)]"
-    
-    f
-end
-
-# ╔═╡ a59bbe1a-1587-46f7-b259-22ac35e6c557
-with_theme() do
-    T = LinRange(300, 4000, 1000)
-    c = funcs_shomate.enthalpy.(T)
-
-    f = Figure(size = (650, 400))
-    ax = Axis(f[1, 1])
-    lines!(ax, T, c)
-
-    ax.xticks = 300:300:3000
-    xlims!(ax, extrema(ax.xticks.val))
-
-    ax.yticks = 0:50:450
-    ylims!(ax, extrema(ax.yticks.val))
-
-    ax.xlabel = "Temperature [K]"
-    ax.ylabel = "Enthalpy [kJ/mol]"
-    
-    f
-end
-
-# ╔═╡ beae262c-7a1a-4bf2-af80-4402747a5e1c
-funcs_shomate.enthalpy.([300, 400, 2300, 2326, 2328, 2400, 3000, 4000])
 
 # ╔═╡ 33ba2a68-47b7-4e43-b7a7-37abeb9f5588
 md"""
@@ -300,15 +204,6 @@ md"""
 # ax.set_aspect("equal")
 # ax.set(xlabel="X", ylabel="Y", zlabel="Z")
 # ax.view_init(elev=20, azim=45)
-
-# ╔═╡ 06ac6f46-99f0-4b78-b304-35f77a0d2796
-
-
-# ╔═╡ 273623a1-aa40-45ab-b4a4-71f235ebad0a
-
-
-# ╔═╡ 788268b2-1834-4830-a118-cc60546fc0a2
-
 
 # ╔═╡ e560dd80-f880-4afe-8567-e9378c99528b
 md"""
@@ -471,9 +366,6 @@ datax = load_compound_data(AuChimiste.THERMO_COMPOUND_DATA)
 # ╔═╡ b5062fde-093f-4cfd-8d70-706a27b46485
 
 
-# ╔═╡ f1acd017-98c9-44c7-9721-972d245d8db5
-
-
 # ╔═╡ 4158547b-c954-46aa-b0ca-cfd0f9e86917
 begin
     DATA_PATH = AuChimiste.DATA_PATH
@@ -569,37 +461,20 @@ the_species = Species(name, comp)
 # ╟─72358599-fbdc-49c5-af59-b69c9ce3d0dd
 # ╟─aad33446-8805-4a21-8aa5-a3cc68066ed4
 # ╟─f065648f-475a-422d-99e2-a75551a792ab
-# ╟─bcbcd94e-3925-4f1d-95ac-75625005dc4c
-# ╠═42ac0731-63a8-47a0-8781-0d69f1b8bd22
-# ╠═4a03e2c9-363a-4ac4-9db5-d6b1f9a3e194
-# ╠═362cba82-dc54-4e20-a328-d8c41604840b
-# ╟─53d9c6d8-b728-45c2-a49a-51595bd9e542
-# ╟─dfe2a3be-ab62-44d7-9a82-d9c49dbc8dc0
 # ╟─09ed98ba-d47d-44ea-a0d3-9647a2bec6d1
 # ╟─c40e4a4d-33fb-415e-b15f-d6ce7299afb9
-# ╠═3486f783-291f-48aa-ba97-0ba56ffbcb87
-# ╠═8123f1c6-a43e-40e3-847e-d4b54f9178ae
-# ╠═4cd7074d-bb51-489f-bc3a-cb236d9faab4
-# ╠═0bcbfc67-1800-41ce-8f10-a79b76805527
-# ╠═7dfb5133-5cae-4277-9a0d-31e6218bc3cc
-# ╠═5504b594-4413-4815-95cd-2110fd823127
-# ╠═1abc26d2-0c12-420e-a32f-b157c755c734
-# ╟─06f78fdf-c8bf-44b2-9378-5dc8a6f3a6bd
-# ╟─a59bbe1a-1587-46f7-b259-22ac35e6c557
-# ╠═beae262c-7a1a-4bf2-af80-4402747a5e1c
+# ╟─3486f783-291f-48aa-ba97-0ba56ffbcb87
+# ╟─8123f1c6-a43e-40e3-847e-d4b54f9178ae
+# ╟─4cd7074d-bb51-489f-bc3a-cb236d9faab4
 # ╟─33ba2a68-47b7-4e43-b7a7-37abeb9f5588
 # ╟─e0d17cb8-6049-4502-8d2d-9e40901ebd91
 # ╟─7a1e95eb-ee21-41be-84c0-39a293e81bd2
-# ╠═06ac6f46-99f0-4b78-b304-35f77a0d2796
-# ╠═273623a1-aa40-45ab-b4a4-71f235ebad0a
-# ╠═788268b2-1834-4830-a118-cc60546fc0a2
 # ╟─e560dd80-f880-4afe-8567-e9378c99528b
 # ╠═91cb1803-1625-4aad-99f5-0e75cdf09fec
 # ╠═1a0ab8ee-5cb8-4e80-afe4-f4f11cd95013
 # ╠═ffab7c25-f343-40b0-a82b-6a229e01ca3f
 # ╠═0dda1075-b795-431b-a403-ced37e73a2de
 # ╠═b5062fde-093f-4cfd-8d70-706a27b46485
-# ╠═f1acd017-98c9-44c7-9721-972d245d8db5
 # ╠═4158547b-c954-46aa-b0ca-cfd0f9e86917
 # ╠═2111925f-fc71-4c05-88e4-e9087d790e13
 # ╟─9ae5e2e2-389a-47ad-800f-8c352669491a
