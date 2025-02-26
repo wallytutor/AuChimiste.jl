@@ -70,65 +70,17 @@ md"""
 ### NASA 7
 """
 
+# ╔═╡ 42ac0731-63a8-47a0-8781-0d69f1b8bd22
+
+
+# ╔═╡ 4a03e2c9-363a-4ac4-9db5-d6b1f9a3e194
+
+
 # ╔═╡ 362cba82-dc54-4e20-a328-d8c41604840b
-nasa7, funcs7 = let
-    @info("Sample data for NASA7")
 
-    bounds = [200.0, 1000.0, 6000.0]
-    
-    data = [
-        [ 3.53100528e+00, -1.23660987e-04, -5.02999437e-07, 2.43530612e-09,
-         -1.40881235e-12, -1.04697628e+03,  2.96747468e+00],
-        [ 2.95257626e+00,  1.39690057e-03, -4.92631691e-07, 7.86010367e-11,
-         -4.60755321e-15, -9.23948645e+02,  5.87189252e+00]
-    ]
-
-    nasa = thermo_factory("NASA7", data, bounds)
-	funcs = CompiledThermoFunctions(nasa)
-
-	nasa, funcs
-end;
-
-# ╔═╡ 6a890274-86b4-4851-8364-207be7c676a8
-nasa7
-
-# ╔═╡ 39c04419-fa06-460c-96a9-0af85c4e41fe
-funcs7
-
-# ╔═╡ 86f697e2-215c-4bdf-b714-7f4cf39b767a
-funcs7.specific_heat
-
-# ╔═╡ 6cef9a19-20f6-4161-9a72-b346eb4d097d
-# funcs7 = CompiledThermoFunctions(nasa7)
-
-# ╔═╡ 9ee0c758-bb33-408e-b388-bcdfe38b8a99
-# ╠═╡ disabled = true
-#=╠═╡
-@benchmark funcs7.specific_heat.(300:0.01:3000)
-  ╠═╡ =#
 
 # ╔═╡ 53d9c6d8-b728-45c2-a49a-51595bd9e542
-with_theme() do
-    mw = 0.001component(:stoichiometry; N=2).molar_mass
-    
-    T = LinRange(300, 3000, 100)
-    c = funcs7.specific_heat.(T) ./ mw
 
-    f = Figure(size = (650, 400))
-    ax = Axis(f[1, 1])
-    lines!(ax, T, c)
-
-    ax.xticks = 300:300:3000
-    xlims!(ax, extrema(ax.xticks.val))
-
-    ax.yticks = 1000:50:1350
-    ylims!(ax, extrema(ax.yticks.val))
-
-    ax.xlabel = "Temperature [K]"
-    ax.ylabel = "Specific heat capacity [J/(kg.K)]"
-    
-    f
-end
 
 # ╔═╡ dfe2a3be-ab62-44d7-9a82-d9c49dbc8dc0
 md"""
@@ -618,12 +570,9 @@ the_species = Species(name, comp)
 # ╟─aad33446-8805-4a21-8aa5-a3cc68066ed4
 # ╟─f065648f-475a-422d-99e2-a75551a792ab
 # ╟─bcbcd94e-3925-4f1d-95ac-75625005dc4c
+# ╠═42ac0731-63a8-47a0-8781-0d69f1b8bd22
+# ╠═4a03e2c9-363a-4ac4-9db5-d6b1f9a3e194
 # ╠═362cba82-dc54-4e20-a328-d8c41604840b
-# ╠═6a890274-86b4-4851-8364-207be7c676a8
-# ╠═39c04419-fa06-460c-96a9-0af85c4e41fe
-# ╠═86f697e2-215c-4bdf-b714-7f4cf39b767a
-# ╠═6cef9a19-20f6-4161-9a72-b346eb4d097d
-# ╠═9ee0c758-bb33-408e-b388-bcdfe38b8a99
 # ╟─53d9c6d8-b728-45c2-a49a-51595bd9e542
 # ╟─dfe2a3be-ab62-44d7-9a82-d9c49dbc8dc0
 # ╟─09ed98ba-d47d-44ea-a0d3-9647a2bec6d1

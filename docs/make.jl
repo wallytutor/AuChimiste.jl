@@ -15,6 +15,7 @@ pages = [
     "Getting Started" => [
         "basics/elements.md",
         "basics/components.md",
+        "basics/thermodynamics.md",
         "basics/kinetics.md",
         "basics/hardcoded.md",
         "basics/drummers.md",
