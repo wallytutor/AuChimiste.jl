@@ -52,7 +52,7 @@ end
 """
 Stores data for NASA-`K` parametrization with `N` temperature ranges.
 """
-struct NASAThermo{K, N} <: ThermodynamicModelData
+struct NASAThermo{K, N} <: AbstractThermodynamicData
     data::ThermoData{K, N}
     h_ref::Float64
     s_ref::Float64
@@ -68,9 +68,12 @@ end
 
 """
 Stores data for Shomate parametrization with `N` temperature ranges.
-Model equations are as provided by [Shomate1954](@cite).
+Model equations are based in the ideas of Shomate [Shomate1954](@cite).
+
+**Note:** Shomate data provided in literature is often found in JANAF
+tables which report values on a per mole basis.
 """
-struct ShomateThermo{K, N} <: ThermodynamicModelData
+struct ShomateThermo{K, N} <: AbstractThermodynamicData
     data::ThermoData{K, N}
     h_ref::Float64
     s_ref::Float64
@@ -84,8 +87,29 @@ struct ShomateThermo{K, N} <: ThermodynamicModelData
     end
 end
 
-# struct MaierKelleyThermo <: ThermodynamicModelData end
-# struct EinsteinThermo <: ThermodynamicModelData end
+"""
+Stores data for Maier-Kelley parametrization with `N` temperature ranges.
+Model equations are based in the ideas of Maier and Kelley [Maier1932](@cite).
+
+**Note:** Maier-Kelley data provided in literature is often provided in
+calorie per mole units; convert to joules before providing it here!
+"""
+struct MaierKelleyThermo{K, N} <: AbstractThermodynamicData
+    data::ThermoData{K, N}
+    h_ref::Float64
+    s_ref::Float64
+
+    function MaierKelleyThermo(data::ThermoData{K, N}) where {K, N}
+        return new{K, N}(data, data.params[end-1, 1], data.params[end, 1])
+    end
+
+    function MaierKelleyThermo(data::Vector{Vector{Float64}}, bounds::Vector{Float64})
+        return MaierKelleyThermo(ThermoData(data, bounds))
+    end
+end
+
+# struct MaierKelleyThermo <: AbstractThermodynamicData end
+# struct EinsteinThermo <: AbstractThermodynamicData end
 
 #######################################################################
 # INTERNALS
@@ -136,11 +160,19 @@ function factory_symbolic(m::ShomateThermo{K, N}) where {K, N}
     return factory_symbolic(m.data, properties_shomate)
 end
 
+function factory_symbolic(m::MaierKelleyThermo{K, N}) where {K, N}
+    return factory_symbolic(m.data, properties_maierkelley)
+end
+
 function factory_numeric(m::NASAThermo{K, N}) where {K, N}
     error("not implemented")
 end
 
-function factory_numeric(m::ShomateThermo)
+function factory_numeric(m::ShomateThermo{K, N}) where {K, N}
+    error("not implemented")
+end
+
+function factory_numeric(m::MaierKelleyThermo{K, N}) where {K, N}
     error("not implemented")
 end
 
@@ -148,9 +180,12 @@ end
 # IMPLEMENTATIONS
 #######################################################################
 
-const Nasa7Coefs   = SVector{7, Float64}
-const Nasa9Coefs   = SVector{9, Float64}
-const ShomateCoefs = SVector{8, Float64}
+# XXX: MaierKelleyCoefs could be variable size, handle this in the
+# future by generalizing with LaurentPolynomial objects!
+const Nasa7Coefs       = SVector{7, Float64}
+const Nasa9Coefs       = SVector{9, Float64}
+const ShomateCoefs     = SVector{8, Float64}
+const MaierKelleyCoefs = SVector{5, Float64}
 
 function specific_heat_nasa(T, c::Nasa7Coefs)
     f = c[4] + T * c[5]
@@ -165,8 +200,11 @@ function specific_heat_nasa(T, c::Nasa9Coefs)
 end
 
 function specific_heat_shomate(t, c::ShomateCoefs)
-    p = c[1] + t * (c[2] + t * (c[3] + t * c[4]))
-    return p + c[5] / t^2
+    return c[1] + t * (c[2] + t * (c[3] + t * c[4])) + c[5] / t^2
+end
+
+function specific_heat_maierkelley(T, c::MaierKelleyCoefs)
+    return c[1] + c[2] * T + c[3] / T^2
 end
 
 function enthalpy_nasa(T, c::Nasa7Coefs)
@@ -187,6 +225,10 @@ function enthalpy_shomate(t, c::ShomateCoefs)
     return p - c[5] / t + c[6] - c[8]
 end
 
+function enthalpy_maierkelley(T, c::MaierKelleyCoefs)
+    return T * (c[1] + c[2]/2 * T) - c[3] / T
+end
+
 function entropy_nasa(T, c::Nasa7Coefs)
     f = c[4] / 3 + T * c[5] / 4
     f = c[3] / 2 + T * f
@@ -204,6 +246,10 @@ function entropy_shomate(t, c::ShomateCoefs)
     return p - c[5] / (2 * t^2) + c[7]
 end
 
+function entropy_maierkelley(T, c::MaierKelleyCoefs)
+    return log(T) * c[1] + c[2] * T - c[3] / (2 * T^2)
+end
+
 function properties_nasa(T, c)
     eval_cp = GAS_CONSTANT * specific_heat_nasa(T, c)
     eval_hm = GAS_CONSTANT * enthalpy_nasa(T, c)
@@ -218,6 +264,13 @@ function properties_shomate(T, c)
     return eval_cp, eval_hm, eval_sm
 end
 
+function properties_maierkelley(T, c)
+    eval_cp = specific_heat_maierkelley(T, c)
+    eval_hm = enthalpy_maierkelley(T, c)
+    eval_sm = entropy_maierkelley(T, c)
+    return eval_cp, eval_hm, eval_sm
+end
+
 #######################################################################
 # FACTORY
 #######################################################################
@@ -227,7 +280,7 @@ function thermo_models()
         :NASA7 => NASAThermo,
         :NASA9 => NASAThermo,
         :SHOMATE => ShomateThermo,
-        # :MAIERKELLEY => MaierKelleyThermo,
+        :MAIERKELLEY => MaierKelleyThermo,
         # :EINSTEIN => EinsteinThermo,
     )
 end
@@ -247,7 +300,11 @@ function get_thermo_model(name::String)
     return models[symb]
 end
 
-function thermo_factory(m::ThermodynamicModelData; how = :symbolic)
+function thermo_data(; model, data, bounds)
+    return get_thermo_model(model)(data, bounds)
+end
+
+function thermo_factory(m::AbstractThermodynamicData; how = :symbolic)
     how == :symbolic && return factory_symbolic(m)
     how == :numeric  && return factory_numeric(m)
 
@@ -260,9 +317,7 @@ function thermo_factory(m::ThermodynamicModelData; how = :symbolic)
 end
 
 function thermo_factory(model::String, data, bounds; how = :symbolic)
-    data_builder = get_thermo_model(model)
-    thermo_data = data_builder(data, bounds)
-    return thermo_factory(thermo_data; how)
+    return thermo_factory(thermo_data(; model, data, bounds); how)
 end
 
 # XXX: keep this wrapper for ease of data parsing!
@@ -289,3 +344,52 @@ function CompiledThermoFunctions(model::String, data, bounds;
     funcs = thermo_factory(model, data, bounds; how)
     return new(compile_function.(funcs, expression)...)
 end
+
+#######################################################################
+# SPECIES
+#######################################################################
+
+struct Thermodynamics <: AbstractThermodynamicsModel
+    data::AbstractThermodynamicData
+    base::NTuple{3, Any}
+    func::CompiledThermoFunctions
+
+    function Thermodynamics(thermo::NamedTuple; how = :symbolic)
+        data = thermo_data(; thermo...)
+        base = thermo_factory(data; how)
+        func = CompiledThermoFunctions(base)
+        return new(data, base, func)
+    end
+end
+
+struct Species
+    composition::ChemicalComponent
+    thermo::AbstractThermodynamicsModel
+    transport::Union{Nothing, AbstractTransportModel}
+    
+    function Species(s::NamedTuple; how = :symbolic)
+        comp = component(s.composition)
+        thermo = Thermodynamics(s.thermo; how)
+
+        # TODO: implement transport model!
+        trans = nothing
+        
+        return new(comp, thermo, trans)
+    end
+end
+
+function specific_heat(s::Species, T)
+    return s.thermo.func.specific_heat(T) 
+end
+
+function enthalpy(s::Species, T)
+    return s.thermo.func.enthalpy(T)
+end
+
+function entropy(s::Species, T)
+    return s.thermo.func.entropy(T)
+end
+
+#######################################################################
+# EOF
+#######################################################################

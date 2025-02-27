@@ -70,6 +70,8 @@ export NASAThermo
 export ShomateThermo
 export thermo_factory
 export CompiledThermoFunctions
+export Thermodynamics
+export Species
 
 #######################################################################
 # ABSTRACT
@@ -78,7 +80,11 @@ export CompiledThermoFunctions
 abstract type ChemicalException       <: Exception end
 abstract type ChemicalElementsError   <: ChemicalException end
 abstract type ChemicalComponentsError <: ChemicalException end
-abstract type ThermodynamicModelData end
+
+abstract type AbstractThermodynamicData end
+abstract type AbstractThermodynamicsModel end
+abstract type AbstractTransportModel end
+
 abstract type AbstractReactorModel end
 abstract type AbstractDrumBedModel <: AbstractReactorModel end
 

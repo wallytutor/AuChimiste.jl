@@ -340,33 +340,53 @@ md"""
 # end
 
 # ╔═╡ 3cf274ff-09a4-4a6d-8a77-b9690101caf9
-begin
+# begin
 
 
-	abstract type AbstractTransportModel end
+# 	abstract type AbstractThermodynamicsModel end
+# 	abstract type AbstractTransportModel end
+
+# 	struct Thermodynamics <: AbstractThermodynamicsModel
+# 		data::AuChimiste.ThermodynamicModelData
+# 		base::NTuple{3, Any}
+# 		func::CompiledThermoFunctions
+
+# 		function Thermodynamics(thermo::NamedTuple; how = :symbolic)
+# 			data = AuChimiste.thermo_data(; thermo...)
+# 			base = thermo_factory(data; how)
+# 			func = CompiledThermoFunctions(base)
+# 			return new(data, base, func)
+# 		end
+# 	end
 	
-	struct Species
-		composition::AuChimiste.ChemicalComponent
-		thermo_raw::NTuple{3, Any}
-		thermo_fn::CompiledThermoFunctions
-		transport::Union{Nothing, AbstractTransportModel}
+# 	struct Species
+# 		composition::AuChimiste.ChemicalComponent
+# 		thermo::AbstractThermodynamicsModel
+# 		transport::Union{Nothing, AbstractTransportModel}
 		
-		function Species(s::NamedTuple; how = :symbolic)
-			comp = component(s.composition)
-			thermo_raw = thermo_factory(; s.thermo..., how)
-			thermo_fn = CompiledThermoFunctions(thermo_raw)
+# 		function Species(s::NamedTuple; how = :symbolic)
+# 			comp = component(s.composition)
+# 			thermo = Thermodynamics(s.thermo; how)
 
-			# TODO: implement transport model!
-			trans = nothing
+# 			# TODO: implement transport model!
+# 			trans = nothing
 			
-			return new(comp, thermo_raw, thermo_fn, trans)
-		end
-	end
+# 			return new(comp, thermo, trans)
+# 		end
+# 	end
+
+# 	function specific_heat(s::Species, T)
+# 		return s.thermo.func.specific_heat(T) 
+# 	end
 	
-end
-
-# ╔═╡ e0746ed3-97b7-4094-abbc-d72e3b44a477
-
+# 	function enthalpy(s::Species, T)
+# 		return s.thermo.func.enthalpy(T)
+# 	end
+	
+# 	function entropy(s::Species, T)
+# 		return s.thermo.func.entropy(T)
+# 	end
+# end
 
 # ╔═╡ ffab7c25-f343-40b0-a82b-6a229e01ca3f
 struct CompoundDatabase
@@ -382,9 +402,6 @@ struct CompoundDatabase
 	end
 end
 
-# ╔═╡ 4b003acd-4e46-4c4f-9d13-d4ea66804b3c
-
-
 # ╔═╡ 0dda1075-b795-431b-a403-ced37e73a2de
 begin
 	data_1 = load_data_yaml(AuChimiste.THERMO_COMPOUND_DATA)
@@ -396,116 +413,37 @@ begin
 	species_3 = AuChimiste.parse_species_yaml.(data_3["species"])
 end;
 
+# ╔═╡ 57b06f6b-1aea-4e36-bcb5-b18c305de179
+begin
+
+end
+
 # ╔═╡ b5062fde-093f-4cfd-8d70-706a27b46485
 let s = Species.(species_1)
-	# s.thermo_fn.specific_heat
+	@variables x
+
+	# specific_heat(s[end-3], x)
+	s[end]
 end
-
-# ╔═╡ 4158547b-c954-46aa-b0ca-cfd0f9e86917
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-    DATA_PATH = AuChimiste.DATA_PATH
-    USER_PATH = AuChimiste.USER_PATH
-    ChemicalComponent = AuChimiste.ChemicalComponent
-end
-  ╠═╡ =#
-
-# ╔═╡ 2111925f-fc71-4c05-88e4-e9087d790e13
-# ╠═╡ disabled = true
-#=╠═╡
-
-  ╠═╡ =#
-
-# ╔═╡ 9ae5e2e2-389a-47ad-800f-8c352669491a
-# ╠═╡ disabled = true
-#=╠═╡
-function species_transport()
-end
-  ╠═╡ =#
-
-# ╔═╡ b3190738-7086-4d2f-90cd-8383d3eb1591
-# ╠═╡ disabled = true
-#=╠═╡
-function species_thermo()
-end
-  ╠═╡ =#
-
-# ╔═╡ f6a037a7-2e60-414f-8f86-04cd10b22510
-# ╠═╡ disabled = true
-#=╠═╡
-struct Species
-    name::String
-    composition::Union{ChemicalComponent, Nothing}
-
-    function Species(name, comp)
-        composition = species_component(comp)
-        
-        return new(name, composition)
-    end
-end
-  ╠═╡ =#
 
 # ╔═╡ f7aa9875-4509-4275-aaa7-174cb71106c0
 # ╠═╡ disabled = true
 #=╠═╡
-struct KineticMechanism
-    raw_data::Dict
-    species::Vector{Species}
-end
-  ╠═╡ =#
-
-# ╔═╡ bb42b7c6-63f7-49bf-b314-2df8b19fd749
-# ╠═╡ disabled = true
-#=╠═╡
-function load_mechanism(name; format = :cantera)
-    file = AuChimiste.get_data_file(name)
-    data = YAML.load_file(file; dicttype=OrderedDict{String,Any})
-    
-    species = []
-    
-    return KineticMechanism(data, species)
-end
-  ╠═╡ =#
-
-# ╔═╡ ec1619aa-1749-42e3-87ca-d685c2372d38
-# ╠═╡ disabled = true
-#=╠═╡
 begin
-    data = load_mechanism("nasa_gas.yaml").raw_data
-    species = data["species"]
-    data
-end;
-  ╠═╡ =#
-
-# ╔═╡ 7d255703-661b-4e13-af46-05f2bbdf0a7a
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-    s = species[530]
-    
-    name = s["name"]
-    comp = s["composition"]
-    thermo = s["thermo"]
-
-    trans = get(s, "transport", nothing)
-    note = get(s, "note", "")
-    
-    # thermo_rngs = thermo["temperature-ranges"]
-    # thermo_data = vcat(thermo["data"]'...)
-
-    thermo_model  = thermo["model"]
-    thermo_data   = thermo["data"]
-    thermo_bounds = thermo["temperature-ranges"]
-    
-    thermo_factory(thermo_model, thermo_data, thermo_bounds)
+	struct KineticMechanism
+	    raw_data::Dict
+	    species::Vector{Species}
+	end
+	
+	function load_mechanism(name; format = :cantera)
+	    file = AuChimiste.get_data_file(name)
+	    data = YAML.load_file(file; dicttype=OrderedDict{String,Any})
+	    
+	    species = []
+	    
+	    return KineticMechanism(data, species)
+	end
 end
-  ╠═╡ =#
-
-# ╔═╡ 58d1cc29-3d43-4ae9-bfa4-357ee9e078eb
-# ╠═╡ disabled = true
-#=╠═╡
-the_species = Species(name, comp)
   ╠═╡ =#
 
 # ╔═╡ Cell order:
@@ -525,18 +463,8 @@ the_species = Species(name, comp)
 # ╟─e560dd80-f880-4afe-8567-e9378c99528b
 # ╠═91cb1803-1625-4aad-99f5-0e75cdf09fec
 # ╠═3cf274ff-09a4-4a6d-8a77-b9690101caf9
-# ╠═e0746ed3-97b7-4094-abbc-d72e3b44a477
 # ╠═ffab7c25-f343-40b0-a82b-6a229e01ca3f
-# ╠═4b003acd-4e46-4c4f-9d13-d4ea66804b3c
 # ╠═0dda1075-b795-431b-a403-ced37e73a2de
+# ╠═57b06f6b-1aea-4e36-bcb5-b18c305de179
 # ╠═b5062fde-093f-4cfd-8d70-706a27b46485
-# ╠═4158547b-c954-46aa-b0ca-cfd0f9e86917
-# ╠═2111925f-fc71-4c05-88e4-e9087d790e13
-# ╠═9ae5e2e2-389a-47ad-800f-8c352669491a
-# ╠═b3190738-7086-4d2f-90cd-8383d3eb1591
-# ╠═f6a037a7-2e60-414f-8f86-04cd10b22510
 # ╠═f7aa9875-4509-4275-aaa7-174cb71106c0
-# ╠═bb42b7c6-63f7-49bf-b314-2df8b19fd749
-# ╠═ec1619aa-1749-42e3-87ca-d685c2372d38
-# ╠═7d255703-661b-4e13-af46-05f2bbdf0a7a
-# ╠═58d1cc29-3d43-4ae9-bfa4-357ee9e078eb

@@ -76,7 +76,7 @@ end
 
 function load_data_yaml(fname; kwargs...)
     which = get(kwargs, :which, false)
-    path = AuChimiste.get_data_file(fname; which)
+    path = get_data_file(fname; which)
     return YAML.load_file(path)
 end
 
@@ -85,6 +85,11 @@ function parse_thermo_yaml(thermo)
     bounds = get(thermo, "temperature-ranges", [0.0, 6000.0])
     data = thermo["data"]
     
+    # XXX: add units to database!
+    if uppercase(model) == "MAIERKELLEY"
+        data .*= JOULE_PER_CALORIE
+    end
+
     return (; model, bounds, data)
 end
 
