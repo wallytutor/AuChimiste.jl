@@ -360,20 +360,26 @@ struct CompoundDatabase
 	end
 end
 
-# ╔═╡ 0dda1075-b795-431b-a403-ced37e73a2de
-datax = load_compound_data(AuChimiste.THERMO_COMPOUND_DATA)
+# ╔═╡ 4b003acd-4e46-4c4f-9d13-d4ea66804b3c
+struct ThermoCompound
+end
 
 # ╔═╡ b5062fde-093f-4cfd-8d70-706a27b46485
 
 
 # ╔═╡ 4158547b-c954-46aa-b0ca-cfd0f9e86917
+# ╠═╡ disabled = true
+#=╠═╡
 begin
     DATA_PATH = AuChimiste.DATA_PATH
     USER_PATH = AuChimiste.USER_PATH
     ChemicalComponent = AuChimiste.ChemicalComponent
 end
+  ╠═╡ =#
 
 # ╔═╡ 2111925f-fc71-4c05-88e4-e9087d790e13
+# ╠═╡ disabled = true
+#=╠═╡
 function species_component(comp)
     # Retrieve charge of component:
     charge = -1get(comp, "E", 0)
@@ -387,16 +393,25 @@ function species_component(comp)
     comp = NamedTuple(zip(Symbol.(keys(comp)), values(comp)))
     return component(:stoichiometry; charge = charge, comp...)
 end
+  ╠═╡ =#
 
 # ╔═╡ 9ae5e2e2-389a-47ad-800f-8c352669491a
+# ╠═╡ disabled = true
+#=╠═╡
 function species_transport()
 end
+  ╠═╡ =#
 
 # ╔═╡ b3190738-7086-4d2f-90cd-8383d3eb1591
+# ╠═╡ disabled = true
+#=╠═╡
 function species_thermo()
 end
+  ╠═╡ =#
 
 # ╔═╡ f6a037a7-2e60-414f-8f86-04cd10b22510
+# ╠═╡ disabled = true
+#=╠═╡
 struct Species
     name::String
     composition::Union{ChemicalComponent, Nothing}
@@ -407,14 +422,20 @@ struct Species
         return new(name, composition)
     end
 end
+  ╠═╡ =#
 
 # ╔═╡ f7aa9875-4509-4275-aaa7-174cb71106c0
+# ╠═╡ disabled = true
+#=╠═╡
 struct KineticMechanism
     raw_data::Dict
     species::Vector{Species}
 end
+  ╠═╡ =#
 
 # ╔═╡ bb42b7c6-63f7-49bf-b314-2df8b19fd749
+# ╠═╡ disabled = true
+#=╠═╡
 function load_mechanism(name; format = :cantera)
     file = AuChimiste.get_data_file(name)
     data = YAML.load_file(file; dicttype=OrderedDict{String,Any})
@@ -423,15 +444,11 @@ function load_mechanism(name; format = :cantera)
     
     return KineticMechanism(data, species)
 end
-
-# ╔═╡ ec1619aa-1749-42e3-87ca-d685c2372d38
-begin
-    data = load_mechanism("nasa_gas.yaml").raw_data
-    species = data["species"]
-    data
-end;
+  ╠═╡ =#
 
 # ╔═╡ 7d255703-661b-4e13-af46-05f2bbdf0a7a
+# ╠═╡ disabled = true
+#=╠═╡
 begin
     s = species[530]
     
@@ -451,9 +468,26 @@ begin
     
     thermo_factory(thermo_model, thermo_data, thermo_bounds)
 end
+  ╠═╡ =#
 
 # ╔═╡ 58d1cc29-3d43-4ae9-bfa4-357ee9e078eb
+# ╠═╡ disabled = true
+#=╠═╡
 the_species = Species(name, comp)
+  ╠═╡ =#
+
+# ╔═╡ 0dda1075-b795-431b-a403-ced37e73a2de
+data = load_compound_data(AuChimiste.THERMO_COMPOUND_DATA)
+
+# ╔═╡ ec1619aa-1749-42e3-87ca-d685c2372d38
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+    data = load_mechanism("nasa_gas.yaml").raw_data
+    species = data["species"]
+    data
+end;
+  ╠═╡ =#
 
 # ╔═╡ Cell order:
 # ╟─fd0a3399-8589-428c-9036-0d8a57ae6a92
@@ -473,11 +507,12 @@ the_species = Species(name, comp)
 # ╠═91cb1803-1625-4aad-99f5-0e75cdf09fec
 # ╠═1a0ab8ee-5cb8-4e80-afe4-f4f11cd95013
 # ╠═ffab7c25-f343-40b0-a82b-6a229e01ca3f
+# ╠═4b003acd-4e46-4c4f-9d13-d4ea66804b3c
 # ╠═0dda1075-b795-431b-a403-ced37e73a2de
 # ╠═b5062fde-093f-4cfd-8d70-706a27b46485
 # ╠═4158547b-c954-46aa-b0ca-cfd0f9e86917
 # ╠═2111925f-fc71-4c05-88e4-e9087d790e13
-# ╟─9ae5e2e2-389a-47ad-800f-8c352669491a
+# ╠═9ae5e2e2-389a-47ad-800f-8c352669491a
 # ╠═b3190738-7086-4d2f-90cd-8383d3eb1591
 # ╠═f6a037a7-2e60-414f-8f86-04cd10b22510
 # ╠═f7aa9875-4509-4275-aaa7-174cb71106c0
