@@ -1,40 +1,71 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
 
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
+    #! format: off
     quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
     end
+    #! format: on
 end
 
-# ╔═╡ 276f19f0-9075-11ee-06f3-7d2f8111ed34
+# ╔═╡ f8fb6e2d-ecfb-4402-8c39-5c82034389ae
 begin
-    @info "Loading tools..."
-    import Pkg
-    Pkg.activate(Base.current_project())
+    @info("Initializing toolbox...")
+    using Pkg
 
-    using CairoMakie
-    using DifferentialEquations: solve
+    open("pluto_init.log", "w") do logs
+        root = "D:/Kompanion/bin/pkgs/AuChimiste.jl"
+        Pkg.activate(root; io=logs)
+        Pkg.instantiate(; io=logs)
+    end
+
+    # Pkg.add("SciMLBaseMLStyleExt")
+    # Pkg.status()
+    
+    push!(LOAD_PATH, @__DIR__)
+
+    using PlutoLinks
+    using PlutoUI: TableOfContents
+	import PlutoUI
+	
+    TableOfContents()
+end
+
+# ╔═╡ 535cad2b-8510-4590-9d23-0313eeef641a
+begin
+    @info("Required tools...")
+
+	using CairoMakie
+	using CommonSolve
+	using DifferentialEquations
+	using DocStringExtensions
+	using DynamicQuantities
     using LinearAlgebra
-    using ModelingToolkit
-    using NumericalIntegration
+	using ModelingToolkit
+	using NumericalIntegration
     using Polynomials
-    using PlutoUI
-    using PrettyPrinting
-    using Printf: @sprintf
+	using Printf
+	using PrettyPrinting
+	using SciMLBase
+	using Symbolics
     using Symbolics: scalarize
-    using Trapz: trapz
-
-    using WallyToolbox
-
+	using Trapz
+	
     CairoMakie.activate!(; type = "svg", visible = false)
+end
+
+# ╔═╡ b2ce6430-e91a-4f98-89af-e8804051b32a
+begin
+	@info("Local toolbox...")
+	@revise using AuChimiste
 end
 
 # ╔═╡ 062e6786-9518-4420-9ae2-6182508a5fa8
@@ -80,24 +111,24 @@ begin
         "SPINEL",
         "SIO2_GLASS"
     ]
-    tdb = ThermoDatabase(; selected_compounds)
+	tdb = AuChimisteDatabase(; selected_species)
     
-    compounds(tdb)
+    species_table(tdb)
 end
 
 # ╔═╡ 241f2150-c134-4951-b87d-d820727b8269
 "Materials for considered phases."
 const materials = [
-    tdb.compounds[4]
-    tdb.compounds[1]
-    tdb.compounds[2]
-    tdb.compounds[5]
-    tdb.compounds[3]
+    tdb.species.SPINEL
+    tdb.species.WATER_L
+    tdb.species.KAOLINITE
+    tdb.species.SIO2_GLASS
+    tdb.species.METAKAOLIN
 ]
 
 # ╔═╡ 5bc5d31b-9f3a-44e5-a271-12d9e8ffa7de
 "Molecular masses of considered phases [``kg\\cdotp{}mol^{-1}``]"
-const Mₘ = map(molecularmass, materials)
+const Mₘ = map(molar_mass, materials)
 
 # ╔═╡ 967579c7-252d-460c-a68d-c39dc9e2e0f0
 """
@@ -105,7 +136,7 @@ const Mₘ = map(molecularmass, materials)
 
 Retrieve specific heat for all species
 """
-specificheat(T) = map(m -> specific_heat(m, T), materials)
+specificheat(T) = map(m->specific_heat(m, T), materials)
 
 # ╔═╡ 9d98242a-7487-447b-89a4-5b5acb957ff6
 """
@@ -598,7 +629,9 @@ Hope these notes provided you insights on DSC/TGA methods!
 # ╟─062e6786-9518-4420-9ae2-6182508a5fa8
 # ╟─d54aad4f-5cfe-4ea3-a237-ba0ab8973721
 # ╟─8e43ead5-4099-469e-9d74-6aa1b3659988
-# ╟─276f19f0-9075-11ee-06f3-7d2f8111ed34
+# ╟─f8fb6e2d-ecfb-4402-8c39-5c82034389ae
+# ╟─535cad2b-8510-4590-9d23-0313eeef641a
+# ╟─b2ce6430-e91a-4f98-89af-e8804051b32a
 # ╟─c05012fd-6647-48df-83ec-f7bf26686a87
 # ╟─5e84be72-1120-4cac-9944-fcd6765ea85c
 # ╟─241f2150-c134-4951-b87d-d820727b8269

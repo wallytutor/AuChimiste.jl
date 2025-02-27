@@ -55,8 +55,6 @@ begin
 	using SciMLBase
 	using Symbolics
 	using Trapz
-
-	# using WallyToolbox
 end
 
 # ╔═╡ c43baed9-a267-4cdd-9534-bf51274d2d1b
