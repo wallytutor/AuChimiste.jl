@@ -99,7 +99,9 @@ AuChimiste.GAS_CONSTANT
 AuChimiste.STEFAN_BOLTZMANN
 AuChimiste.P_NORMAL
 AuChimiste.T_NORMAL
+AuChimiste.C_NORMAL
 AuChimiste.T_STANDARD
+AuChimiste.JOULE_PER_CALORIE
 ```
 
 ## Exception types
