@@ -6,6 +6,7 @@ export reset_load_path
 export AuChimisteDatabase
 export species_names
 export species_table
+export list_species
 
 #######################################################################
 # CONSTANTS
@@ -163,10 +164,10 @@ struct AuChimisteDatabase
             validate = true,
             which = false
         )
-        data = load_data_yaml(data_file; which = false)
+        data = load_data_yaml(data_file; which)
 
         if validate && !data_validate(data) 
-            throw(ErrorException("Unable to validate contents of $(data_file)"))
+            throw(ErrorException("Unable to validate $(data_file)"))
         end
 
         description = replace(data["description"], "\n"=>" ")
@@ -236,6 +237,12 @@ function species_table(data::AuChimisteDatabase)
         source  = columnize(:source),
         state   = columnize(:aggregation)
 	)
+end
+
+# XXX: lazy loading (database not really parsed, just the names)
+function list_species(; data_file = THERMO_COMPOUND_DATA, which = false)
+    data = load_data_yaml(data_file; which)
+    return map(c->c["name"], data["species"])
 end
 
 #######################################################################

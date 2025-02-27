@@ -259,11 +259,15 @@ The model creation function `assemblymodel(cpx, cpy)` requires the specific heat
 
 # ╔═╡ e3252f33-a7ea-42c5-8dc5-701320c9f0eb
 begin
-	tdb = AuChimisteDatabase(; selected_species = ["KAOLINITE", "METAKAOLIN"])
+	selected_species = ["KAOLINITE", "METAKAOLIN", "WATER_G"]
+	tdb = AuChimisteDatabase(; selected_species)
 
     cpx(T) = specific_heat(tdb.species.KAOLINITE, T)
     cpy(T) = specific_heat(tdb.species.METAKAOLIN, T)
 end;
+
+# ╔═╡ f7e7dc07-e0a6-4b3d-a07e-be6a3cafab62
+molar_mass(tdb.species.METAKAOLIN)
 
 # ╔═╡ f7438057-3f77-4155-837c-92d85a90cf88
 md"""
@@ -327,8 +331,8 @@ begin
         m₀ => val_m₀,
         ax => 1.0,
         az => 2.0,
-        Mx => 0.257902462000,
-        Mz => 0.018010564683,
+        Mx => molar_mass(tdb.species.KAOLINITE),
+        Mz => molar_mass(tdb.species.WATER_G),
         θ̇ => val_θ̇,
         T₀ => val_T₀,
     ]
@@ -402,6 +406,8 @@ end
 
 # ╔═╡ 761f6651-8a89-48b7-8276-53c4dadc2ad2
 fig = let
+	@info("Plotting DSC/TGA curves")
+	
     # Integration interval to simulate problem.
     τ = (val_T₁ - val_T₀) / val_θ̇
 
@@ -427,7 +433,10 @@ fig = let
     ylims!(ax3, extrema(ax3.yticks.val))
 
     f
-end
+end;
+
+# ╔═╡ 6f34a67f-2b69-4d74-b8d0-f05973144773
+fig
 
 # ╔═╡ e173efa6-1808-47db-a938-4ae33e3db507
 begin
@@ -533,8 +542,9 @@ end
 # ╟─2bff2c9b-29bd-4fc1-8556-c9af051bd721
 # ╟─c9196b25-ec02-4c98-b6c3-b794e9550d07
 # ╠═e3252f33-a7ea-42c5-8dc5-701320c9f0eb
+# ╠═f7e7dc07-e0a6-4b3d-a07e-be6a3cafab62
 # ╟─f7438057-3f77-4155-837c-92d85a90cf88
-# ╟─ead986d8-bd2a-442c-b581-03c7d46daef6
+# ╠═ead986d8-bd2a-442c-b581-03c7d46daef6
 # ╟─af8fd783-7b86-4f66-9817-06bd81cd1517
 # ╠═778a56af-09e4-4a8e-9838-9816b0a4b6c5
 # ╠═419ad4de-ffe7-4aa8-95b9-7b1c850509e8
@@ -546,6 +556,7 @@ end
 # ╠═df46e437-51a9-4c49-9d20-50d73aaf5be1
 # ╟─b88d9170-0352-4e7b-9690-d34757636442
 # ╟─761f6651-8a89-48b7-8276-53c4dadc2ad2
+# ╟─6f34a67f-2b69-4d74-b8d0-f05973144773
 # ╟─55b79d52-b88f-4a45-a342-0d8fe7469666
 # ╟─11c4dec9-fcbe-4849-b2f0-69a53c198665
 # ╟─61301359-1998-4555-b8e4-7c0321b44682

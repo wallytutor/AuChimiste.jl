@@ -211,24 +211,13 @@ md"""
 ## Devel
 """
 
+# ╔═╡ 46ecd6b1-cafe-48a6-9cb8-e0100ad559f7
+list_species()
+
 # ╔═╡ 7cb83a44-dd0d-4f00-88b6-7effb5a34cbc
 let
 	data = AuChimisteDatabase(; selected_species = ["KAOLINITE", "METAKAOLIN"])
 	species_table(data)
-end
-
-# ╔═╡ 0dda1075-b795-431b-a403-ced37e73a2de
-let
-	# data_1 = AuChimiste.load_data_yaml(AuChimiste.THERMO_COMPOUND_DATA)
-	# data_2 = AuChimiste.load_data_yaml("nasa_condensed.yaml")
-	# data_3 = AuChimiste.load_data_yaml("gri30.yaml")
-
-	# species_1 = AuChimiste.parse_species_yaml.(data_1["species"])
-	# species_2 = AuChimiste.parse_species_yaml.(data_2["species"])
-	# species_3 = AuChimiste.parse_species_yaml.(data_3["species"])
-
-	# s = Species(species_1[1])
-	# specific_heat(s, 300)
 end
 
 # ╔═╡ f7aa9875-4509-4275-aaa7-174cb71106c0
@@ -266,6 +255,6 @@ end
 # ╟─e0d17cb8-6049-4502-8d2d-9e40901ebd91
 # ╟─7a1e95eb-ee21-41be-84c0-39a293e81bd2
 # ╟─e560dd80-f880-4afe-8567-e9378c99528b
+# ╠═46ecd6b1-cafe-48a6-9cb8-e0100ad559f7
 # ╠═7cb83a44-dd0d-4f00-88b6-7effb5a34cbc
-# ╠═0dda1075-b795-431b-a403-ced37e73a2de
 # ╠═f7aa9875-4509-4275-aaa7-174cb71106c0
