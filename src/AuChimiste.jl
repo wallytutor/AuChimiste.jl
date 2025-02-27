@@ -622,11 +622,15 @@ end
     component(c::Composition{Stoichiometry}, charge)
     component(c::Composition{MoleProportion}, charge)
     component(c::Composition{MassProportion}, charge)
+    component(c::Dict, charge)
 
 Compile component from given composition specification. This function
 is a wrapper eliminating the need of calling [`stoichiometry`](@ref),
 [`mole_proportions`](@ref) or [`mass_proportions`](@ref) directly. The
 value of `spec` must be the symbol representing one of their names.
+
+**Note:** the overload supporting a dictionary input is intended only
+for parsing database species data; its direct use is discouraged.
 """ component
 
 macro component(func, comp, charge)
@@ -669,6 +673,20 @@ end
 
 function component(c::Composition{MassProportion}, charge)
     return @component((Y, W)->(get_mole_fractions(Y, W), Y), c, charge)
+end
+
+function component(c::Dict)
+    # Retrieve charge of component:
+    charge = -1get(c, "E", 0)
+
+    # Delete electron from composition:
+    haskey(c, "E") && delete!(c, "E")
+        
+    # Handle electron as species without composition:
+    isempty(c) && return
+        
+    c = NamedTuple(zip(Symbol.(keys(c)), values(c)))
+    return component(:stoichiometry; charge = charge, c...)
 end
 
 """

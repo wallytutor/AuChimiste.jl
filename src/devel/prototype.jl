@@ -339,12 +339,34 @@ md"""
 #     )
 # end
 
-# ╔═╡ 1a0ab8ee-5cb8-4e80-afe4-f4f11cd95013
-function load_compound_data(fname; kwargs...)
-	which = get(kwargs, :which, false)
-	path = AuChimiste.get_data_file(fname; which)
-	return YAML.load_file(path)
+# ╔═╡ 3cf274ff-09a4-4a6d-8a77-b9690101caf9
+begin
+
+
+	abstract type AbstractTransportModel end
+	
+	struct Species
+		composition::AuChimiste.ChemicalComponent
+		thermo_raw::NTuple{3, Any}
+		thermo_fn::CompiledThermoFunctions
+		transport::Union{Nothing, AbstractTransportModel}
+		
+		function Species(s::NamedTuple; how = :symbolic)
+			comp = component(s.composition)
+			thermo_raw = thermo_factory(; s.thermo..., how)
+			thermo_fn = CompiledThermoFunctions(thermo_raw)
+
+			# TODO: implement transport model!
+			trans = nothing
+			
+			return new(comp, thermo_raw, thermo_fn, trans)
+		end
+	end
+	
 end
+
+# ╔═╡ e0746ed3-97b7-4094-abbc-d72e3b44a477
+
 
 # ╔═╡ ffab7c25-f343-40b0-a82b-6a229e01ca3f
 struct CompoundDatabase
@@ -361,48 +383,22 @@ struct CompoundDatabase
 end
 
 # ╔═╡ 4b003acd-4e46-4c4f-9d13-d4ea66804b3c
-struct ThermoCompound
-end
+
 
 # ╔═╡ 0dda1075-b795-431b-a403-ced37e73a2de
 begin
-	data_1 = load_compound_data(AuChimiste.THERMO_COMPOUND_DATA)
-	data_2 = load_compound_data("nasa_condensed.yaml")
+	data_1 = load_data_yaml(AuChimiste.THERMO_COMPOUND_DATA)
+	data_2 = load_data_yaml("nasa_condensed.yaml")
+	data_3 = load_data_yaml("gri30.yaml")
 
-	species_1 = data_1["species"][1]
-	species_2 = data_2["species"][13]
-end
-
-# ╔═╡ 05c69ac0-ecbc-484b-9063-3ca2d8390830
-function parse_species_yaml(species)
-	name = species["name"]
-	display_name = get(species, "display_name", name)
-	aggregation = get(species, "aggregation", "unknown")
-	
-	composition = species["composition"]
-
-	thermo = species["thermo"]
-	thermo_model = thermo["model"]
-	thermo_ranges = get(thermo, "temperature-ranges", [0.0, 6000.0])
-
-	return (;
-		name,
-		display_name,
-		aggregation,
-		composition,
-		thermo_model,
-		thermo_ranges
-	)
-end
+	species_1 = AuChimiste.parse_species_yaml.(data_1["species"])
+	species_2 = AuChimiste.parse_species_yaml.(data_2["species"])
+	species_3 = AuChimiste.parse_species_yaml.(data_3["species"])
+end;
 
 # ╔═╡ b5062fde-093f-4cfd-8d70-706a27b46485
-let
-	parse_species_yaml(species_1)
-end
-
-# ╔═╡ e8ac358f-c006-47e3-8a78-d8be217ce574
-let
-	parse_species_yaml(species_2)
+let s = Species.(species_1)
+	# s.thermo_fn.specific_heat
 end
 
 # ╔═╡ 4158547b-c954-46aa-b0ca-cfd0f9e86917
@@ -418,19 +414,7 @@ end
 # ╔═╡ 2111925f-fc71-4c05-88e4-e9087d790e13
 # ╠═╡ disabled = true
 #=╠═╡
-function species_component(comp)
-    # Retrieve charge of component:
-    charge = -1get(comp, "E", 0)
 
-    # Delete electron from composition:
-    haskey(comp, "E") && delete!(comp, "E")
-        
-    # Handle electron as species without composition:
-    isempty(comp) && return
-        
-    comp = NamedTuple(zip(Symbol.(keys(comp)), values(comp)))
-    return component(:stoichiometry; charge = charge, comp...)
-end
   ╠═╡ =#
 
 # ╔═╡ 9ae5e2e2-389a-47ad-800f-8c352669491a
@@ -527,7 +511,7 @@ the_species = Species(name, comp)
 # ╔═╡ Cell order:
 # ╟─fd0a3399-8589-428c-9036-0d8a57ae6a92
 # ╟─3aeadbf4-c14d-11ef-3fd8-09cedaa2b25d
-# ╟─72358599-fbdc-49c5-af59-b69c9ce3d0dd
+# ╠═72358599-fbdc-49c5-af59-b69c9ce3d0dd
 # ╟─aad33446-8805-4a21-8aa5-a3cc68066ed4
 # ╟─f065648f-475a-422d-99e2-a75551a792ab
 # ╟─09ed98ba-d47d-44ea-a0d3-9647a2bec6d1
@@ -540,13 +524,12 @@ the_species = Species(name, comp)
 # ╟─7a1e95eb-ee21-41be-84c0-39a293e81bd2
 # ╟─e560dd80-f880-4afe-8567-e9378c99528b
 # ╠═91cb1803-1625-4aad-99f5-0e75cdf09fec
-# ╠═1a0ab8ee-5cb8-4e80-afe4-f4f11cd95013
+# ╠═3cf274ff-09a4-4a6d-8a77-b9690101caf9
+# ╠═e0746ed3-97b7-4094-abbc-d72e3b44a477
 # ╠═ffab7c25-f343-40b0-a82b-6a229e01ca3f
 # ╠═4b003acd-4e46-4c4f-9d13-d4ea66804b3c
 # ╠═0dda1075-b795-431b-a403-ced37e73a2de
-# ╠═05c69ac0-ecbc-484b-9063-3ca2d8390830
 # ╠═b5062fde-093f-4cfd-8d70-706a27b46485
-# ╠═e8ac358f-c006-47e3-8a78-d8be217ce574
 # ╠═4158547b-c954-46aa-b0ca-cfd0f9e86917
 # ╠═2111925f-fc71-4c05-88e4-e9087d790e13
 # ╠═9ae5e2e2-389a-47ad-800f-8c352669491a

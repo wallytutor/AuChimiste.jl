@@ -265,6 +265,11 @@ function thermo_factory(model::String, data, bounds; how = :symbolic)
     return thermo_factory(thermo_data; how)
 end
 
+# XXX: keep this wrapper for ease of data parsing!
+function thermo_factory(; model, data, bounds, how = :symbolic)
+    return thermo_factory(model, data, bounds; how)
+end
+
 function compile_function(f, expression)
     return build_function(f, Symbolics.get_variables(f); expression)
 end

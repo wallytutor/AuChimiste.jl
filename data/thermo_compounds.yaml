@@ -38,7 +38,7 @@ species:
           146.9970,  # G
           -1675.690  # H
         ]
-    comment: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1344281&Type=JANAFS&Table=on#JANAFS
+    note: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1344281&Type=JANAFS&Table=on#JANAFS
 
   - name: AL2O3_GAMMA
     display_name: Alumina (gamma)
@@ -63,7 +63,7 @@ species:
           155.1360,  # G
           -1656.860  # H
         ]
-    comment: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1344281&Type=JANAFS&Table=on#JANAFS
+    note: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1344281&Type=JANAFS&Table=on#JANAFS
 
   - name: AL2O3_DELTA
     display_name: Alumina (delta)
@@ -88,7 +88,7 @@ species:
           151.7920,  # G
           -1666.490  # H
         ]
-    comment: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1344281&Type=JANAFS&Table=on#JANAFS
+    note: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1344281&Type=JANAFS&Table=on#JANAFS
 
   - name: AL2O3_KAPPA
     display_name: Alumina (kappa)
@@ -113,7 +113,7 @@ species:
           153.9350,  # G
           -1662.300  # H
         ]
-    comment: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1344281&Type=JANAFS&Table=on#JANAFS
+    note: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1344281&Type=JANAFS&Table=on#JANAFS
 
   - name: CA1O1
     display_name: Calcium oxide
@@ -138,7 +138,7 @@ species:
           92.56096,  # G
           -635.0894 # H
         ]
-    comment: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1305788&Mask=2#Thermo-Condensed
+    note: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1305788&Mask=2#Thermo-Condensed
 
   - name: SIO2_ALPHA
     display_name: SiO2 (alpha quartz)
@@ -163,7 +163,7 @@ species:
           -27.96962,
           -910.8568
         ]
-    comment: 
+    note: 
       https://webbook.nist.gov/cgi/cbook.cgi?ID=C14808607&Mask=2#Thermo-Condensed
       s298 converted from SCHIELTZ1968
 
@@ -190,7 +190,7 @@ species:
           105.8092,
           -910.8568
         ]
-    comment: 
+    note: 
       https://webbook.nist.gov/cgi/cbook.cgi?ID=C14808607&Mask=2#Thermo-Condensed
       s298 converted from SCHIELTZ1968
 
@@ -217,7 +217,7 @@ species:
           116.8909,      # G
           -557.3339      # H
         ]
-    comment: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1305788&Mask=2#Thermo-Condensed
+    note: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1305788&Mask=2#Thermo-Condensed
 
   - name: KAOLINITE
     display_name: Kaolinite

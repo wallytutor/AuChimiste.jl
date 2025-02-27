@@ -3,6 +3,7 @@
 export load_path
 export add_load_path
 export reset_load_path
+export load_data_yaml
 
 #######################################################################
 # CONSTANTS
@@ -71,4 +72,64 @@ function get_data_file(name; which = false)
     path =  join(map(n->"- $(n)", USER_PATH), "\n")
     @warn("Data file `$(name)` not in load path:\n$(path)")
     return nothing
+end
+
+function load_data_yaml(fname; kwargs...)
+    which = get(kwargs, :which, false)
+    path = AuChimiste.get_data_file(fname; which)
+    return YAML.load_file(path)
+end
+
+function parse_thermo_yaml(thermo)
+    model = thermo["model"]
+    bounds = get(thermo, "temperature-ranges", [0.0, 6000.0])
+    data = thermo["data"]
+    
+    return (; model, bounds, data)
+end
+
+function parse_transport_yaml(trans)
+    isnothing(trans) && return nothing
+
+    model = trans["model"]
+    geometry = trans["geometry"]
+    well_depth = trans["well-depth"]
+    diameter = trans["diameter"]
+        
+    rot_relaxation = get(trans, "rotational-relaxation", nothing)
+    polarizability = get(trans, "polarizability", nothing)
+    dipole = get(trans, "dipole", nothing)
+    note = get(trans, "note", nothing)
+
+    return (;
+        model,
+        geometry,
+        well_depth,
+        diameter,
+        rot_relaxation,
+        polarizability,
+        dipole,
+        note
+    )
+end
+
+function parse_species_yaml(species)
+    name = species["name"]
+    display_name = get(species, "display_name", name)
+    aggregation = get(species, "aggregation", "unknown")
+    
+    composition = species["composition"]
+    thermo = parse_thermo_yaml(species["thermo"])
+    transport = parse_transport_yaml(get(species, "transport", nothing))
+    note = get(species, "note", nothing)
+
+    return (;
+        name,
+        display_name,
+        aggregation,
+        composition,
+        thermo,
+        transport,
+        note
+    )
 end
