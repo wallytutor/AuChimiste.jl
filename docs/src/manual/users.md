@@ -47,6 +47,7 @@ AuChimiste.Composition
 The following interfaces are provided as a centralization of names for the package. Generally these functions will take an object with the type for which they implement the quantity associated with their name, and other relevant parameters, such as temperature, pressure, and/or an array of mass fractions. In all cases values are expected to be returned in SI units, as documented by each function.
 
 ```@docs
+AuChimiste.molar_mass
 AuChimiste.density
 AuChimiste.specific_heat
 AuChimiste.enthalpy

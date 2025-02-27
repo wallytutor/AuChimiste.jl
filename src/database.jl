@@ -3,7 +3,9 @@
 export load_path
 export add_load_path
 export reset_load_path
-export load_data_yaml
+export AuChimisteDatabase
+export species_names
+export species_table
 
 #######################################################################
 # CONSTANTS
@@ -56,10 +58,15 @@ function reset_load_path()
 end
 
 #######################################################################
-# INTERNALS
+# READING/PARSING
 #######################################################################
 
 function get_data_file(name; which = false)
+    if isabspath(name) && isfile(name)
+        which && @info("Absolute path provided for `$(name)`")
+        return name
+    end
+
     for path in USER_PATH
         tentative = joinpath(path, name)
 
@@ -126,6 +133,7 @@ function parse_species_yaml(species)
     composition = species["composition"]
     thermo = parse_thermo_yaml(species["thermo"])
     transport = parse_transport_yaml(get(species, "transport", nothing))
+    source = get(species, "data_source", nothing)
     note = get(species, "note", nothing)
 
     return (;
@@ -135,6 +143,101 @@ function parse_species_yaml(species)
         composition,
         thermo,
         transport,
+        source,
         note
     )
 end
+
+#######################################################################
+# AUCHIMISTEDATABASE
+#######################################################################
+
+struct AuChimisteDatabase
+    description::String
+    species::NamedTuple
+    references::Union{Nothing, Dict{String, String}}
+
+    function AuChimisteDatabase(;
+            data_file = THERMO_COMPOUND_DATA,
+            selected_species = "*",
+            validate = true,
+            which = false
+        )
+        data = load_data_yaml(data_file; which = false)
+
+        if validate && !data_validate(data) 
+            throw(ErrorException("Unable to validate contents of $(data_file)"))
+        end
+
+        description = replace(data["description"], "\n"=>" ")
+        species = data_get_selected_species(data["species"], selected_species)
+        species = NamedTuple(map(s->Symbol(s.meta.name)=>s, species))
+        references = get(data, "references", nothing)
+        
+        return new(description, species, references)
+    end
+end
+
+function data_validate(data)
+    spec = data_validate_hassection(data, "species")
+    refs = data_validate_hassection(data, "references")
+
+    if !isnothing(refs)
+        valid_references = data_validate_references(refs, spec)
+        return all([valid_references, ])
+    end
+
+    @warn("Cannot validate references: not available")
+    return true
+end
+
+function data_validate_hassection(data, name)
+    !haskey(data, name) && begin
+        @warn("Missing $(name) section in thermodata!")
+        return nothing
+    end
+    return data[name]
+end
+
+function data_validate_references(refs, spec)
+    function validate(species, refs)
+        !haskey(species, "data_source") && begin
+            @warn("Missing data source for $(species["name"])")
+            return false
+        end
+    
+        !haskey(refs, species["data_source"]) && begin
+            @warn("Missing reference entry for $(species["data_source"])")
+            return false
+        end
+    
+        return true
+    end
+    
+    return all(c->validate(c, refs), spec)
+end
+
+function data_get_selected_species(species, selected)
+    selected == "*" && return Species.(species)
+    return Species.(filter(c->c["name"] in selected, species))
+end
+
+function species_names(data::AuChimisteDatabase)
+    return String.(keys(data.species))
+end
+
+function species_table(data::AuChimisteDatabase)
+	species_meta = map(s->s.meta, values(data.species))
+	columnize(n) = vcat(map(x->getfield(x, n), species_meta)...)
+	
+    return DataFrame(
+        names   = columnize(:name),
+        display = columnize(:display_name),
+        source  = columnize(:source),
+        state   = columnize(:aggregation)
+	)
+end
+
+#######################################################################
+# EOF
+#######################################################################

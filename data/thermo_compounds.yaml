@@ -2,7 +2,7 @@
 # THERMODYNAMICS DATA
 ##############################################################################
 
-description: /-
+description:
   Thermodynamic database with compounds and solid phases for use in process
   calculations and phase equilibria determination; this is an ongoing work
   and structure might evolve until a stable version.
@@ -18,7 +18,7 @@ species:
   - name: AL2O3_ALPHA
     display_name: Alumina (alpha)
     aggregation: solid
-    datasource: CHASE1998
+    data_source: CHASE1998
     composition:
       Al: 2
       O : 3
@@ -43,7 +43,7 @@ species:
   - name: AL2O3_GAMMA
     display_name: Alumina (gamma)
     aggregation: solid
-    datasource: CHASE1998
+    data_source: CHASE1998
     composition:
       Al: 2
       O : 3
@@ -68,7 +68,7 @@ species:
   - name: AL2O3_DELTA
     display_name: Alumina (delta)
     aggregation: solid
-    datasource: CHASE1998
+    data_source: CHASE1998
     composition:
       Al: 2
       O : 3
@@ -93,7 +93,7 @@ species:
   - name: AL2O3_KAPPA
     display_name: Alumina (kappa)
     aggregation: solid
-    datasource: CHASE1998
+    data_source: CHASE1998
     composition:
       Al: 2
       O : 3
@@ -118,7 +118,7 @@ species:
   - name: CA1O1
     display_name: Calcium oxide
     aggregation: solid
-    datasource: CHASE1998
+    data_source: CHASE1998
     composition:
       Ca: 1
       O : 1
@@ -143,7 +143,7 @@ species:
   - name: SIO2_ALPHA
     display_name: SiO2 (alpha quartz)
     aggregation: solid
-    datasource: CHASE1998
+    data_source: CHASE1998
     composition:
       Si: 1
       O : 2
@@ -170,7 +170,7 @@ species:
   - name: SIO2_BETA
     display_name: SiO2 (beta quartz)
     aggregation: solid
-    datasource: CHASE1998
+    data_source: CHASE1998
     composition:
       Si: 1
       O : 2
@@ -197,7 +197,7 @@ species:
   - name: CA1O1_L
     display_name: Calcium oxide
     aggregation: liquid
-    datasource: CHASE1998
+    data_source: CHASE1998
     composition:
       Ca: 1
       O : 1
@@ -222,7 +222,7 @@ species:
   - name: KAOLINITE
     display_name: Kaolinite
     aggregation: solid
-    datasource: SCHIELTZ1964
+    data_source: SCHIELTZ1964
     composition:
       Al: 2
       Si: 2
@@ -236,7 +236,7 @@ species:
   - name: METAKAOLIN
     display_name: Metakaolin
     aggregation: solid
-    datasource: SCHIELTZ1964
+    data_source: SCHIELTZ1964
     composition:
       Al: 2
       Si: 2
@@ -249,7 +249,7 @@ species:
   - name: MULLITE
     display_name: Mullite
     aggregation: solid
-    datasource: SCHIELTZ1964
+    data_source: SCHIELTZ1964
     composition:
       Al: 6
       Si: 2
@@ -262,7 +262,7 @@ species:
   - name: AL2O3_GAMMA
     display_name: Alumina (gamma)
     aggregation: solid
-    datasource: SCHIELTZ1964
+    data_source: SCHIELTZ1964
     composition:
       Al: 2
       O : 3
@@ -274,7 +274,7 @@ species:
   - name: SIO2_ALPHA
     display_name: SiO2 (alpha quartz)
     aggregation: solid
-    datasource: SCHIELTZ1964
+    data_source: SCHIELTZ1964
     composition:
       Si: 1
       O : 2
@@ -286,7 +286,7 @@ species:
   - name: SIO2_BETA
     display_name: SiO2 (beta quartz)
     aggregation: solid
-    datasource: SCHIELTZ1964
+    data_source: SCHIELTZ1964
     composition:
       Si: 1
       O : 2
@@ -298,7 +298,7 @@ species:
   - name: SIO2_GLASS
     display_name: SiO2 (glass)
     aggregation: solid
-    datasource: SCHIELTZ1964
+    data_source: SCHIELTZ1964
     composition:
       Si: 1
       O : 2
@@ -310,7 +310,7 @@ species:
   - name: CRISTOBALITE_ALPHA
     display_name: Cristobalite (alpha)
     aggregation: solid
-    datasource: SCHIELTZ1964
+    data_source: SCHIELTZ1964
     composition:
       Si: 1
       O : 2
@@ -322,7 +322,7 @@ species:
   - name: CRISTOBALITE_BETA
     display_name: Cristobalite (beta)
     aggregation: solid
-    datasource: SCHIELTZ1964
+    data_source: SCHIELTZ1964
     composition:
       Si: 1
       O : 2
@@ -334,7 +334,7 @@ species:
   - name: TRIDYMITE_ALPHA
     display_name: Tridymite (alpha)
     aggregation: solid
-    datasource: SCHIELTZ1964
+    data_source: SCHIELTZ1964
     composition:
       Si: 1
       O : 2
@@ -346,7 +346,7 @@ species:
   - name: TRIDYMITE_BETA
     display_name: Tridymite (beta)
     aggregation: solid
-    datasource: SCHIELTZ1964
+    data_source: SCHIELTZ1964
     composition:
       Si: 1
       O : 2
@@ -358,7 +358,7 @@ species:
   - name: WATER_L
     display_name: Water (liquid)
     aggregation: liquid
-    datasource: SCHIELTZ1964
+    data_source: SCHIELTZ1964
     composition:
       H : 2
       O : 1
@@ -370,7 +370,7 @@ species:
   - name: WATER_G
     display_name: Water (gas)
     aggregation: gas
-    datasource: SCHIELTZ1964
+    data_source: SCHIELTZ1964
     composition:
       H : 2
       O : 1
@@ -382,7 +382,7 @@ species:
   - name: SPINEL
     display_name: Spinel
     aggregation: solid
-    datasource: HYPOTHETICAL
+    data_source: HYPOTHETICAL
     composition:
       Al: 4
       Si: 3

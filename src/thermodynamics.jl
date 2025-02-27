@@ -349,6 +349,18 @@ end
 # SPECIES
 #######################################################################
 
+struct SpeciesMeta
+    name::String
+    display_name::String
+    aggregation::String
+    source::Union{Nothing, String}
+    note::Union{Nothing, String}
+
+    function SpeciesMeta(s::NamedTuple)
+        return new(s.name, s.display_name, s.aggregation, s.source, s.note)
+    end
+end
+
 struct Thermodynamics <: AbstractThermodynamicsModel
     data::AbstractThermodynamicData
     base::NTuple{3, Any}
@@ -363,27 +375,37 @@ struct Thermodynamics <: AbstractThermodynamicsModel
 end
 
 struct Species
+    meta::SpeciesMeta
     composition::ChemicalComponent
     thermo::AbstractThermodynamicsModel
     transport::Union{Nothing, AbstractTransportModel}
     
     function Species(s::NamedTuple; how = :symbolic)
+        meta = SpeciesMeta(s)
         comp = component(s.composition)
         thermo = Thermodynamics(s.thermo; how)
 
         # TODO: implement transport model!
         trans = nothing
         
-        return new(comp, thermo, trans)
+        return new(meta, comp, thermo, trans)
     end
 end
 
+function Species(s::Dict)
+	return Species(parse_species_yaml(s))
+end
+
+function molar_mass(s::Species)
+    return 0.001s.composition.molar_mass
+end
+
 function specific_heat(s::Species, T)
-    return s.thermo.func.specific_heat(T) 
+    return s.thermo.func.specific_heat(T) / molar_mass(s)
 end
 
 function enthalpy(s::Species, T)
-    return s.thermo.func.enthalpy(T)
+    return s.thermo.func.enthalpy(T) / molar_mass(s)
 end
 
 function entropy(s::Species, T)

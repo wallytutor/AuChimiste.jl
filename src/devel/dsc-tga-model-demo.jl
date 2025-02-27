@@ -34,7 +34,7 @@ begin
 
     using PlutoLinks
     using PlutoUI: TableOfContents
-	import PlutoUI as UI
+	import PlutoUI
 	
     TableOfContents()
 end
@@ -69,7 +69,7 @@ end
 md"""
 # Modeling DSC / TGA data
 
-Understanding the phase transformations is related energy aspects is key in any development in Materials Science. In what follows we summarize a simple modeling approach to extract detailed information from coupled DSC / TGA analyses. It can also be seen as a primer in [ModelingToolkit.jl](https://docs.sciml.ai/ModelingToolkit/stable/), the framework upon which the model is built.
+Understanding the phase transformations and related energy aspects is key in any development in Materials Science. In what follows we summarize a simple modeling approach to extract detailed information from coupled DSC / TGA analyses. It can also be seen as a primer in [ModelingToolkit.jl](https://docs.sciml.ai/ModelingToolkit/stable/), the framework upon which the model is built.
 """
 
 # ╔═╡ edd99e16-31e8-449a-b3fd-68a8824bc3d1
@@ -117,8 +117,11 @@ md"""
 This is a time-dependent process, so we start by declaring the independent and dependent variables:
 """
 
+# ╔═╡ 7ef7b652-407e-46a8-b678-ec2999f38945
+@independent_variables t;
+
 # ╔═╡ 17f20bd0-6e3e-417c-b372-528c087c2c6a
-@variables t m(t);
+@variables m(t);
 
 # ╔═╡ 7a9acd48-d338-4fc0-aeb8-b88423655a4a
 md"""
@@ -256,10 +259,10 @@ The model creation function `assemblymodel(cpx, cpy)` requires the specific heat
 
 # ╔═╡ e3252f33-a7ea-42c5-8dc5-701320c9f0eb
 begin
-    tdb = ThermoDatabase(; selected_compounds = ["KAOLINITE", "METAKAOLIN"])
+	tdb = AuChimisteDatabase(; selected_species = ["KAOLINITE", "METAKAOLIN"])
 
-    cpx(T) = specific_heat(tdb.compounds[1], T)
-    cpy(T) = specific_heat(tdb.compounds[2], T)
+    cpx(T) = specific_heat(tdb.species.KAOLINITE, T)
+    cpy(T) = specific_heat(tdb.species.METAKAOLIN, T)
 end;
 
 # ╔═╡ f7438057-3f77-4155-837c-92d85a90cf88
@@ -282,7 +285,10 @@ Hopefully `ModelingToolkit` handles structural simplification and is able to det
 """
 
 # ╔═╡ 778a56af-09e4-4a8e-9838-9816b0a4b6c5
-model_final = structural_simplify(model)
+model_final = structural_simplify(model);
+
+# ╔═╡ 419ad4de-ffe7-4aa8-95b9-7b1c850509e8
+model_final
 
 # ╔═╡ de78ad6c-9828-4a74-a579-2adcb8424a66
 md"""
@@ -505,12 +511,13 @@ end
 
 # ╔═╡ Cell order:
 # ╟─ce8f4ea4-013c-4f73-9d0d-7c84cd29285d
-# ╠═08f1bb01-5a39-473f-8c75-cd6ade835a77
-# ╠═ebad837b-8c80-4132-8093-a0634462161c
-# ╠═c43baed9-a267-4cdd-9534-bf51274d2d1b
+# ╟─08f1bb01-5a39-473f-8c75-cd6ade835a77
+# ╟─ebad837b-8c80-4132-8093-a0634462161c
+# ╟─c43baed9-a267-4cdd-9534-bf51274d2d1b
 # ╟─edd99e16-31e8-449a-b3fd-68a8824bc3d1
 # ╟─872c6b13-c71f-45bb-9d9d-f1d239550902
 # ╟─883b9fe2-992a-4d7f-a51c-24f3c3dc26eb
+# ╠═7ef7b652-407e-46a8-b678-ec2999f38945
 # ╠═17f20bd0-6e3e-417c-b372-528c087c2c6a
 # ╟─7a9acd48-d338-4fc0-aeb8-b88423655a4a
 # ╠═888a8e11-61e8-47bf-a74f-fa377f7da19e
@@ -529,7 +536,8 @@ end
 # ╟─f7438057-3f77-4155-837c-92d85a90cf88
 # ╟─ead986d8-bd2a-442c-b581-03c7d46daef6
 # ╟─af8fd783-7b86-4f66-9817-06bd81cd1517
-# ╟─778a56af-09e4-4a8e-9838-9816b0a4b6c5
+# ╠═778a56af-09e4-4a8e-9838-9816b0a4b6c5
+# ╠═419ad4de-ffe7-4aa8-95b9-7b1c850509e8
 # ╟─de78ad6c-9828-4a74-a579-2adcb8424a66
 # ╟─d0506cba-b5eb-4c72-9f00-c731b7245603
 # ╟─60e41b3d-4c4d-4a57-9517-8c27d9baf5ec

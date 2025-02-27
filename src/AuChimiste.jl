@@ -5,6 +5,7 @@ __init__() = nothing
 
 using CairoMakie
 using CommonSolve
+using DataFrames
 using DifferentialEquations
 using DocStringExtensions: TYPEDFIELDS
 using DynamicQuantities
@@ -54,6 +55,7 @@ export mass_fractions_map
 export quantity
 
 # For interfaces
+export molar_mass
 export specific_heat
 export thermal_conductivity
 export viscosity

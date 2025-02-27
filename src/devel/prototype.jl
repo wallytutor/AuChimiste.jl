@@ -40,6 +40,7 @@ begin
 	using BenchmarkTools
 	using CairoMakie
 	using CommonSolve
+	using DataFrames
 	using DifferentialEquations
 	using DocStringExtensions
 	using DynamicQuantities
@@ -210,220 +211,24 @@ md"""
 ## Devel
 """
 
-# ╔═╡ 91cb1803-1625-4aad-99f5-0e75cdf09fec
-#     function ThermoDatabase(;
-#             otherpath = nothing,
-#             validate = true,
-#             selected_compounds = "*"
-#         )
-#         datapath = isnothing(otherpath) ? DEFAULTTHERMODATA : otherpath
-
-#         !isfile(datapath) && begin
-#             throw(ErrorException("File not found: $(datapath)"))
-#         end
-
-#         data = YAML.load_file(datapath)
-
-#         if validate && !thermodata_validate(data) 
-#             throw(ErrorException("Unable to validate contents $(datapath)"))
-#         end
-
-#         compounds = thermo_get_selected_compounds(
-#             data["compounds"], selected_compounds)
-
-#         return new(data["about"], compounds, data["references"])
-#     end
-# end
-
-# ##############################################################################
-# # READING AND VALIDATION
-# ##############################################################################
-
-# function thermodata_validate(data)
-#     refs = thermodata_validate_hassection(data, "references")
-#     cmps = thermodata_validate_hassection(data, "compounds")
-
-#     valid_references = thermodata_validate_references(refs, cmps)
-
-#     return all([
-#         valid_references,
-#     ])
-# end
-
-# function thermodata_validate_references(refs, cmps)
-#     return all(c->thermodata_validate_datasource(c, refs), cmps)
-# end
-
-# function thermodata_validate_datasource(compound, refs)
-#     !haskey(compound, "datasource") && begin
-#         @warn("Missing data source for $(compound["displayname"])")
-#         return false
-#     end
-
-#     !haskey(refs, compound["datasource"]) && begin
-#         @warn("Missing reference entry for $(compound["datasource"])")
-#         return false
-#     end
-
-#     return true
-# end
-
-# function thermodata_validate_hassection(data, name)
-#     !haskey(data, name) && begin
-#         @warn("Missing $(name) section in thermodata!")
-#         return nothing
-#     end
-#     return data[name]
-# end
-
-# function thermo_get_selected_compounds(compounds, selected)
-#     selected == "*" && return map(thermo_get_compound, compounds)
-
-#     buffer = filter(c->c["compoundname"] in selected, compounds)
-
-#     return thermo_get_compound.(buffer)
-# end
-
-# function thermo_get_thermodynamics(thermo, chemical)
-#     thermotype = Symbol(thermo["type"])
-
-#     return if thermotype == :maier_kelley
-#         thermo_parse_thermomaierkelly(thermo["data"], chemical)
-#     elseif thermotype == :shomate
-#         thermo_parse_thermoshomate(thermo["data"], chemical)
-#     else
-#         throw(ErrorException("Unsupported thermotype $(thermotype)"))
-#     end
-# end
-
-# function thermo_get_compound(cmp)
-#     chemical = ChemicalCompound(cmp["stoichiometry"])
-#     thermo = thermo_get_thermodynamics(cmp["thermodynamics"], chemical)
-    
-#     ThermoCompound(
-#         cmp["compoundname"],
-#         cmp["displayname"],
-#         cmp["aggregation"],
-#         cmp["datasource"],
-#         chemical,
-#         thermo
-#     )
-# end
-
-# function thermo_parse_thermomaierkelly(thermodata, compound)
-#     return MaierKelleyThermo(
-#         thermodata["h298"], thermodata["s298"], copy(thermodata["coefs"]);
-#         units = get(thermodata, "units", :mole),
-#         molar_mass = molecularmass(compound)
-#     )
-# end
-
-# function thermo_parse_thermoshomate(thermodata, compound)
-#     return ShomateThermo(
-#         thermodata["h298"], thermodata["s298"], copy(thermodata["coefs"]),
-#         (thermodata["range"]...,); units = get(thermodata, "units", :mole),
-#         molar_mass = molecularmass(compound)
-#     )
-# end
-
-# ##############################################################################
-# # QUERY
-# ##############################################################################
-
-# function compounds(data::ThermoDatabase)
-#     return DataFrames.DataFrame(
-#         names   = map(x->x.compoundname, data.compounds),
-#         display = map(x->x.displayname,  data.compounds),
-#         source  = map(x->x.datasource,   data.compounds),
-#         state   = map(x->x.aggregation,  data.compounds),
-#     )
-# end
-
-# ╔═╡ 3cf274ff-09a4-4a6d-8a77-b9690101caf9
-# begin
-
-
-# 	abstract type AbstractThermodynamicsModel end
-# 	abstract type AbstractTransportModel end
-
-# 	struct Thermodynamics <: AbstractThermodynamicsModel
-# 		data::AuChimiste.ThermodynamicModelData
-# 		base::NTuple{3, Any}
-# 		func::CompiledThermoFunctions
-
-# 		function Thermodynamics(thermo::NamedTuple; how = :symbolic)
-# 			data = AuChimiste.thermo_data(; thermo...)
-# 			base = thermo_factory(data; how)
-# 			func = CompiledThermoFunctions(base)
-# 			return new(data, base, func)
-# 		end
-# 	end
-	
-# 	struct Species
-# 		composition::AuChimiste.ChemicalComponent
-# 		thermo::AbstractThermodynamicsModel
-# 		transport::Union{Nothing, AbstractTransportModel}
-		
-# 		function Species(s::NamedTuple; how = :symbolic)
-# 			comp = component(s.composition)
-# 			thermo = Thermodynamics(s.thermo; how)
-
-# 			# TODO: implement transport model!
-# 			trans = nothing
-			
-# 			return new(comp, thermo, trans)
-# 		end
-# 	end
-
-# 	function specific_heat(s::Species, T)
-# 		return s.thermo.func.specific_heat(T) 
-# 	end
-	
-# 	function enthalpy(s::Species, T)
-# 		return s.thermo.func.enthalpy(T)
-# 	end
-	
-# 	function entropy(s::Species, T)
-# 		return s.thermo.func.entropy(T)
-# 	end
-# end
-
-# ╔═╡ ffab7c25-f343-40b0-a82b-6a229e01ca3f
-struct CompoundDatabase
-    about::String
-    # compounds::Vector{ThermoCompound}
-    references::Dict{String, String}
-
-	function CompoundDatabase(;
-			fname = AuChimiste.THERMO_COMPOUND_DATA,
-		)
-
-		
-	end
+# ╔═╡ 7cb83a44-dd0d-4f00-88b6-7effb5a34cbc
+let
+	data = AuChimisteDatabase(; selected_species = ["KAOLINITE", "METAKAOLIN"])
+	species_table(data)
 end
 
 # ╔═╡ 0dda1075-b795-431b-a403-ced37e73a2de
-begin
-	data_1 = load_data_yaml(AuChimiste.THERMO_COMPOUND_DATA)
-	data_2 = load_data_yaml("nasa_condensed.yaml")
-	data_3 = load_data_yaml("gri30.yaml")
+let
+	# data_1 = AuChimiste.load_data_yaml(AuChimiste.THERMO_COMPOUND_DATA)
+	# data_2 = AuChimiste.load_data_yaml("nasa_condensed.yaml")
+	# data_3 = AuChimiste.load_data_yaml("gri30.yaml")
 
-	species_1 = AuChimiste.parse_species_yaml.(data_1["species"])
-	species_2 = AuChimiste.parse_species_yaml.(data_2["species"])
-	species_3 = AuChimiste.parse_species_yaml.(data_3["species"])
-end;
+	# species_1 = AuChimiste.parse_species_yaml.(data_1["species"])
+	# species_2 = AuChimiste.parse_species_yaml.(data_2["species"])
+	# species_3 = AuChimiste.parse_species_yaml.(data_3["species"])
 
-# ╔═╡ 57b06f6b-1aea-4e36-bcb5-b18c305de179
-begin
-
-end
-
-# ╔═╡ b5062fde-093f-4cfd-8d70-706a27b46485
-let s = Species.(species_1)
-	@variables x
-
-	# specific_heat(s[end-3], x)
-	s[end]
+	# s = Species(species_1[1])
+	# specific_heat(s, 300)
 end
 
 # ╔═╡ f7aa9875-4509-4275-aaa7-174cb71106c0
@@ -461,10 +266,6 @@ end
 # ╟─e0d17cb8-6049-4502-8d2d-9e40901ebd91
 # ╟─7a1e95eb-ee21-41be-84c0-39a293e81bd2
 # ╟─e560dd80-f880-4afe-8567-e9378c99528b
-# ╠═91cb1803-1625-4aad-99f5-0e75cdf09fec
-# ╠═3cf274ff-09a4-4a6d-8a77-b9690101caf9
-# ╠═ffab7c25-f343-40b0-a82b-6a229e01ca3f
+# ╠═7cb83a44-dd0d-4f00-88b6-7effb5a34cbc
 # ╠═0dda1075-b795-431b-a403-ced37e73a2de
-# ╠═57b06f6b-1aea-4e36-bcb5-b18c305de179
-# ╠═b5062fde-093f-4cfd-8d70-706a27b46485
 # ╠═f7aa9875-4509-4275-aaa7-174cb71106c0

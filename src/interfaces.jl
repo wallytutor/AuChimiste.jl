@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 
 """
+    molar_mass(args...; kwargs...)
+
+Evaluation of the molar mass of a substance.
+Its return value must be in ``kg\\cdotp{}mol^{-3}``.
+"""
+function molar_mass end
+
+"""
     density(args...; kwargs...)
 
 Evaluation of the density of a substance.
