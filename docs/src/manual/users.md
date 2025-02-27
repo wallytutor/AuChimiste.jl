@@ -81,6 +81,7 @@ AuChimiste.get_mass_fractions
 AuChimiste.ThermoData
 AuChimiste.NASAThermo
 AuChimiste.ShomateThermo
+AuChimiste.MaierKelleyThermo
 ```
 
 ## Hardcoded
