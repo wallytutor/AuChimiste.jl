@@ -364,8 +364,46 @@ end
 struct ThermoCompound
 end
 
-# ╔═╡ b5062fde-093f-4cfd-8d70-706a27b46485
+# ╔═╡ 0dda1075-b795-431b-a403-ced37e73a2de
+begin
+	data_1 = load_compound_data(AuChimiste.THERMO_COMPOUND_DATA)
+	data_2 = load_compound_data("nasa_condensed.yaml")
 
+	species_1 = data_1["species"][1]
+	species_2 = data_2["species"][13]
+end
+
+# ╔═╡ 05c69ac0-ecbc-484b-9063-3ca2d8390830
+function parse_species_yaml(species)
+	name = species["name"]
+	display_name = get(species, "display_name", name)
+	aggregation = get(species, "aggregation", "unknown")
+	
+	composition = species["composition"]
+
+	thermo = species["thermo"]
+	thermo_model = thermo["model"]
+	thermo_ranges = get(thermo, "temperature-ranges", [0.0, 6000.0])
+
+	return (;
+		name,
+		display_name,
+		aggregation,
+		composition,
+		thermo_model,
+		thermo_ranges
+	)
+end
+
+# ╔═╡ b5062fde-093f-4cfd-8d70-706a27b46485
+let
+	parse_species_yaml(species_1)
+end
+
+# ╔═╡ e8ac358f-c006-47e3-8a78-d8be217ce574
+let
+	parse_species_yaml(species_2)
+end
 
 # ╔═╡ 4158547b-c954-46aa-b0ca-cfd0f9e86917
 # ╠═╡ disabled = true
@@ -446,6 +484,16 @@ function load_mechanism(name; format = :cantera)
 end
   ╠═╡ =#
 
+# ╔═╡ ec1619aa-1749-42e3-87ca-d685c2372d38
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+    data = load_mechanism("nasa_gas.yaml").raw_data
+    species = data["species"]
+    data
+end;
+  ╠═╡ =#
+
 # ╔═╡ 7d255703-661b-4e13-af46-05f2bbdf0a7a
 # ╠═╡ disabled = true
 #=╠═╡
@@ -476,19 +524,6 @@ end
 the_species = Species(name, comp)
   ╠═╡ =#
 
-# ╔═╡ 0dda1075-b795-431b-a403-ced37e73a2de
-data = load_compound_data(AuChimiste.THERMO_COMPOUND_DATA)
-
-# ╔═╡ ec1619aa-1749-42e3-87ca-d685c2372d38
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-    data = load_mechanism("nasa_gas.yaml").raw_data
-    species = data["species"]
-    data
-end;
-  ╠═╡ =#
-
 # ╔═╡ Cell order:
 # ╟─fd0a3399-8589-428c-9036-0d8a57ae6a92
 # ╟─3aeadbf4-c14d-11ef-3fd8-09cedaa2b25d
@@ -509,7 +544,9 @@ end;
 # ╠═ffab7c25-f343-40b0-a82b-6a229e01ca3f
 # ╠═4b003acd-4e46-4c4f-9d13-d4ea66804b3c
 # ╠═0dda1075-b795-431b-a403-ced37e73a2de
+# ╠═05c69ac0-ecbc-484b-9063-3ca2d8390830
 # ╠═b5062fde-093f-4cfd-8d70-706a27b46485
+# ╠═e8ac358f-c006-47e3-8a78-d8be217ce574
 # ╠═4158547b-c954-46aa-b0ca-cfd0f9e86917
 # ╠═2111925f-fc71-4c05-88e4-e9087d790e13
 # ╠═9ae5e2e2-389a-47ad-800f-8c352669491a

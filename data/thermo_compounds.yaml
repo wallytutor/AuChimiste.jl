@@ -13,22 +13,22 @@ about:
 # COMPOUNDS
 ##############################################################################
 
-compounds:
+species:
 
-  - compoundname: AL2O3_ALPHA
-    displayname: Alumina (alpha)
+  - name: AL2O3_ALPHA
+    display_name: Alumina (alpha)
     aggregation: solid
     datasource: CHASE1998
-    stoichiometry:
+    composition:
       Al: 2
       O : 3
-    thermodynamics:
-      type: shomate
+    thermo:
+      model: SHOMATE
+      temperature-ranges: [298.0, 2327.0]
+      # h298: -1675690.0
+      # s298: 50.92
       data:
-        range: [298.0, 2327.0]
-        h298: -1675690.0
-        s298: 50.92
-        coefs: [
+        - [
           102.4290,  # A
           38.74980,  # B
           -15.91090, # C
@@ -40,20 +40,20 @@ compounds:
         ]
     comment: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1344281&Type=JANAFS&Table=on#JANAFS
 
-  - compoundname: AL2O3_GAMMA
-    displayname: Alumina (gamma)
+  - name: AL2O3_GAMMA
+    display_name: Alumina (gamma)
     aggregation: solid
     datasource: CHASE1998
-    stoichiometry:
+    composition:
       Al: 2
       O : 3
-    thermodynamics:
-      type: shomate
+    thermo:
+      model: SHOMATE
+      temperature-ranges: [298.0, 2327.0]
+      # h298: -1675690.0
+      # s298: 50.92
       data:
-        range: [298.0, 2327.0]
-        h298: -1675690.0
-        s298: 50.92
-        coefs: [
+        - [
           108.6830,  # A
           37.22630,  # B
           -14.20650, # C
@@ -65,20 +65,20 @@ compounds:
         ]
     comment: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1344281&Type=JANAFS&Table=on#JANAFS
 
-  - compoundname: AL2O3_DELTA
-    displayname: Alumina (delta)
+  - name: AL2O3_DELTA
+    display_name: Alumina (delta)
     aggregation: solid
     datasource: CHASE1998
-    stoichiometry:
+    composition:
       Al: 2
       O : 3
-    thermodynamics:
-      type: shomate
+    thermo:
+      model: SHOMATE
+      temperature-ranges: [298.0, 2327.0]
+      # h298: -1675690.0
+      # s298: 50.92
       data:
-        range: [298.0, 2327.0]
-        h298: -1675690.0
-        s298: 50.92
-        coefs: [
+        - [
           106.9180,  # A
           36.62190,  # B
           -13.97590, # C
@@ -90,20 +90,20 @@ compounds:
         ]
     comment: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1344281&Type=JANAFS&Table=on#JANAFS
 
-  - compoundname: AL2O3_KAPPA
-    displayname: Alumina (kappa)
+  - name: AL2O3_KAPPA
+    display_name: Alumina (kappa)
     aggregation: solid
     datasource: CHASE1998
-    stoichiometry:
+    composition:
       Al: 2
       O : 3
-    thermodynamics:
-      type: shomate
+    thermo:
+      model: SHOMATE
+      temperature-ranges: [298.0, 2327.0]
+      # h298: -1675690.0
+      # s298: 50.92
       data:
-        range: [298.0, 2327.0]
-        h298: -1675690.0
-        s298: 50.92
-        coefs: [
+        - [
           106.0880,  # A
           36.33740,  # B
           -13.86730, # C
@@ -115,20 +115,20 @@ compounds:
         ]
     comment: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1344281&Type=JANAFS&Table=on#JANAFS
 
-  - compoundname: CA1O1
-    displayname: Calcium oxide
+  - name: CA1O1
+    display_name: Calcium oxide
     aggregation: solid
     datasource: CHASE1998
-    stoichiometry:
+    composition:
       Ca: 1
       O : 1
-    thermodynamics:
-      type: shomate
+    thermo:
+      model: SHOMATE
+      temperature-ranges: [298.0, 3200.0]
+      # h298: -635090.0
+      # s298: 38.19
       data:
-        range: [298.0, 3200.0]
-        h298: -635090.0
-        s298: 38.19
-        coefs: [
+        - [
           49.95403,  # A
           4.887916,  # B
           -0.352056, # C
@@ -140,20 +140,20 @@ compounds:
         ]
     comment: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1305788&Mask=2#Thermo-Condensed
 
-  - compoundname: SIO2_ALPHA
-    displayname: SiO2 (alpha quartz)
+  - name: SIO2_ALPHA
+    display_name: SiO2 (alpha quartz)
     aggregation: solid
     datasource: CHASE1998
-    stoichiometry:
+    composition:
       Si: 1
       O : 2
-    thermodynamics:
-      type: shomate
+    thermo:
+      model: SHOMATE
+      temperature-ranges: [298.0, 847.0]
+      # h298: -910860.0
+      # s298: 42.091
       data:
-        range: [298.0, 847.0]
-        h298: -910860.0
-        s298: 42.091
-        coefs: [
+        - [
           -6.076591,
           251.6755,
           -324.7964,
@@ -167,20 +167,20 @@ compounds:
       https://webbook.nist.gov/cgi/cbook.cgi?ID=C14808607&Mask=2#Thermo-Condensed
       s298 converted from SCHIELTZ1968
 
-  - compoundname: SIO2_BETA
-    displayname: SiO2 (beta quartz)
+  - name: SIO2_BETA
+    display_name: SiO2 (beta quartz)
     aggregation: solid
     datasource: CHASE1998
-    stoichiometry:
+    composition:
       Si: 1
       O : 2
-    thermodynamics:
-      type: shomate
+    thermo:
+      model: SHOMATE
+      temperature-ranges: [847.0, 1996.0]
+      # h298: -910860.0
+      # s298: 42.091
       data:
-        range: [847.0, 1996.0]
-        h298: -910860.0
-        s298: 42.091
-        coefs: [
+        - [
           58.7534,
           10.27925,
           -0.131384,
@@ -194,20 +194,20 @@ compounds:
       https://webbook.nist.gov/cgi/cbook.cgi?ID=C14808607&Mask=2#Thermo-Condensed
       s298 converted from SCHIELTZ1968
 
-  - compoundname: CA1O1_L
-    displayname: Calcium oxide
+  - name: CA1O1_L
+    display_name: Calcium oxide
     aggregation: liquid
     datasource: CHASE1998
-    stoichiometry:
+    composition:
       Ca: 1
       O : 1
-    thermodynamics:
-      type: shomate
+    thermo:
+      model: SHOMATE
+      temperature-ranges: [3200.0, 4500.0]
+      # h298: -635090.0
+      # s298: 62.31
       data:
-        range: [3200.0, 4500.0]
-        h298: -635090.0
-        s298: 62.31
-        coefs: [
+        - [
           62.76000,      # A
           4.629681e-07,  # B
           -1.092037e-07, # C
@@ -219,206 +219,206 @@ compounds:
         ]
     comment: https://webbook.nist.gov/cgi/cbook.cgi?ID=C1305788&Mask=2#Thermo-Condensed
 
-  - compoundname: KAOLINITE
-    displayname: Kaolinite
+  - name: KAOLINITE
+    display_name: Kaolinite
     aggregation: solid
     datasource: SCHIELTZ1964
-    stoichiometry:
+    composition:
       Al: 2
       Si: 2
       O : 9
       H : 4
-    thermodynamics:
-      type: maier_kelley
+    thermo:
+      model: MAIER_KELLEY
+      # h298: -964940.0
+      # s298: 40.50
       data:
-        h298: -964940.0
-        s298: 40.50
-        coefs: [57.47, 35.30e-03, -7.87e+05]
+        - [57.47, 35.30e-03, -7.87e+05]
 
-  - compoundname: METAKAOLIN
-    displayname: Metakaolin
+  - name: METAKAOLIN
+    display_name: Metakaolin
     aggregation: solid
     datasource: SCHIELTZ1964
-    stoichiometry:
+    composition:
       Al: 2
       Si: 2
       O : 7
-    thermodynamics:
-      type: maier_kelley
+    thermo:
+      model: MAIER_KELLEY
+      # h298: -767500.0
+      # s298: 32.78
       data:
-        h298: -767500.0
-        s298: 32.78
-        coefs: [54.85, 8.80e-03, -3.48e+05]
+        - [54.85, 8.80e-03, -3.48e+05]
 
-  - compoundname: MULLITE
-    displayname: Mullite
+  - name: MULLITE
+    display_name: Mullite
     aggregation: solid
     datasource: SCHIELTZ1964
-    stoichiometry:
+    composition:
       Al: 6
       Si: 2
       O : 13
-    thermodynamics:
-      type: maier_kelley
+    thermo:
+      model: MAIER_KELLEY
+      # h298: -1804000.0
+      # s298: 60.00
       data:
-        h298: -1804000.0
-        s298: 60.00
-        coefs: [84.22, 20.00e-03, -25.00e+05]
+       - [84.22, 20.00e-03, -25.00e+05]
 
-  - compoundname: AL2O3_GAMMA
-    displayname: Alumina (gamma)
+  - name: AL2O3_GAMMA
+    display_name: Alumina (gamma)
     aggregation: solid
     datasource: SCHIELTZ1964
-    stoichiometry:
+    composition:
       Al: 2
       O : 3
-    thermodynamics:
-      type: maier_kelley
+    thermo:
+      model: MAIER_KELLEY
+      # h298: -395000.0
+      # s298: 12.20
       data:
-        h298: -395000.0
-        s298: 12.20
-        coefs: [16.37, 11.10e-03, 0]
+        - [16.37, 11.10e-03, 0]
 
-  - compoundname: SIO2_ALPHA
-    displayname: SiO2 (alpha quartz)
+  - name: SIO2_ALPHA
+    display_name: SiO2 (alpha quartz)
     aggregation: solid
     datasource: SCHIELTZ1964
-    stoichiometry:
+    composition:
       Si: 1
       O : 2
-    thermodynamics:
-      type: maier_kelley
+    thermo:
+      model: MAIER_KELLEY
+      # h298: -209900.0
+      # s298: 10.06
       data:
-        h298: -209900.0
-        s298: 10.06
-        coefs: [11.22, 8.20e-03, -2.70e+05]
+        - [11.22, 8.20e-03, -2.70e+05]
 
-  - compoundname: SIO2_BETA
-    displayname: SiO2 (beta quartz)
+  - name: SIO2_BETA
+    display_name: SiO2 (beta quartz)
     aggregation: solid
     datasource: SCHIELTZ1964
-    stoichiometry:
+    composition:
       Si: 1
       O : 2
-    thermodynamics:
-      type: maier_kelley
+    thermo:
+      model: MAIER_KELLEY
+      # h298: -209900.0
+      # s298: 10.06
       data:
-        h298: -209900.0
-        s298: 10.06
-        coefs: [14.41, 1.94e-03, 0]
+        - [14.41, 1.94e-03, 0]
 
-  - compoundname: SIO2_GLASS
-    displayname: SiO2 (glass)
+  - name: SIO2_GLASS
+    display_name: SiO2 (glass)
     aggregation: solid
     datasource: SCHIELTZ1964
-    stoichiometry:
+    composition:
       Si: 1
       O : 2
-    thermodynamics:
-      type: maier_kelley
+    thermo:
+      model: MAIER_KELLEY
+      # h298: -202000.0
+      # s298: 10.06
       data:
-        h298: -202000.0
-        s298: 10.06
-        coefs: [13.38, 3.68e-03, -3.45e+05]
+        - [13.38, 3.68e-03, -3.45e+05]
 
-  - compoundname: CRISTOBALITE_ALPHA
-    displayname: Cristobalite (alpha)
+  - name: CRISTOBALITE_ALPHA
+    display_name: Cristobalite (alpha)
     aggregation: solid
     datasource: SCHIELTZ1964
-    stoichiometry:
+    composition:
       Si: 1
       O : 2
-    thermodynamics:
-      type: maier_kelley
+    thermo:
+      model: MAIER_KELLEY
+      # h298: -209500.0
+      # s298: 10.06
       data:
-        h298: -209500.0
-        s298: 10.06
-        coefs: [4.28, 21.06e-03, 0]
+        - [4.28, 21.06e-03, 0]
 
-  - compoundname: CRISTOBALITE_BETA
-    displayname: Cristobalite (beta)
+  - name: CRISTOBALITE_BETA
+    display_name: Cristobalite (beta)
     aggregation: solid
     datasource: SCHIELTZ1964
-    stoichiometry:
+    composition:
       Si: 1
       O : 2
-    thermodynamics:
-      type: maier_kelley
+    thermo:
+      model: MAIER_KELLEY
+      # h298: -209500.0
+      # s298: 10.06
       data:
-        h298: -209500.0
-        s298: 10.06
-        coefs: [14.40, 2.04e-03, 0]
+        - [14.40, 2.04e-03, 0]
 
-  - compoundname: TRIDYMITE_ALPHA
-    displayname: Tridymite (alpha)
+  - name: TRIDYMITE_ALPHA
+    display_name: Tridymite (alpha)
     aggregation: solid
     datasource: SCHIELTZ1964
-    stoichiometry:
+    composition:
       Si: 1
       O : 2
-    thermodynamics:
-      type: maier_kelley
+    thermo:
+      model: MAIER_KELLEY
+      # h298: -209400.0
+      # s298: 10.06
       data:
-        h298: -209400.0
-        s298: 10.06
-        coefs: [3.27, 24.80e-03, 0]
+        - [3.27, 24.80e-03, 0]
 
-  - compoundname: TRIDYMITE_BETA
-    displayname: Tridymite (beta)
+  - name: TRIDYMITE_BETA
+    display_name: Tridymite (beta)
     aggregation: solid
     datasource: SCHIELTZ1964
-    stoichiometry:
+    composition:
       Si: 1
       O : 2
-    thermodynamics:
-      type: maier_kelley
+    thermo:
+      model: MAIER_KELLEY
+      # h298: -209400.0
+      # s298: 10.06
       data:
-        h298: -209400.0
-        s298: 10.06
-        coefs: [13.64, 2.64e-03, 0]
+        - [13.64, 2.64e-03, 0]
 
-  - compoundname: WATER_L
-    displayname: Water (liquid)
+  - name: WATER_L
+    display_name: Water (liquid)
     aggregation: liquid
     datasource: SCHIELTZ1964
-    stoichiometry:
+    composition:
       H : 2
       O : 1
-    thermodynamics:
-      type: maier_kelley
+    thermo:
+      model: MAIER_KELLEY
+      # h298: -68320.0
+      # s298: 16.72
       data:
-        h298: -68320.0
-        s298: 16.72
-        coefs: [18.03, 0, 0]
+        - [18.03, 0, 0]
 
-  - compoundname: WATER_G
-    displayname: Water (gas)
+  - name: WATER_G
+    display_name: Water (gas)
     aggregation: gas
     datasource: SCHIELTZ1964
-    stoichiometry:
+    composition:
       H : 2
       O : 1
-    thermodynamics:
-      type: maier_kelley
+    thermo:
+      model: MAIER_KELLEY
+      # h298: -57800.0
+      # s298: 45.13
       data:
-        h298: -57800.0
-        s298: 45.13
-        coefs: [7.17, 2.56e-03, 0.08e+05]
+        - [7.17, 2.56e-03, 0.08e+05]
 
-  - compoundname: SPINEL
-    displayname: Spinel
+  - name: SPINEL
+    display_name: Spinel
     aggregation: solid
     datasource: HYPOTHETICAL
-    stoichiometry:
+    composition:
       Al: 4
       Si: 3
       O : 12
-    thermodynamics:
-      type: maier_kelley
+    thermo:
+      model: MAIER_KELLEY
+      # h298: -100000.0
+      # s298: 30.0
       data:
-        h298: -100000.0
-        s298: 30.0
-        coefs: [50.0, 0, 0]
+        - [50.0, 0, 0]
 
 ##############################################################################
 # REFERENCES
