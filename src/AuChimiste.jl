@@ -56,7 +56,10 @@ export quantity
 
 # For interfaces
 export molar_mass
+export density
 export specific_heat
+export enthalpy
+export entropy
 export thermal_conductivity
 export viscosity
 
