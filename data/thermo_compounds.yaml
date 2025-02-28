@@ -404,8 +404,8 @@ reactions:
 ##############################################################################
 
 references:
-  CHASE1998: ''
-  SCHIELTZ1964: ''
+  CHASE1998: 'NIST-JANAF Thermochemical Tables'
+  SCHIELTZ1964: '10.1346/ccmn.1964.0130139'
   HYPOTHETICAL: 'Data for testing models and development only!'
 
 ##############################################################################
