@@ -104,12 +104,12 @@ Polynomials for specific heat are those of [Schieltz and Soliman (1964)](https:/
 
 # ╔═╡ 5e84be72-1120-4cac-9944-fcd6765ea85c
 begin
-    selected_compounds = [
+    selected_species = [
         "WATER_L",
         "KAOLINITE",
         "METAKAOLIN",
+        "SIO2_GLASS",
         "SPINEL",
-        "SIO2_GLASS"
     ]
 	tdb = AuChimisteDatabase(; selected_species)
     
@@ -119,11 +119,11 @@ end
 # ╔═╡ 241f2150-c134-4951-b87d-d820727b8269
 "Materials for considered phases."
 const materials = [
-    tdb.species.SPINEL
     tdb.species.WATER_L
     tdb.species.KAOLINITE
-    tdb.species.SIO2_GLASS
     tdb.species.METAKAOLIN
+    tdb.species.SPINEL
+    tdb.species.SIO2_GLASS
 ]
 
 # ╔═╡ 5bc5d31b-9f3a-44e5-a271-12d9e8ffa7de
@@ -190,7 +190,13 @@ In matrix notation one can write ``\dot{\omega}=\nu\cdotp{}r``, as it will be im
 
 # ╔═╡ 19196b8d-566d-4598-acdf-363ffac7a49f
 "Solid state stoichiometric coefficients"
-const ν = [-1 0 0; 0 -1 0; 0 1 -2; 0 0 1; 0 0 1]
+const ν = [
+	-1  0  0; 
+	 0 -1  0;
+	 0  1 -2; 
+	 0  0  1; 
+	 0  0  1
+]
 
 # ╔═╡ a35454c1-4641-48b2-8038-7dbc2a0da6ec
 """
@@ -353,56 +359,99 @@ Because of how a DSC analysis is conducted, it was chosen that the only model pa
 
 # ╔═╡ aedbd5b9-deb3-468c-a82e-5507d0ab8f51
 begin
-    @variables t
-    D = Differential(t)
+    # @independent_variables t
+    # D = Differential(t)
 
-    @mtkmodel ThermalAnalysis begin
-        @variables begin
-            m(t)
-            ṁ(t)
+    # @mtkmodel ThermalAnalysis begin
+    #     @variables begin
+    #         m(t)
+    #         ṁ(t)
 
-            Y(t)[1:5]
-            Ẏ(t)[1:5]
+    #         Y(t)[1:5]
+    #         Ẏ(t)[1:5]
 
-            r(t)[1:3]
-            ω̇(t)[1:5]
+    #         r(t)[1:3]
+    #         ω̇(t)[1:5]
 
-            T(t)
-            c(t)
-            ḣ(t)
-            q̇(t)
-        end
-        @parameters begin
-            θ̇
-        end
-        @equations begin
-            scalarize(r .~ reactionrates(m, T, Y))...
-            scalarize(ω̇ .~ netproductionrates(r))...
+    #         T(t)
+    #         c(t)
+    #         ḣ(t)
+    #         q̇(t)
+    #     end
+    #     @parameters begin
+    #         θ̇
+    #     end
+    #     @equations begin
+    #         D(m) ~ ṁ
+    #         scalarize(D.(Y) .~ Ẏ)...
+			
+    #         scalarize(Ẏ .~ speciesbalance(ṁ, ω̇, m, Y))...
+    #         scalarize(r .~ reactionrates(m, T, Y))...
+    #         scalarize(ω̇ .~ netproductionrates(r))...
+    #         ṁ ~ masslossrate(r)
 
-            scalarize(ṁ .~ masslossrate(r))...
-            scalarize(Ẏ .~ speciesbalance(ṁ, ω̇, m, Y))...
+    #         T ~ temperature(t, θ̇)
+    #         c ~ mixturespecificheat(T, Y)
+    #         ḣ ~ scalarize(heatrelease(r))
+    #         q̇ ~ heatinput(m, c, θ̇, ḣ)
+    #     end
+    # end
 
-            T ~ temperature(t, θ̇)
-            c ~ mixturespecificheat(T, Y)
-            ḣ ~ scalarize(heatrelease(r))
-            q̇ ~ heatinput(m, c, θ̇, ḣ)
-
-            D(m) ~ ṁ
-            scalarize(D.(Y) .~ Ẏ)...
-        end
-    end
-end;
+	"Model creation routine."
+	function thermal_analysis(; name)
+		@independent_variables t
+	    D = Differential(t)
+	
+		state = @variables(begin
+			m(t)
+			ṁ(t)
+	
+			Y(t)[1:5]
+			Ẏ(t)[1:5]
+	
+			r(t)[1:3]
+			ω̇(t)[1:5]
+	
+			T(t)
+			c(t)
+			ḣ(t)
+			q̇(t)
+		end)
+	
+		param = @parameters(begin
+			θ̇
+		end)
+	
+		eqs = [
+			D(m) ~ ṁ
+			scalarize(D.(Y) .~ Ẏ)
+			
+			scalarize(Ẏ .~ speciesbalance(ṁ, ω̇, m, Y))
+			scalarize(r .~ reactionrates(m, T, Y))
+			scalarize(ω̇ .~ netproductionrates(r))
+			ṁ ~ masslossrate(r)
+	
+			T ~ temperature(t, θ̇)
+			c ~ mixturespecificheat(T, Y)
+			ḣ ~ scalarize(heatrelease(r))
+			q̇ ~ heatinput(m, c, θ̇, ḣ)
+		]
+	
+		return ODESystem(eqs, t, state, param; name)
+	end
+end
 
 # ╔═╡ a5b1e781-a756-46e7-80ae-a2e4c8172cea
 md"""
-Below we instantiate the `ThemalAnalysis` model.
+Below we instantiate the model.
 
 We observed the expanded form with all variables and observables:
 """
 
 # ╔═╡ e241fb89-ca3d-4777-8b64-cda11d4a1419
 begin
-    @named analysis = ThermalAnalysis()
+	@named analysis = thermal_analysis()
+    # @named analysis = ThermalAnalysis()
     analysis
 end
 
@@ -411,11 +460,11 @@ md"""
 For solution is is necessary to simplify this system to the equations that really are integrated. Using `structural_simplify` we reach this goal.
 """
 
-# ╔═╡ 370f83eb-301b-4ae9-bfbc-91798e3e114b
-begin
-    model = structural_simplify(analysis)
-    model
-end
+# ╔═╡ 5801dc27-e7e0-4f5b-a16d-041000a072e8
+model = structural_simplify(analysis);
+
+# ╔═╡ 323a0525-d54f-4a16-b62b-bd7022812780
+model
 
 # ╔═╡ 22faaca8-6355-41e1-84c4-c883e9fcb981
 md"""
@@ -424,6 +473,9 @@ Now we can get the actual `equations`:
 
 # ╔═╡ 4ca8b0fc-6506-401d-82d6-779ca0396bbf
 equations(model)
+
+# ╔═╡ 6ff11a55-4f0b-4798-8aa3-2ffd30904c5b
+unknowns(model)
 
 # ╔═╡ d8db21d3-7f81-4251-a569-666ee262c030
 md"""
@@ -524,26 +576,15 @@ end
 
 Standard interface for solving the `ThermalAnalysis` model.
 """
-function solvemodel(model, τ, Θ̇, m₀, Y₀)
-    u0 = [
-        model.m => m₀,
-        model.Y[1] => Y₀[1],
-        model.Y[2] => Y₀[2],
-        model.Y[3] => Y₀[3],
-        model.Y[4] => Y₀[4],
-        model.Y[5] => Y₀[5],
-    ]
-
+function solvemodel(model, τ, Θ̇, m, Y, solver = nothing, kwargs...)
+	defaults = (abstol = 1.0e-12, reltol = 1.0e-08, dtmax = 0.001τ)
+	options = merge(defaults, kwargs)
+	
+    u0 = [model.m => m, model.Y => Y]
     pars = [model.θ̇ => Θ̇]
-
-    # Solver parameters
-    abstol = 1.0e-15
-    reltol = 1.0e-10
-    dtmax = 0.001τ
-
-    # Create and solve ODE problem with stiff algorithm.
-    prob = ODEProblem(model, u0, (0.0, τ), pars)
-    return solve(prob; alg = :stiff, abstol, reltol, dtmax)
+	
+	prob = ODEProblem(model, u0, (0.0, τ), pars)
+    return solve(prob, solver; options...)
 end
 
 # ╔═╡ 3f8f86bb-8890-47cf-9b56-8f5fd65e10ae
@@ -573,16 +614,16 @@ sol, fig = let
     h = hslider / 100.0
 
     # Initial mass (same as Meinhold, 2001).
-    m₀ = 16.0e-06
+    m = 16.0e-06
 
     # Integration interval to simulate problem.
     τ = 1175.0 / Θ̇
 
     # Assembly array of initial states.
-    Y₀ = [h, 1.0 - h, 0.0, 0.0, 0.0]
+    Y = [h, 1.0-h, 0.0, 0.0, 0.0]
 
     # Call model solution routine.
-    sol = solvemodel(model, τ, Θ̇, m₀, Y₀)
+    sol = solvemodel(model, τ, Θ̇, m, Y)
 
     # ... and plot results.
     fig = plotmodel(model, sol)
@@ -613,9 +654,9 @@ let
     ax.xlabel = "Temperature [°C]"
 
     ax.xticks = 0:100:1200
-    ax.yticks = 0.9:0.1:1.4
+    ax.yticks = 0.6:0.1:1.4
     xlims!(ax, (0, 1200))
-    ylims!(ax, (0.9, 1.4))
+    ylims!(ax, (0.6, 1.4))
 
     f
 end
@@ -658,15 +699,17 @@ Hope these notes provided you insights on DSC/TGA methods!
 # ╟─c198f325-1bf5-4060-b26d-fa373297e7b9
 # ╟─5c21c362-caaa-41c2-8bf6-5bb9e85c1412
 # ╟─b13ce972-3015-4d20-92ce-5289711f7605
-# ╠═aedbd5b9-deb3-468c-a82e-5507d0ab8f51
+# ╟─aedbd5b9-deb3-468c-a82e-5507d0ab8f51
 # ╟─a5b1e781-a756-46e7-80ae-a2e4c8172cea
 # ╟─e241fb89-ca3d-4777-8b64-cda11d4a1419
 # ╟─6d474aa1-4dfa-47c7-83d3-b6ab51f3a164
-# ╟─370f83eb-301b-4ae9-bfbc-91798e3e114b
+# ╠═5801dc27-e7e0-4f5b-a16d-041000a072e8
+# ╟─323a0525-d54f-4a16-b62b-bd7022812780
 # ╟─22faaca8-6355-41e1-84c4-c883e9fcb981
-# ╟─4ca8b0fc-6506-401d-82d6-779ca0396bbf
+# ╠═4ca8b0fc-6506-401d-82d6-779ca0396bbf
+# ╠═6ff11a55-4f0b-4798-8aa3-2ffd30904c5b
 # ╟─d8db21d3-7f81-4251-a569-666ee262c030
-# ╟─3e5d5bfd-2d98-409c-8cf6-c26c8815574e
+# ╠═3e5d5bfd-2d98-409c-8cf6-c26c8815574e
 # ╟─734e656f-98b6-4167-b594-4a7b8800d28b
 # ╟─e2679379-774a-498f-af8e-28da123d85d7
 # ╟─dba9d916-e8c4-4e52-ad8e-55d77c188eb5
