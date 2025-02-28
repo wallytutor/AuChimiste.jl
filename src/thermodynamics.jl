@@ -365,12 +365,16 @@ struct Thermodynamics <: AbstractThermodynamicsModel
     data::AbstractThermodynamicData
     base::NTuple{3, Any}
     func::CompiledThermoFunctions
+    h298::Float64
+    s298::Float64
 
     function Thermodynamics(thermo::NamedTuple; how = :symbolic)
         data = thermo_data(; thermo...)
         base = thermo_factory(data; how)
         func = CompiledThermoFunctions(base)
-        return new(data, base, func)
+        h298 = func.enthalpy(298.15)
+        s298 = func.entropy(298.15)
+        return new(data, base, func, h298, s298)
     end
 end
 
@@ -405,7 +409,7 @@ function specific_heat(s::Species, T)
 end
 
 function enthalpy(s::Species, T)
-    return s.thermo.func.enthalpy(T) / molar_mass(s)
+    return (s.thermo.func.enthalpy(T) - s.thermo.h298) / molar_mass(s)
 end
 
 function entropy(s::Species, T)

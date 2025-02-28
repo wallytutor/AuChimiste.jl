@@ -220,6 +220,41 @@ let
 	species_table(data)
 end
 
+# ╔═╡ 8c113248-9cec-490e-b32c-5214bc3eed37
+let
+	@warn("TODO: check this!")
+	selected_species = [
+		"WATER_L",
+		"WATER_G",
+		# "KAOLINITE",
+		# "METAKAOLIN",
+		# "SIO2_GLASS",
+		# "SPINEL",
+	]
+	db = AuChimisteDatabase(; selected_species)
+
+	T = 273.15 + 373.0 
+	# T = 273.15 + 273 + 373
+	T = 273.15
+	mw = molar_mass(db.species.WATER_L)
+	
+	href_0 = 57800.0*JOULE_PER_CALORIE / mw
+	href_1 = 68320.0*JOULE_PER_CALORIE / mw
+	ΔHr = href_1 - href_0
+	
+	# + ΔHr, ΔHr
+	h0 = enthalpy(db.species.WATER_L, T)
+	h1 = enthalpy(db.species.WATER_G, T)
+
+	h1 - h0 + ΔHr
+end
+
+# ╔═╡ 4fc4372c-1be4-4795-bb41-7acee278c2a9
+
+
+# ╔═╡ 3ba4f7ae-3385-490b-96c6-47b0535e9757
+
+
 # ╔═╡ f7aa9875-4509-4275-aaa7-174cb71106c0
 # ╠═╡ disabled = true
 #=╠═╡
@@ -257,4 +292,7 @@ end
 # ╟─e560dd80-f880-4afe-8567-e9378c99528b
 # ╠═46ecd6b1-cafe-48a6-9cb8-e0100ad559f7
 # ╠═7cb83a44-dd0d-4f00-88b6-7effb5a34cbc
+# ╠═8c113248-9cec-490e-b32c-5214bc3eed37
+# ╠═4fc4372c-1be4-4795-bb41-7acee278c2a9
+# ╠═3ba4f7ae-3385-490b-96c6-47b0535e9757
 # ╠═f7aa9875-4509-4275-aaa7-174cb71106c0

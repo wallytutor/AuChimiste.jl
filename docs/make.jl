@@ -21,6 +21,7 @@ pages = [
         "basics/drummers.md",
     ],
     "Tutorials" => [
+        "tutorials/thermal-analysis.md",
         # "tutorials/empirical-fuel-for-cfd.md",
         # "tutorials/kinetics-from-scratch.md",
         # "tutorials/simulating-kinetics.md",
