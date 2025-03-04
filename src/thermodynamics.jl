@@ -58,6 +58,10 @@ struct NASAThermo{K, N} <: AbstractThermodynamicData
     s_ref::Float64
     
     function NASAThermo(data::ThermoData{K, N}) where {K, N}
+        # c = SVector{K}(data.params[1:end, 1])
+        # h_ref = enthalpy_nasa(T_STANDARD, c)
+        # s_ref = entropy_nasa(T_STANDARD, c)
+        # return new{K, N}(data, h_ref, s_ref)
         return new{K, N}(data, data.params[end-1, 1], data.params[end, 1])
     end
 
@@ -405,14 +409,34 @@ function molar_mass(s::Species)
 end
 
 function specific_heat(s::Species, T)
-    return s.thermo.func.specific_heat(T) / molar_mass(s)
+    return specific_heat_mole(s, T) / molar_mass(s)
 end
 
 function enthalpy(s::Species, T)
-    return (s.thermo.func.enthalpy(T) - s.thermo.h298) / molar_mass(s)
+    return enthalpy_mole(s, T) / molar_mass(s)
 end
 
 function entropy(s::Species, T)
+    return entropy_mole(s, T) / molar_mass(s)
+end
+
+#######################################################################
+# SPECIES (FOR REACTION)
+#######################################################################
+
+function formation_enthalpy(s::Species)
+    return s.thermo.data.h_ref
+end
+
+function specific_heat_mole(s::Species, T)
+    return s.thermo.func.specific_heat(T)
+end
+
+function enthalpy_mole(s::Species, T)
+    return s.thermo.func.enthalpy(T)
+end
+
+function entropy_mole(s::Species, T)
     return s.thermo.func.entropy(T)
 end
 

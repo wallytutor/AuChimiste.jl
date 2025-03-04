@@ -211,8 +211,116 @@ md"""
 ## Devel
 """
 
-# ╔═╡ 46ecd6b1-cafe-48a6-9cb8-e0100ad559f7
-list_species()
+# ╔═╡ 4b62589e-d4b1-4008-b67a-0bc8f8e3076f
+begin
+	abstract type AbstractRateConstant end
+	
+	struct Arrhenius <: AbstractRateConstant
+		A::Union{Float64, Num}
+		b::Union{Float64, Num}
+		E::Union{Float64, Num}
+		
+		function Arrhenius(A, b, E)
+			return new(A, b, E)
+		end
+	end
+	
+	function rate_constant(obj::Arrhenius, T, P)
+		return obj.A * T^obj.b * exp(-obj.E / (GAS_CONSTANT * T))
+	end
+end
+
+# ╔═╡ e448387d-e392-48de-a272-37d484834414
+begin
+	rc = Arrhenius(1.0e+10, 0.0, 108000.0)
+	rate_constant(rc, 1000.0, P_NORMAL)
+end
+
+# ╔═╡ 6f38df37-9955-419d-aa32-20a24663b53b
+db = let
+	selected_species = ["CH4", "O2", "CO2", "H2O"]
+	data = AuChimisteDatabase(; data_file = "nasa_gas.yaml", selected_species)
+	@info species_table(data)
+
+	data
+end
+
+# ╔═╡ ce25b010-94fe-49fa-9fcd-9b92ac8b10f1
+let
+	# https://cantera.org/stable/userguide/heating-value.html
+	formation_enthalpy = AuChimiste.formation_enthalpy
+	enthalpy_mole = AuChimiste.enthalpy_mole
+	
+	T = 298.15
+
+	s = db.species
+	m = molar_mass(s.CH4)
+
+	hr0 = enthalpy_mole(s.CH4, T) + 2enthalpy_mole(s.O2, T)
+	hr1 = enthalpy_mole(s.CO2, T) + 2enthalpy_mole(s.H2O, T)
+	Δhr = hr1 - hr0
+	
+	hf0 = formation_enthalpy(s.CH4) + 2formation_enthalpy(s.O2)
+	hf1 = formation_enthalpy(s.CO2) + 2formation_enthalpy(s.H2O)
+	Δhf = hf1 - hf0
+	
+	Δhf / m, Δhr / m
+end
+
+# ╔═╡ 366ab45b-efc2-499c-9bf6-31f231ba7d5c
+db.species.CH4.thermo.data.h_ref / 0.016
+
+# ╔═╡ 788ab808-0730-4346-9421-aec3473ab27d
+specific_heat(db.species.CH4, 298.15)
+
+# ╔═╡ fbda6359-e10a-4d54-8f05-35e6f3babcc9
+db.species.CH4.thermo
+
+# ╔═╡ a61b2625-9e17-44a2-b98f-367c990cf91f
+# function [wdot] = wdot_mak(self, z, T, Y, L)
+#     % Mass action kinetics methane combustion rate [kg/(m³.s)].
+#     k0 = 1.1e+07;
+#     Ea = 83680.0;
+
+#     X = self.mass_to_mole_fraction(Y);
+#     C = (X * self.PRESSURE ./ (self.GAS_CONSTANT .* T));
+#     k = k0 * exp(-Ea ./ (self.GAS_CONSTANT .* T));
+#     rt = k .* C(:, 1) .* C(:, 2).^0.5;
+
+#     wdot = rt * (self.mw .* self.SPECIES_COEFS);
+# endfunction
+
+# function [wdot] = wdot_ebu(self, z, T, Y, L)
+#     % Eddy break-up kinetics methane combustion rate [kg/(m³.s)].
+#     cr = 4.000e+00;
+#     bo = 4.375e+00;
+#     k0 = 1.600e+10;
+#     Ea = 1.081e+05;
+
+#     k = k0 * exp(-Ea ./ (self.GAS_CONSTANT .* T));
+#     rho = self.density_mass(T, self.PRESSURE, Y);
+#     yf = Y(:, 1);
+#     yo = Y(:, 2);
+
+#     % TODO implement this in ProjectData
+#     ke = z ./ L;
+
+#     R_ebu = (rho.^1) .* cr .* ke .* min(yf, yo ./ bo);
+#     R_arr = (rho.^2) .* yf .* yo .* k;
+
+#     rt = min(R_ebu, R_arr) / self.mw(1);
+
+#     wdot = rt * (self.mw .* self.SPECIES_COEFS);
+# endfunction
+
+# ╔═╡ de5025bf-fb76-4877-bb11-ed16655368ae
+
+
+# ╔═╡ 511c3404-b19d-4c8b-9edf-2460db7a76f7
+
+
+# ╔═╡ c8559710-8dcd-4bba-b369-98db1b417571
+
 
 # ╔═╡ 7cb83a44-dd0d-4f00-88b6-7effb5a34cbc
 let
@@ -223,37 +331,42 @@ end
 # ╔═╡ 8c113248-9cec-490e-b32c-5214bc3eed37
 let
 	@warn("TODO: check this!")
-	selected_species = [
-		"WATER_L",
-		"WATER_G",
-		# "KAOLINITE",
-		# "METAKAOLIN",
-		# "SIO2_GLASS",
-		# "SPINEL",
-	]
+	selected_species = ["WATER_L", "WATER_G"]
 	db = AuChimisteDatabase(; selected_species)
-
+	s = db.species
+	
 	T = 273.15 + 373.0 
-	# T = 273.15 + 273 + 373
-	T = 273.15
-	mw = molar_mass(db.species.WATER_L)
+	T = 273.15 + 273 + 373
+	T = 298.15
 	
-	href_0 = 57800.0*JOULE_PER_CALORIE / mw
-	href_1 = 68320.0*JOULE_PER_CALORIE / mw
-	ΔHr = href_1 - href_0
+	m = molar_mass(s.WATER_L)
 	
-	# + ΔHr, ΔHr
-	h0 = enthalpy(db.species.WATER_L, T)
-	h1 = enthalpy(db.species.WATER_G, T)
+	# href_0 = 68320.0 * JOULE_PER_CALORIE
+	# href_1 = 57800.0 * JOULE_PER_CALORIE
+	href_0 = s.WATER_L.thermo.data.h_ref
+	href_1 = s.WATER_G.thermo.data.h_ref
+	Δhf1 = href_1 - href_0
 
-	h1 - h0 + ΔHr
+	hf0 = AuChimiste.formation_enthalpy(s.WATER_L)
+	hf1 = AuChimiste.formation_enthalpy(s.WATER_G)
+	Δhf2 = hf1 - hf0
+	
+	hr0 = AuChimiste.enthalpy_mole(db.species.WATER_L, T)
+	hr1 = AuChimiste.enthalpy_mole(db.species.WATER_G, T)
+	Δhr = hr1 - hr0
+	
+	Δhr, Δhf1, Δhf2
 end
 
-# ╔═╡ 4fc4372c-1be4-4795-bb41-7acee278c2a9
-
-
-# ╔═╡ 3ba4f7ae-3385-490b-96c6-47b0535e9757
-
+# ╔═╡ cdd832ce-1061-4268-905e-28f15f67abee
+# https://thermoddem.brgm.fr/species/h2og
+#
+# 241826/ JOULE_PER_CALORIE
+#
+# let
+# 	T = 298.15
+# 	(7.17T + 2.56e-03T^2/2 - 0.08e+05 / T) #* JOULE_PER_CALORIE
+# end
 
 # ╔═╡ f7aa9875-4509-4275-aaa7-174cb71106c0
 # ╠═╡ disabled = true
@@ -290,9 +403,18 @@ end
 # ╟─e0d17cb8-6049-4502-8d2d-9e40901ebd91
 # ╟─7a1e95eb-ee21-41be-84c0-39a293e81bd2
 # ╟─e560dd80-f880-4afe-8567-e9378c99528b
-# ╠═46ecd6b1-cafe-48a6-9cb8-e0100ad559f7
+# ╠═4b62589e-d4b1-4008-b67a-0bc8f8e3076f
+# ╠═e448387d-e392-48de-a272-37d484834414
+# ╠═6f38df37-9955-419d-aa32-20a24663b53b
+# ╠═ce25b010-94fe-49fa-9fcd-9b92ac8b10f1
+# ╠═366ab45b-efc2-499c-9bf6-31f231ba7d5c
+# ╠═788ab808-0730-4346-9421-aec3473ab27d
+# ╠═fbda6359-e10a-4d54-8f05-35e6f3babcc9
+# ╠═a61b2625-9e17-44a2-b98f-367c990cf91f
+# ╠═de5025bf-fb76-4877-bb11-ed16655368ae
+# ╠═511c3404-b19d-4c8b-9edf-2460db7a76f7
+# ╠═c8559710-8dcd-4bba-b369-98db1b417571
 # ╠═7cb83a44-dd0d-4f00-88b6-7effb5a34cbc
 # ╠═8c113248-9cec-490e-b32c-5214bc3eed37
-# ╠═4fc4372c-1be4-4795-bb41-7acee278c2a9
-# ╠═3ba4f7ae-3385-490b-96c6-47b0535e9757
+# ╠═cdd832ce-1061-4268-905e-28f15f67abee
 # ╠═f7aa9875-4509-4275-aaa7-174cb71106c0
