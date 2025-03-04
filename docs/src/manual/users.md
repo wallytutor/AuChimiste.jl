@@ -88,7 +88,14 @@ AuChimiste.MaierKelleyThermo
 
 ```@docs
 AuChimiste.MujumdarFlueProperties
+AuChimiste.specific_heat(::MujumdarFlueProperties, T)
+AuChimiste.thermal_conductivity(::MujumdarFlueProperties, T)
+AuChimiste.viscosity(::MujumdarFlueProperties, T)
+```
+
+```@docs
 AuChimiste.LawnHfoProperties
+AuChimiste.specific_heat(::LawnHfoProperties, T, S)
 AuChimiste.enthalpy_net_bs2869
 ```
 
