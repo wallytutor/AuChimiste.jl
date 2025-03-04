@@ -88,6 +88,8 @@ AuChimiste.MaierKelleyThermo
 
 ```@docs
 AuChimiste.MujumdarFlueProperties
+AuChimiste.LawnHfoProperties
+AuChimiste.enthalpy_net_bs2869
 ```
 
 ## Database parsing
