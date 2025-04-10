@@ -4,18 +4,6 @@
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    #! format: off
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
-    #! format: on
-end
-
 # ╔═╡ f8fb6e2d-ecfb-4402-8c39-5c82034389ae
 begin
     @info("Initializing toolbox...")
@@ -29,13 +17,13 @@ begin
 
     # Pkg.add("SciMLBaseMLStyleExt")
     # Pkg.status()
-    
+
     push!(LOAD_PATH, @__DIR__)
 
     using PlutoLinks
     using PlutoUI: TableOfContents
 	import PlutoUI
-	
+
     TableOfContents()
 end
 
@@ -58,7 +46,7 @@ begin
 	using Symbolics
     using Symbolics: scalarize
 	using Trapz
-	
+
     CairoMakie.activate!(; type = "svg", visible = false)
 end
 
@@ -78,14 +66,14 @@ begin
         "SPINEL",
     ]
 	tdb = AuChimisteDatabase(; selected_species)
-    
+
     species_table(tdb)
 end
 
 # ╔═╡ 241f2150-c134-4951-b87d-d820727b8269
 begin
 	@info("Implementation...")
-	
+
 	# "Materials for considered phases."
 	const materials = [
 	    tdb.species.WATER_L
@@ -106,10 +94,10 @@ begin
 
 	#"Solid state stoichiometric coefficients"
 	const ν = [
-		-1  0  0; 
+		-1  0  0;
 		 0 -1  0;
-		 0  1 -2; 
-		 0  0  1; 
+		 0  1 -2;
+		 0  0  1;
 		 0  0  1
 	]
 
@@ -150,7 +138,7 @@ begin
 
 	### SPECIFICS
 
-	
+
 	# "Thermal cycle to apply to sample."
 	temperature(t, θ̇; T₀ = 298.15) = T₀ + θ̇ * t
 
@@ -182,7 +170,7 @@ begin
     #     @equations begin
     #         D(m) ~ ṁ
     #         scalarize(D.(Y) .~ Ẏ)...
-			
+
     #         scalarize(Ẏ .~ speciesbalance(ṁ, ω̇, m, Y))...
     #         scalarize(r .~ reactionrates(m, T, Y))...
     #         scalarize(ω̇ .~ netproductionrates(r))...
@@ -199,52 +187,45 @@ begin
 	function thermal_analysis(; name)
 		@independent_variables t
 	    D = Differential(t)
-	
+
 		state = @variables(begin
 			m(t)
 			ṁ(t)
-	
+
 			Y(t)[1:5]
 			Ẏ(t)[1:5]
-	
+
 			r(t)[1:3]
 			ω̇(t)[1:5]
-	
+
 			T(t)
 			c(t)
 			ḣ(t)
 			q̇(t)
 		end)
-	
+
 		param = @parameters(begin
 			θ̇
 		end)
-	
+
 		eqs = [
 			D(m) ~ ṁ
 			scalarize(D.(Y) .~ Ẏ)
-			
+
 			scalarize(Ẏ .~ speciesbalance(ṁ, ω̇, m, Y))
 			scalarize(r .~ reactionrates(m, T, Y))
 			scalarize(ω̇ .~ netproductionrates(r))
 			ṁ ~ masslossrate(r)
-	
+
 			T ~ temperature(t, θ̇)
 			c ~ mixturespecificheat(T, Y)
 			ḣ ~ scalarize(heatrelease(r))
 			q̇ ~ heatinput(m, c, θ̇, ḣ)
 		]
-	
+
 		return ODESystem(eqs, t, state, param; name)
 	end
 end;
-
-# ╔═╡ a5b1e781-a756-46e7-80ae-a2e4c8172cea
-md"""
-Below we instantiate the model.
-
-We observed the expanded form with all variables and observables:
-"""
 
 # ╔═╡ e241fb89-ca3d-4777-8b64-cda11d4a1419
 begin
@@ -253,21 +234,11 @@ begin
     analysis
 end
 
-# ╔═╡ 6d474aa1-4dfa-47c7-83d3-b6ab51f3a164
-md"""
-For solution is is necessary to simplify this system to the equations that really are integrated. Using `structural_simplify` we reach this goal.
-"""
-
 # ╔═╡ 5801dc27-e7e0-4f5b-a16d-041000a072e8
 model = structural_simplify(analysis);
 
 # ╔═╡ 323a0525-d54f-4a16-b62b-bd7022812780
 model
-
-# ╔═╡ 22faaca8-6355-41e1-84c4-c883e9fcb981
-md"""
-Now we can get the actual `equations`:
-"""
 
 # ╔═╡ 4ca8b0fc-6506-401d-82d6-779ca0396bbf
 equations(model)
@@ -275,27 +246,10 @@ equations(model)
 # ╔═╡ 6ff11a55-4f0b-4798-8aa3-2ffd30904c5b
 unknowns(model)
 
-# ╔═╡ d8db21d3-7f81-4251-a569-666ee262c030
-md"""
-... and the `observed` quantities.
-"""
-
 # ╔═╡ 3e5d5bfd-2d98-409c-8cf6-c26c8815574e
 observed(model)
 
-# ╔═╡ 734e656f-98b6-4167-b594-4a7b8800d28b
-md"""
-### Solution utilities
-
-To make problem solution and visualization simple we provide the following utilities.
-"""
-
 # ╔═╡ e2679379-774a-498f-af8e-28da123d85d7
-"""
-    plotmodel(model, sol)
-
-Standardized plotting of DSC/TGA analyses simulation.
-"""
 function plotmodel(model, sol)
     tk = sol[:t]
     Tk = sol[model.T] .- 273.15
@@ -369,37 +323,22 @@ function plotmodel(model, sol)
 end
 
 # ╔═╡ dba9d916-e8c4-4e52-ad8e-55d77c188eb5
-"""
-    solvemodel(model, τ, Θ̇, m₀, Y₀)
-
-Standard interface for solving the `ThermalAnalysis` model.
-"""
 function solvemodel(model, τ, Θ̇, m, Y, solver = nothing, kwargs...)
 	defaults = (abstol = 1.0e-12, reltol = 1.0e-08, dtmax = 0.001τ)
 	options = merge(defaults, kwargs)
-	
+
     u0 = [model.m => m, model.Y => Y]
     pars = [model.θ̇ => Θ̇]
-	
+
 	prob = ODEProblem(model, u0, (0.0, τ), pars)
     return solve(prob, solver; options...)
 end
 
-# ╔═╡ 3f8f86bb-8890-47cf-9b56-8f5fd65e10ae
-md"""
-## Sensitivity study
+# ╔═╡ 11c69b54-a023-438a-9281-530247ece17f
+θ̇slider = 20
 
-Now it is time to play and perform a numerical experiment.
-
-This will insights about the effects of some parameters over the expected results.
-
-Use the slider below to select the value of:
-
-|  |  |
-|--------------------------|:---|
-| Heating rate [°C/min]    | $(@bind θ̇slider PlutoUI.Slider([1,5,10,20,40,100]; show_value = true, default=20.0))
-| Residual water [%wt]     | $(@bind hslider PlutoUI.Slider([0, 0.1, 0.5, 1, 2, 5]; show_value = true, default=0.5))
-"""
+# ╔═╡ 3ec73a41-8253-4fd1-ba05-cdecf9fac085
+hslider = 0.5
 
 # ╔═╡ 12ea7ab4-9f08-4483-8bf3-e4542d234d3b
 sol, fig = let
@@ -432,13 +371,6 @@ end;
 # ╔═╡ 1a9d4f7b-dfdd-4202-87d2-77a6c8a1e7b9
 fig
 
-# ╔═╡ 6069017a-6f01-4347-9a26-e3abcddf0fe9
-md"""
-An advantage of using observables in the model is the post-processing capactities it offers. All observables are stored in memory together with problem solution. If expected solution is too large, it is important to really think about what should be included as an observable for memory reasons.
-
-Below we illustrate the mixture specific heat extracted from the observables.
-"""
-
 # ╔═╡ 15fc86de-2052-4767-af4d-608852059185
 let
     T = sol[model.T] .- 273.15
@@ -459,33 +391,22 @@ let
     f
 end
 
-# ╔═╡ aa2bf440-fa66-4271-b21f-9d5f61dfa17b
-md"""
-Hope these notes provided you insights on DSC/TGA methods!
-"""
-
 # ╔═╡ Cell order:
-# ╟─f8fb6e2d-ecfb-4402-8c39-5c82034389ae
-# ╟─535cad2b-8510-4590-9d23-0313eeef641a
-# ╟─b2ce6430-e91a-4f98-89af-e8804051b32a
+# ╠═f8fb6e2d-ecfb-4402-8c39-5c82034389ae
+# ╠═535cad2b-8510-4590-9d23-0313eeef641a
+# ╠═b2ce6430-e91a-4f98-89af-e8804051b32a
 # ╠═5e84be72-1120-4cac-9944-fcd6765ea85c
 # ╠═241f2150-c134-4951-b87d-d820727b8269
-# ╟─a5b1e781-a756-46e7-80ae-a2e4c8172cea
-# ╟─e241fb89-ca3d-4777-8b64-cda11d4a1419
-# ╟─6d474aa1-4dfa-47c7-83d3-b6ab51f3a164
+# ╠═e241fb89-ca3d-4777-8b64-cda11d4a1419
 # ╠═5801dc27-e7e0-4f5b-a16d-041000a072e8
 # ╟─323a0525-d54f-4a16-b62b-bd7022812780
-# ╟─22faaca8-6355-41e1-84c4-c883e9fcb981
 # ╠═4ca8b0fc-6506-401d-82d6-779ca0396bbf
 # ╠═6ff11a55-4f0b-4798-8aa3-2ffd30904c5b
-# ╟─d8db21d3-7f81-4251-a569-666ee262c030
 # ╠═3e5d5bfd-2d98-409c-8cf6-c26c8815574e
-# ╟─734e656f-98b6-4167-b594-4a7b8800d28b
-# ╟─e2679379-774a-498f-af8e-28da123d85d7
-# ╟─dba9d916-e8c4-4e52-ad8e-55d77c188eb5
-# ╟─3f8f86bb-8890-47cf-9b56-8f5fd65e10ae
-# ╟─12ea7ab4-9f08-4483-8bf3-e4542d234d3b
+# ╠═e2679379-774a-498f-af8e-28da123d85d7
+# ╠═dba9d916-e8c4-4e52-ad8e-55d77c188eb5
+# ╠═11c69b54-a023-438a-9281-530247ece17f
+# ╠═3ec73a41-8253-4fd1-ba05-cdecf9fac085
+# ╠═12ea7ab4-9f08-4483-8bf3-e4542d234d3b
 # ╟─1a9d4f7b-dfdd-4202-87d2-77a6c8a1e7b9
-# ╟─6069017a-6f01-4347-9a26-e3abcddf0fe9
-# ╟─15fc86de-2052-4767-af4d-608852059185
-# ╟─aa2bf440-fa66-4271-b21f-9d5f61dfa17b
+# ╠═15fc86de-2052-4767-af4d-608852059185
