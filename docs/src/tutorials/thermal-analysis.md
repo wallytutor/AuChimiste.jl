@@ -300,6 +300,7 @@ Because of how a DSC analysis is conducted, it was chosen that the only model pa
 #         q̇ ~ heatinput(m, c, θ̇, ḣ)
 #     end
 # end
+nothing; # hide
 ```
 
 ```@example tutorial
