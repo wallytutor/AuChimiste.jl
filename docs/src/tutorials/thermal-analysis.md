@@ -4,8 +4,6 @@
 In this note we investigate the right implementation to reproduce the kinetics of kaolinite calcination reported by Eskelinen *et al.* [Eskelinen2015](@cite). Neither their model nor their references properly provide the concentration units used in the rate laws, so that becomes an issue when trying to reproduce the results. Here we derive the equations for a complete mass and energy balance to simulate a coupled DSC/TGA analysis of the material in with different concentration units in the rate laws.
 
 
-## Tools
-
 ```@example tutorial
 using AuChimiste
 using CairoMakie
@@ -60,7 +58,8 @@ const materials = [
 ]
 
 # Molecular masses of considered phases [kg/mol]:
-const W = map(molar_mass, materials);
+const W = map(molar_mass, materials)
+nothing; # hide
 ```
 
 Computing mixture properties (specific heat) makes use of this indexing too:
@@ -196,17 +195,20 @@ r_{i} = k_i(T)n_r=k_i(T)\frac{m_r}{M_r}=k_i(T)\frac{Y_r}{M_r}m
 
 ```@example tutorial
 "Rate constant pre-exponential factor [1/s]."
-const A = [5.0000e+07; 1.0000e+07; 5.0000e+33];
+const A = [5.0000e+07; 1.0000e+07; 5.0000e+33]
+nothing; # hide
 ```
 
 ```@example tutorial
 "Reaction rate activtation energies [J/(mol.K)]."
-const E = [6.1000e+04; 1.4500e+05; 8.5600e+05];
+const E = [6.1000e+04; 1.4500e+05; 8.5600e+05]
+nothing; # hide
 ```
 
 ```@example tutorial
 "Reaction enthalpies per unit mass of reactant [J/kg]."
-const ΔH = [2.2582e+06; 8.9100e+05; -2.1290e+05];
+const ΔH = [2.2582e+06; 8.9100e+05; -2.1290e+05]
+nothing; # hide
 ```
 
 ```@example tutorial
@@ -262,44 +264,44 @@ There are a few different types of quantities here:
 Because of how a DSC analysis is conducted, it was chosen that the only model parameter should be the heating rate ``θ̇``. Furthermore, all other quantities were encoded in the developed functions.
 
 ```@example tutorial
-# XXX: why is this broken?
-# @independent_variables t
-# D = Differential(t)
-#
-# @mtkmodel ThermalAnalysis begin
-#     @variables begin
-#         m(t)
-#         ṁ(t)
-#
-#         Y(t)[1:5]
-#         Ẏ(t)[1:5]
-#
-#         r(t)[1:3]
-#         ω̇(t)[1:5]
-#
-#         T(t)
-#         c(t)
-#         ḣ(t)
-#         q̇(t)
-#     end
-#     @parameters begin
-#         θ̇
-#     end
-#     @equations begin
-#         D(m) ~ ṁ
-#         scalarize(D.(Y) .~ Ẏ)...
-#
-#         scalarize(Ẏ .~ speciesbalance(ṁ, ω̇, m, Y))...
-#         scalarize(r .~ reactionrates(m, T, Y))...
-#         scalarize(ω̇ .~ netproductionrates(r))...
-#         ṁ ~ masslossrate(r)
-#
-#         T ~ temperature(t, θ̇)
-#         c ~ mixturespecificheat(T, Y)
-#         ḣ ~ scalarize(heatrelease(r))
-#         q̇ ~ heatinput(m, c, θ̇, ḣ)
-#     end
-# end
+# XXX: why is this broken? # hide
+# @independent_variables t # hide
+# D = Differential(t) # hide
+# # hide
+# @mtkmodel ThermalAnalysis begin # hide
+#     @variables begin # hide
+#         m(t) # hide
+#         ṁ(t) # hide
+# # hide
+#         Y(t)[1:5] # hide
+#         Ẏ(t)[1:5] # hide
+# # hide
+#         r(t)[1:3] # hide
+#         ω̇(t)[1:5] # hide
+# # hide
+#         T(t) # hide
+#         c(t) # hide
+#         ḣ(t) # hide
+#         q̇(t) # hide
+#     end # hide
+#     @parameters begin # hide
+#         θ̇ # hide
+#     end # hide
+#     @equations begin # hide
+#         D(m) ~ ṁ # hide
+#         scalarize(D.(Y) .~ Ẏ)... # hide
+# # hide
+#         scalarize(Ẏ .~ speciesbalance(ṁ, ω̇, m, Y))... # hide
+#         scalarize(r .~ reactionrates(m, T, Y))... # hide
+#         scalarize(ω̇ .~ netproductionrates(r))... # hide
+#         ṁ ~ masslossrate(r) # hide
+# # hide
+#         T ~ temperature(t, θ̇) # hide
+#         c ~ mixturespecificheat(T, Y) # hide
+#         ḣ ~ scalarize(heatrelease(r)) # hide
+#         q̇ ~ heatinput(m, c, θ̇, ḣ) # hide
+#     end # hide
+# end # hide
 nothing; # hide
 ```
 
@@ -496,6 +498,7 @@ Use the variables below to select the value of:
 ```@example tutorial
 θ̇user = 20.0
 huser = 0.5
+nothing; # hide
 ```
 
 ```@example tutorial
@@ -524,11 +527,12 @@ sol, fig = let
     fig = plotmodel(model, sol)
 
     sol, fig
-end;
+end
+nothing; # hide
 ```
 
 ```@example tutorial
-fig
+fig # hide
 ```
 
 An advantage of using observables in the model is the post-processing capactities it offers. All observables are stored in memory together with problem solution. If expected solution is too large, it is important to really think about what should be included as an observable for memory reasons.
