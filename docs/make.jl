@@ -46,6 +46,11 @@ format = Documenter.HTML(
     prettyurls = get(ENV, "CI", nothing) == "true",
     canonical  = "https://$(user).github.io/$(sitename)",
     repolink   = "https://github.com/$(user)/$(sitename)",
+    edit_link  = "main",
+    assets     = String[],
+    size_threshold_warn    = 2_000_000,
+    size_threshold         = 5_000_000,
+    example_size_threshold = 5_000_000,
 )
 
 plugins = [
