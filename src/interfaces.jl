@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 
+export molar_mass
+export density
+export specific_heat
+export enthalpy
+export entropy
+export thermal_conductivity
+export viscosity
+
 """
     molar_mass(args...; kwargs...)
 

@@ -21,18 +21,6 @@ using Symbolics: scalarize
 using Trapz
 using YAML
 
-# For constants:
-export ELECTRON_MASS
-export AVOGADRO
-export GAS_CONSTANT
-export STEFAN_BOLTZMANN
-export JOULE_PER_CALORIE
-export P_NORMAL
-export T_NORMAL
-export C_NORMAL
-export T_STANDARD
-export JOULE_PER_CALORIE
-
 # For elements:
 export has_element
 export list_elements
@@ -54,15 +42,6 @@ export mole_fractions_map
 export mass_fractions_map
 export quantity
 
-# For interfaces
-export molar_mass
-export density
-export specific_heat
-export enthalpy
-export entropy
-export thermal_conductivity
-export viscosity
-
 # For physical chemistry:
 export mean_molecular_mass_y
 export mean_molecular_mass_x
@@ -70,29 +49,7 @@ export mean_molecular_mass
 export get_mole_fractions
 export get_mass_fractions
 
-# For thermodynamics:
-export NASAThermo
-export ShomateThermo
-export thermo_factory
-export CompiledThermoFunctions
-export Thermodynamics
-export Species
-
-#######################################################################
-# ABSTRACT
-#######################################################################
-
-abstract type ChemicalException       <: Exception end
-abstract type ChemicalElementsError   <: ChemicalException end
-abstract type ChemicalComponentsError <: ChemicalException end
-
-abstract type AbstractThermodynamicData end
-abstract type AbstractThermodynamicsModel end
-abstract type AbstractTransportModel end
-
-abstract type AbstractReactorModel end
-abstract type AbstractDrumBedModel <: AbstractReactorModel end
-
+include("abstract.jl")
 include("constants.jl")
 
 #######################################################################

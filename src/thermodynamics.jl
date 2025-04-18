@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+export NASAThermo
+export ShomateThermo
+export thermo_factory
+export CompiledThermoFunctions
+export Thermodynamics
+export Species
+
 #######################################################################
 # GENERAL DATA
 #######################################################################

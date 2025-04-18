@@ -1,5 +1,16 @@
 # -*- coding: utf-8 -*-
 
+export ELECTRON_MASS
+export AVOGADRO
+export GAS_CONSTANT
+export STEFAN_BOLTZMANN
+export JOULE_PER_CALORIE
+export P_NORMAL
+export T_NORMAL
+export C_NORMAL
+export T_STANDARD
+export JOULE_PER_CALORIE
+
 "Electron Mass ``m_e`` [$(ELECTRON_MASS) kg]"
 const ELECTRON_MASS = 9.109_382_915e-31
 
