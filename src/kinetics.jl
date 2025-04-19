@@ -3,6 +3,7 @@
 export ThermalAnalysisData
 export ThermalAnalysisModel
 export solve
+export tabulate
 export plot
 
 struct ThermalAnalysisThermo
@@ -29,7 +30,7 @@ struct ThermalAnalysisData{N, M, R}
     heat_release_rate::Function
 
     function ThermalAnalysisData(;
-            data_file::String = AuChimiste.THERMO_COMPOUND_DATA,
+            data_file::String = THERMO_COMPOUND_DATA,
             selected_species::Vector{String},
             released_species::Vector{String},
             
@@ -56,7 +57,7 @@ struct ThermalAnalysisData{N, M, R}
     end
 end
 
-struct ThermalAnalysisModel{N, M, R} <: AuChimiste.AbstractThermalAnalysis
+struct ThermalAnalysisModel{N, M, R} <: AbstractThermalAnalysis
     data::ThermalAnalysisData
     ode::ODESystem
     
@@ -109,8 +110,8 @@ struct ThermalAnalysisModel{N, M, R} <: AuChimiste.AbstractThermalAnalysis
             θ ~ D(T)
 
             # Mass weighted mixture specific heat/total enthalpy:
-            c ~ scalarize(Y' * map(s->AuChimiste.specific_heat(s, T), ssp))
-            h ~ scalarize(Y' * map(s->AuChimiste.enthalpy(s, T), ssp))
+            c ~ scalarize(Y' * map(s->specific_heat(s, T), ssp))
+            h ~ scalarize(Y' * map(s->enthalpy(s, T), ssp))
             
             # Required heat input rate to maintain heating rate θ:
             qdot ~ m * c * θ + hdot
@@ -155,6 +156,36 @@ function losses_solution(model::ThermalAnalysisModel, sol)
     data = get_variable_table(sol, model.ode, :rdot)
     spec(k, v) = (model.data.losses.species[k].meta.display_name, v)
     return Dict([spec(k, v) for (k, v) in enumerate(eachcol(data))])
+end
+
+function tabulate(model::ThermalAnalysisModel, sol)
+    df = DataFrame(
+        "Time [s]"                  => sol[:t],
+        "Temperature [K]"           => sol[:T],
+        "Mass [mg]"                 => 1e6sol[:m],
+        "Specific heat [kJ/(kg.K)]" => sol[:c],
+        "Heat input [mW]"           => 1e3sol[:qdot]
+    )
+    
+    DSC = (df[!, "Heat input [mW]"] / df[1, "Mass [mg]"])
+    TGA = 100df[!, "Mass [mg]"] / df[1, "Mass [mg]"]
+    
+    df[!, "DSC signal [W/g]"] = DSC
+    df[!, "TGA signal [%wt]"] = TGA
+    
+    df[!, "Enthalpy change [MJ/kg]"] = sol[:H] ./ df[!, "Mass [mg]"]
+    df[!, "Energy consumption [MJ/kg]"] = 0.001cumul_integrate(sol[:t], DSC)
+    
+    species = species_solution(model, sol)
+    species = ["$(k) [%wt]" => 100v for (k, v) in species]
+    
+    losses = losses_solution(model, sol)
+    losses = ["$(k) [mg/s]" => 1e6v for (k, v) in losses]
+    
+    insertcols!(df, species...)
+    insertcols!(df, losses...)
+
+    return df
 end
 
 function plot(model::ThermalAnalysisModel, sol; xticks = nothing)
