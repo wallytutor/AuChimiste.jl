@@ -447,6 +447,12 @@ function entropy_mole(s::Species, T)
     return s.thermo.func.entropy(T)
 end
 
+# WIP: enthalpy calculation for use in Hess' law [J/mol].
+function enthalpy_hess(s, T; T_ref = nothing)
+    h_ref = isnothing(T_ref) ? s.thermo.h298 : enthalpy_mole(s, T_ref)
+    return (enthalpy_mole(s, T) - h_ref) + formation_enthalpy(s)
+end
+
 #######################################################################
 # EOF
 #######################################################################

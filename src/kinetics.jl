@@ -101,7 +101,7 @@ struct ThermalAnalysisModel{N, M, R} <: AuChimiste.AbstractThermalAnalysis
             scalarize(r    .~ data.reaction_rates(data, m, T, Y))
             scalarize(ωdot .~ data.net_production_rates(data, r))
             rdot ~ scalarize(data.mass_loss_rate(data, r))
-            hdot ~ scalarize(data.heat_release_rate(data, r))
+            hdot ~ scalarize(data.heat_release_rate(data, r, T))
             mdot ~ sum(rdot)
 
             # Programmed temperature profile:
@@ -157,7 +157,7 @@ function losses_solution(model::ThermalAnalysisModel, sol)
     return Dict([spec(k, v) for (k, v) in enumerate(eachcol(data))])
 end
 
-function CairoMakie.plot(model::ThermalAnalysisModel, sol; xticks = nothing)
+function plot(model::ThermalAnalysisModel, sol; xticks = nothing)
     species = species_solution(model, sol)
     losses = losses_solution(model, sol)
     
