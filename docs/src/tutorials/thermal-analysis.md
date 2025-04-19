@@ -1,6 +1,11 @@
 # Thermal analysis simulation
 
 
+!!! danger "Under development"
+
+    This is a placeholder! Please, hold tight while the cook works!
+
+
 In this note we investigate the right implementation to reproduce the kinetics of kaolinite calcination reported by Eskelinen *et al.* [Eskelinen2015](@cite). Neither their model nor their references properly provide the concentration units used in the rate laws, so that becomes an issue when trying to reproduce the results. Here we derive the equations for a complete mass and energy balance to simulate a coupled DSC/TGA analysis of the material in with different concentration units in the rate laws.
 
 

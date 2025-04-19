@@ -11,7 +11,7 @@ The general principle of thermal analysis is to provide heat to a given amount o
 To help accelerating the testing of different kinetics, `AuChimiste` provides `ThermalAnalysisModel`. This class provides an ODE system built upon `ModelingToolkit` to simulate the change of mass ``m``, its integral enthalpy change ``H``, and the mass fractions of different components ``Y_k``. The modeled system - the sample material - is open in the sense it looses matter (generally water or decomposition by-products) to the environment - the carrier gas. Thus, it is necessary to add this contribution to the balance equations so that evaluated mass fractions remain right. From the definitions below
 
 ```math
-\frac{dm}{dt} = \dot{m}
+\frac{dm}{dt} = \dot{m} = \sum\dot{m}_k
 \qquad
 \frac{dm_k}{dt} = \dot{\omega}
 \qquad
@@ -48,10 +48,10 @@ Notice that this is not the amount reported in DSC analyses, as it accounts for 
 \frac{dH}{dt} &= mc_{P}\dot{\theta} + \dot{h}
 \\[6pt]
 %
-\frac{dY_k}{dt} &=\frac{1}{m}\left(\dot{\omega}-\dot{m}Y_k\right)
+m\frac{dY_k}{dt} &= \dot{\omega}-\dot{m}Y_k
 \end{aligned}
 ```
 
-From a practical standpoint, a user needs to define a function for the computation the reaction rates of the different processes (units of ``\mathrm{mol\cdotp{}s^{-1}}``), which is provided to a user-provided balance function for the net production rates of sample compounds (``\mathrm{kg\cdotp{}s^[-1]}``) and the mass loss rates (``\mathrm{kg\cdotp{}s^[-1]}``), and the temperature dependent heat release rate.
+From a practical standpoint, a user needs to define a function for the computation the reaction rates of the different processes (units of ``\mathrm{mol\cdotp{}s^{-1}}``), which is provided to a user-provided balance function for the net production rates ``\dot{\omega}`` of sample compounds (``\mathrm{kg\cdotp{}s^{-1}}``) and the mass loss rates ``\dot{m}_k`` (``\mathrm{kg\cdotp{}s^{-1}}``), and the temperature dependent heat release rate ``\dot{h}`` (``\mathrm{J\cdotp{}s^{-1}}``).
 
 An application tutorial is provided [here](../tutorials/thermal-analysis.md); for development purposes or teaching the internals of the implementation, a tutorial independent of the implementation is [provided](../tutorials/thermal-analysis-manual.md).
