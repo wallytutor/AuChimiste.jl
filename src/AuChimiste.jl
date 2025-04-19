@@ -11,6 +11,7 @@ using DocStringExtensions: TYPEDFIELDS
 using DynamicQuantities
 using Latexify
 using ModelingToolkit
+using NumericalIntegration
 using Pkg.Artifacts
 using Polynomials
 using Printf
