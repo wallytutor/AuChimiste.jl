@@ -1,13 +1,7 @@
 # Thermal analysis simulation
 
 
-!!! danger "Under development"
-
-    This is a placeholder! Please, hold tight while the cook works!
-
-
-In this note we investigate the right implementation to reproduce the kinetics of kaolinite calcination reported by Eskelinen *et al.* [Eskelinen2015](@cite). Neither their model nor their references properly provide the concentration units used in the rate laws, so that becomes an issue when trying to reproduce the results. Here we derive the equations for a complete mass and energy balance to simulate a coupled DSC/TGA analysis of the material in with different concentration units in the rate laws.
-
+This tutorial illustrates how to model TGA/DSC analyses with a proposed kinetics mechanism. The ideas behind the implementation are presented [elsewhere](../manual/kinetics.md), and a development guide in the sense of `ModelingToolkit` is provded [here](thermal-analysis-manual.md). In what follows we implement implementation to reproduce the kinetics of kaolinite calcination reported by Eskelinen *et al.* [Eskelinen2015](@cite). Neither their model nor their references properly provide the concentration units used in the rate laws, so that becomes an issue when trying to reproduce the results. Here we derive the equations for a complete mass and energy balance to simulate a coupled DSC/TGA analysis of the material in with different concentration units in the rate laws.
 
 ```julia
 using AuChimiste
@@ -15,10 +9,9 @@ using LinearAlgebra
 using ModelingToolkit
 ```
 
-## Species properties
+## Problem statement
 
-
-In what follows the condensate species will be indexed as the next list, so for simplifying notation species will be referred to solely by their index.
+In out implementation, the condensate species will be indexed as the following list, so for simplifying notation species will be referred to solely by their index.
 
 1. Liquid water
 1. Kaolinite ``Al_2Si_2O_5(OH)_4``
@@ -26,17 +19,9 @@ In what follows the condensate species will be indexed as the next list, so for 
 1. *Spinel* ``Al_4Si_3O_{12}``
 1. Amorphous silica ``SiO_2``
 
-Final conversion of spinel into mullite and cristobalite is neglected here.
+Final conversion of spinel into mullite and cristobalite is neglected here. Polynomials for specific heat and the value of reference enthalpy of formation are those of Schieltz and Soliman [Schieltz1964](@cite), except for *spinel* phase for which at the time of the publication was unknown. A rough estimate of its value is provided by Eskelinen *et al.* [Eskelinen2015](@cite). Since this phase is the least relevant in the present study and the  order of magnitude seems correct, it is employed in the simulations.
 
-Polynomials for specific heat are those of Schieltz and Soliman [Schieltz1964](@cite), except for *spinel* phase for which at the time of the publication was unknown. A rough estimate of its value is provided by Eskelinen *et al.* [Eskelinen2015](@cite). Since this phase is the least relevant in the present study and the  order of magnitude seems correct, it is employed in the simulations.
-
-Below we start by loading the database and displaying the species table:
-
-
-## Global mechanism
-
-
-Here we provide the mechanism discussed by Eskelinen *et al.* [Eskelinen2015](@cite). Individual reaction steps are better described by Holm [Holm2001](@cite), especially beyond our scope at high temperatures.
+The mechanism discussed by Eskelinen *et al.* [Eskelinen2015](@cite) is provided below. Individual reaction steps are better described by Holm [Holm2001](@cite), especially beyond our scope at high temperatures.
 
 ```math
 \begin{aligned}
@@ -45,6 +30,7 @@ Al_2Si_2O_5(OH)_4 &\rightarrow Al_2Si_2O_7 + 2H_2O_{(g)} & \Delta{}H>0\\
 2Al_2Si_2O_7 &\rightarrow Al_4Si_3O_{12} + {SiO_2}_{(a)} & \Delta{}H<0
 \end{aligned}
 ```
+
 Be ``r_{i}`` the rate of the above reactions in molar units, *i.e.* ``mol\cdotp{}s^{-1}``, then the rate of production of each of the considered species in solid state is given as:
 
 ```math
@@ -70,11 +56,16 @@ r_3\\
 \end{pmatrix}
 ```
 
-In matrix notation one can write ``\dot{\omega}=\nu\cdotp{}r``, as it will be implemented. By multiplying each element of the resulting array by its molecular mass we get the net production rates in mass units. Constant ``\nu`` provides the required coefficients matrix.
+In matrix notation one can write ``\dot{\omega}=\nu\cdotp{}r``, as it will be implemented. By multiplying each element of the resulting array by its molecular mass we get the net production rates in mass units. Constant ``\nu`` provides the required coefficients matrix. Mass loss through evaporation and dehydroxylation is handled separately because it becomes simpler to evaluate the condensate phases specific heat in a later stage. The first two reactions release water to the gas phase, so ``\eta`` below provides the stoichiometry for this processes. Sample mass loss is then simply ``\dot{m}=\eta\cdotp{}rM_1``, where ``M_1`` is water molecular mass so that the expression is given in ``kg\cdotp{}s^{-1}``.
 
-Mass loss through evaporation and dehydroxylation is handled separately because it becomes simpler to evaluate the condensate phases specific heat in a later stage. The first two reactions release water to the gas phase, so ``\eta`` below provides the stoichiometry for this processes.
+Eskelinen *et al.* [Eskelinen2015](@cite) compile a set of pre-exponential factors and activation energies for *Arrhenius* rate constants for the above reactions, which are provided in `A` and `Eₐ` below. Their reported reaction enthalpies are given in ``ΔH``, but here we will stick to temperature dependent evaluations through Hess' law. For such a global approach we do not have the privilege of working with actual concentrations because the mass distribution in the system is unknown and it would be meaningless to work with specific masses. Thus, assume the reaction rates are proportional to the number of moles of the reacting species ``n_r`` so we get the required units as exposed above. Then the ``r_i`` can be expressed as
 
-Sample mass loss is then simply ``\dot{m}=\eta\cdotp{}rM_1``, where ``M_1`` is water molecular mass so that the expression is given in ``kg\cdotp{}s^{-1}``.
+```math
+r_{i} = k_i(T)n_r=k_i(T)\frac{m_r}{M_r}=k_i(T)\frac{Y_r}{M_r}m
+```
+
+
+## Species balances
 
 ```julia
 "Species net production rate [kg/s]"
@@ -98,15 +89,6 @@ nothing; # hide
 ```
 
 ## Reaction kinetics
-
-
-Eskelinen *et al.* [Eskelinen2015](@cite) compile a set of pre-exponential factors and activation energies for *Arrhenius* rate constants for the above reactions, which are provided in `A` and `Eₐ` below. Their reported reaction enthalpies are given in ``ΔH``.
-
-For such a global approach we do not have the privilege of working with actual concentrations because the mass distribution in the system is unknown and it would be meaningless to work with specific masses. Thus, assume the reaction rates are proportional to the number of moles of the reacting species ``n_r`` so we get the required units as exposed above. Then the ``r_i`` can be expressed as
-
-```math
-r_{i} = k_i(T)n_r=k_i(T)\frac{m_r}{M_r}=k_i(T)\frac{Y_r}{M_r}m
-```
 
 ```julia
 "Compute reaction rates [mol/s]."
@@ -176,17 +158,7 @@ To wrap-up we provide the programmed thermal cycle and the computation of requir
 
 ## Model statement
 
-
-Below we put together everything that has been developed above.
-
-There are a few different types of quantities here:
-
-- Independent variables, here only ```t``
-- Dependent variables, ``m`` and ``Y``
-- Observable derivatives ``ṁ`` and ``Ẏ``
-- Other observables (partial calculations)
-
-Because of how a DSC analysis is conducted, it was chosen that the only model parameter should be the heating rate ``θ̇``. Furthermore, all other quantities were encoded in the developed functions.
+Below we load the required data with species properly ordered to work with the implemente functions.
 
 ```julia
 data = ThermalAnalysisData(;
@@ -209,9 +181,7 @@ data = ThermalAnalysisData(;
 @info(species_table(data.sample.db))
 ```
 
-```julia
-data.sample.molar_masses[3]
-```
+Now it is time to play and perform a numerical experiment. This will provide insights about the effects of some parameters over the expected results. The next cell provides the parameters for control of the *analysis* and the sample characteristics. Use the variables below to select their values.
 
 ```julia
 # Analysis heating rate.
@@ -219,45 +189,34 @@ data.sample.molar_masses[3]
 
 # Integration interval to simulate problem.
 T_ini = 300.0
-T_end = 300 + 1175
+T_end = 1500.0
 
 # Initial mass.
 m = 16.0e-06
 
 # Initial composition of the system.
 y0 = [0.005, 0.995, 0.0, 0.0, 0.0]
+```
 
-# Interval of simulation.
-τ = (T_end - T_ini) * 60 / Θ
+With these values in hand we are ready to simulate the TGA/DSC as follows:
 
+```julia
 program_temperature = LinearProgramTemperature(T_ini, Θ)
 
 model = ThermalAnalysisModel(; data, program_temperature = (t)->program_temperature(t))
 
-sol = solve(model, τ, m, y0)
+sol = solve(model, (T_end-T_ini)*60/ Θ, m, y0)
 nothing; # hide
 ```
+
+A detailed table of results can be produced with `tabulate`; below we display the available columns.
 
 ```julia
 df = tabulate(model, sol)
 names(df)
 ```
 
-Now we can get the actual `equations`:
-
-```julia
-equations(model.ode)
-```
-
-```julia
-unknowns(model.ode)
-```
-
-... and the `observed` quantities.
-
-```julia
-# observed(model.ode)
-```
+A default plot can also be generated; the `plot` function returns handles so that you can customize appearance.
 
 ```julia
 let
@@ -282,19 +241,20 @@ let
 end
 ```
 
-## Sensitivity study
+If required, we can get the actual `equations` and `unknowns`:
 
+```julia
+equations(model.ode)
+```
 
-Now it is time to play and perform a numerical experiment.
+```julia
+unknowns(model.ode)
+```
 
-This will insights about the effects of some parameters over the expected results.
+... and the `observed` quantities.
 
-Use the variables below to select the value of:
-
-
-An advantage of using observables in the model is the post-processing capactities it offers. All observables are stored in memory together with problem solution. If expected solution is too large, it is important to really think about what should be included as an observable for memory reasons.
-
-Below we illustrate the mixture specific heat extracted from the observables.
-
+```julia
+observed(model.ode)
+```
 
 Hope these notes provided you insights on DSC/TGA methods!
