@@ -453,6 +453,12 @@ function enthalpy_hess(s, T; T_ref = nothing)
     return (enthalpy_mole(s, T) - h_ref) + formation_enthalpy(s)
 end
 
+function enthalpy_reaction(T, vr, vp, r, p)
+    hr = vr' * map(s->enthalpy_hess(s, T), r)
+    hp = vp' * map(s->enthalpy_hess(s, T), p)
+    return hp - hr
+end
+
 #######################################################################
 # EOF
 #######################################################################
