@@ -819,5 +819,6 @@ include("combustion.jl")
 include("hardcoded.jl")
 include("drummer.jl")
 include("extensions.jl")
+include("recipes.jl")
 
 end # (module AuChimiste)
