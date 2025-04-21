@@ -54,6 +54,16 @@ format = Documenter.HTML(
     example_size_threshold = 5_000_000,
 )
 
+function clean_unwanted(unwanted)
+    for thedir in unwanted
+        isdir(thedir) && rm(thedir, recursive=true)
+    end
+end
+
+clean_unwanted([
+    joinpath(@__DIR__, "src/tutorials/.ipynb_checkpoints")
+])
+
 plugins = [
     CitationBibliography(joinpath(@__DIR__, "src", "references.bib"))
 ]
