@@ -219,14 +219,19 @@ begin
 		A::Union{Float64, Num}
 		b::Union{Float64, Num}
 		E::Union{Float64, Num}
+		C::Union{Float64, Num}
 		
-		function Arrhenius(A, b, E)
-			return new(A, b, E)
+		function Arrhenius(A, b, E; C=0.0)
+			return new(A, b, E, C)
 		end
+	end
+
+	function activation(obj::Arrhenius, T, P)
+		return obj.E + obj.C * T
 	end
 	
 	function rate_constant(obj::Arrhenius, T, P)
-		return obj.A * T^obj.b * exp(-obj.E / (GAS_CONSTANT * T))
+		return obj.A * T^obj.b * exp(-activation(obj, T, P) / (GAS_CONSTANT * T))
 	end
 end
 
@@ -241,8 +246,27 @@ db = let
 	selected_species = ["CH4", "O2", "CO2", "H2O"]
 	data = AuChimisteDatabase(; data_file = "nasa_gas.yaml", selected_species)
 	@info species_table(data)
-
 	data
+end
+
+# ╔═╡ 5fa7c0d1-b786-466b-a495-9540ba7c353f
+# Obtain NASA7 coefficients for your species and calculate  H(298.15)
+# using the polynomial formula.
+# Subtract the enthalpies of the individual elements (based on
+# stoichiometric composition).
+AuChimiste.formation_enthalpy(db.species.H2O) # ---> WRONG FOR NASA7!!!
+
+# ╔═╡ df8b5d14-d4ff-4acf-8b3e-9e3b59c3fdb8
+let
+	T = 298.15
+	s = db.species
+	
+	r = [s.CH4, s.O2]
+	p = [s.CO2, s.H2O]
+	vr = [1, 2]
+	vp = [1, 2]
+	
+    ΔH = AuChimiste.enthalpy_reaction(T, vr, vp, r, p)
 end
 
 # ╔═╡ ce25b010-94fe-49fa-9fcd-9b92ac8b10f1
@@ -275,6 +299,20 @@ specific_heat(db.species.CH4, 298.15)
 
 # ╔═╡ fbda6359-e10a-4d54-8f05-35e6f3babcc9
 db.species.CH4.thermo
+
+# ╔═╡ d3ae4199-cc1b-4ec1-b132-45ca8a3fa562
+let
+	db = AuChimisteDatabase()
+
+	T = 273.15 .+ collect(0:10:240)
+	r = [db.species.WATER_L]
+	p = [db.species.WATER_G]
+
+	f(T) = AuChimiste.enthalpy_reaction(T, [1], [1], r, p)
+	ΔH = f.(T) * 0.001 / molar_mass(r[1])
+
+	AuChimiste.formation_enthalpy(db.species.WATER_G)
+end
 
 # ╔═╡ a61b2625-9e17-44a2-b98f-367c990cf91f
 # function [wdot] = wdot_mak(self, z, T, Y, L)
@@ -313,60 +351,11 @@ db.species.CH4.thermo
 #     wdot = rt * (self.mw .* self.SPECIES_COEFS);
 # endfunction
 
-# ╔═╡ de5025bf-fb76-4877-bb11-ed16655368ae
-
-
-# ╔═╡ 511c3404-b19d-4c8b-9edf-2460db7a76f7
-
-
-# ╔═╡ c8559710-8dcd-4bba-b369-98db1b417571
-
-
 # ╔═╡ 7cb83a44-dd0d-4f00-88b6-7effb5a34cbc
 let
 	data = AuChimisteDatabase(; selected_species = ["KAOLINITE", "METAKAOLIN"])
 	species_table(data)
 end
-
-# ╔═╡ 8c113248-9cec-490e-b32c-5214bc3eed37
-let
-	@warn("TODO: check this!")
-	selected_species = ["WATER_L", "WATER_G"]
-	db = AuChimisteDatabase(; selected_species)
-	s = db.species
-	
-	T = 273.15 + 373.0 
-	T = 273.15 + 273 + 373
-	T = 298.15
-	
-	m = molar_mass(s.WATER_L)
-	
-	# href_0 = 68320.0 * JOULE_PER_CALORIE
-	# href_1 = 57800.0 * JOULE_PER_CALORIE
-	href_0 = s.WATER_L.thermo.data.h_ref
-	href_1 = s.WATER_G.thermo.data.h_ref
-	Δhf1 = href_1 - href_0
-
-	hf0 = AuChimiste.formation_enthalpy(s.WATER_L)
-	hf1 = AuChimiste.formation_enthalpy(s.WATER_G)
-	Δhf2 = hf1 - hf0
-	
-	hr0 = AuChimiste.enthalpy_mole(db.species.WATER_L, T)
-	hr1 = AuChimiste.enthalpy_mole(db.species.WATER_G, T)
-	Δhr = hr1 - hr0
-	
-	Δhr, Δhf1, Δhf2
-end
-
-# ╔═╡ cdd832ce-1061-4268-905e-28f15f67abee
-# https://thermoddem.brgm.fr/species/h2og
-#
-# 241826/ JOULE_PER_CALORIE
-#
-# let
-# 	T = 298.15
-# 	(7.17T + 2.56e-03T^2/2 - 0.08e+05 / T) #* JOULE_PER_CALORIE
-# end
 
 # ╔═╡ f7aa9875-4509-4275-aaa7-174cb71106c0
 # ╠═╡ disabled = true
@@ -406,15 +395,13 @@ end
 # ╠═4b62589e-d4b1-4008-b67a-0bc8f8e3076f
 # ╠═e448387d-e392-48de-a272-37d484834414
 # ╠═6f38df37-9955-419d-aa32-20a24663b53b
+# ╠═5fa7c0d1-b786-466b-a495-9540ba7c353f
+# ╠═df8b5d14-d4ff-4acf-8b3e-9e3b59c3fdb8
 # ╠═ce25b010-94fe-49fa-9fcd-9b92ac8b10f1
 # ╠═366ab45b-efc2-499c-9bf6-31f231ba7d5c
 # ╠═788ab808-0730-4346-9421-aec3473ab27d
 # ╠═fbda6359-e10a-4d54-8f05-35e6f3babcc9
+# ╠═d3ae4199-cc1b-4ec1-b132-45ca8a3fa562
 # ╠═a61b2625-9e17-44a2-b98f-367c990cf91f
-# ╠═de5025bf-fb76-4877-bb11-ed16655368ae
-# ╠═511c3404-b19d-4c8b-9edf-2460db7a76f7
-# ╠═c8559710-8dcd-4bba-b369-98db1b417571
 # ╠═7cb83a44-dd0d-4f00-88b6-7effb5a34cbc
-# ╠═8c113248-9cec-490e-b32c-5214bc3eed37
-# ╠═cdd832ce-1061-4268-905e-28f15f67abee
 # ╠═f7aa9875-4509-4275-aaa7-174cb71106c0
