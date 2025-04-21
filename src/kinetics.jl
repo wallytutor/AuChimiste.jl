@@ -4,7 +4,6 @@ export ThermalAnalysisData
 export ThermalAnalysisModel
 export solve
 export tabulate
-export plot
 
 struct ThermalAnalysisThermo
     db::AuChimisteDatabase
@@ -18,26 +17,63 @@ struct ThermalAnalysisThermo
     end
 end
 
-# TODO: in the future reactions will be parsed by database reader
-# and parameter `n_reaction` will be determined automatically.
+"""
+    ThermalAnalysisData(; kwargs...)
 
+Base building block of a thermal analysis (TGA/DSC) simulation.
+
+The keyword arguments must specify the following:
+
+- data_file::String: thermodynamics database file, defaults to built-in.
+
+- selected_species::Vector{String}: vector of species names in initial sample.
+
+- released_species::Vector{String}: vector of species names in lost material.
+
+- n_reactions::Int64: number of reactions in system (also see *To-do*).
+
+- reaction_rates::Function: please, see *Fields* below.
+
+- net_production_rates::Function: please, see *Fields* below.
+
+- mass_loss_rate::Function: please, see *Fields* below.
+
+- heat_release_rate::Function: please, see *Fields* below.
+
+## To-do
+
+In the future reactions will be parsed by database reader and parameter
+`n_reaction` will be determined automatically; simple kinetics (at least)
+will be parsed from file and the related arguments will be kept in this
+interface for custom implementations.
+
+## Fields
+
+$(TYPEDFIELDS)
+"""
 struct ThermalAnalysisData{N, M, R}
+    "Thermodynamic properties of condensate (sample) components."
     sample::ThermalAnalysisThermo
+
+    "Thermodynamic properties of evaporated (lost) components."
     losses::ThermalAnalysisThermo
+
+    "Function describing reaction rates in sample [mol/s]."
     reaction_rates::Function
+
+    "Function describing net production rates of species in sample [kg/s]."
     net_production_rates::Function
+
+    "Function describing the component mass loss rate in sample [kg/s]."
     mass_loss_rate::Function
+
+    "Function describing the overall reaction heat release rate [W]."
     heat_release_rate::Function
 
     function ThermalAnalysisData(;
             data_file::String = THERMO_COMPOUND_DATA,
             selected_species::Vector{String},
             released_species::Vector{String},
-            
-            ###
-            # TO ALLOW DB PARSING...
-            ###
-            
             n_reactions::Int64,
             reaction_rates::Function,
             net_production_rates::Function,
@@ -51,24 +87,47 @@ struct ThermalAnalysisData{N, M, R}
         N = length(selected_species)
         M = length(released_species)
         R = n_reactions
-        
+
         return new{N, M, R}(sample, losses, reaction_rates,
             net_production_rates, mass_loss_rate, heat_release_rate)
     end
 end
 
+"""
+    ThermalAnalysisModel(; kwargs...)
+
+Provides simulation of coupled TGA/DSC analysis for mechanism investigation.
+
+## To-do
+
+Since data holds all the information required here (as well as the type
+parameters of this structure), it is pretty clear that merging that field
+and eliminating `ThermalAnalysisData` is a cleaner design choice. There is
+some difficulty concerning the creation of this object, though; user-supplied
+functions require a data object to be supplied, and this object is not ready
+by the point it is necessary. Using reference values is not considered an
+alternative for now because this object is intended to be fully static.
+
+## Fields
+
+$(TYPEDFIELDS)
+"""
 struct ThermalAnalysisModel{N, M, R} <: AbstractThermalAnalysis
+    "Handle containing all model data."
     data::ThermalAnalysisData
+
+    "Problem differential formulation established with `ModelingToolkit`."
     ode::ODESystem
-    
+
     function ThermalAnalysisModel(;
             data::ThermalAnalysisData{N, M, R},
             name::Symbol = :thermal_analysis,
-            program_temperature::Function
+            program_temperature::Function,
+            param = []
         ) where {N, M, R}
         @independent_variables t
         D = Differential(t)
-    
+
         state = @variables(begin
             m(t),         [description=""]
             mdot(t),      [description=""]
@@ -89,15 +148,15 @@ struct ThermalAnalysisModel{N, M, R} <: AbstractThermalAnalysis
         model_equations = [
             D(m) ~ mdot
             D(H) ~ qdot
-            scalarize(D.(Y) .~ Ydot) 
+            scalarize(D.(Y) .~ Ydot)
         ]
 
         ssp = data.sample.species
-        
+
         model_observables = [
             # Balance equation for species with varying system mass:
             scalarize(Ydot .~ (1 / m) * (ωdot - Y .* mdot))
-    
+
             # Evaluate and apply reaction rates to net changes:
             scalarize(r    .~ data.reaction_rates(data, m, T, Y))
             scalarize(ωdot .~ data.net_production_rates(data, r))
@@ -112,27 +171,48 @@ struct ThermalAnalysisModel{N, M, R} <: AbstractThermalAnalysis
             # Mass weighted mixture specific heat/total enthalpy:
             c ~ scalarize(Y' * map(s->specific_heat(s, T), ssp))
             h ~ scalarize(Y' * map(s->enthalpy(s, T), ssp))
-            
+
             # Required heat input rate to maintain heating rate θ:
             qdot ~ m * c * θ + hdot
         ]
-        
+
         eqs = vcat(model_equations, model_observables)
-        system = ODESystem(eqs, t, state, []; name)
+        system = ODESystem(eqs, t, state, param; name)
         ode = structural_simplify(system)
-        
+
         return new{N, M, R}(data, ode)
     end
 end
 
-# "Standard interface for solving the `ThermalAnalysisModel` model."
-function CommonSolve.solve(model::ThermalAnalysisModel, τ, m, Y, 
-                           solver = nothing, kwargs...)
+"""
+    CommonSolve.solve(analysis::ThermalAnalysisModel, τ, m, Y, kwargs...)
+
+Provide the integration of `ThermalAnalysisModel` by creating a problem
+(`ODEProblem`) and the base `Common.solve` implementation. The mandatory
+arguments must include:
+
+- τ: total analysis time in seconds [s].
+
+- m: initial sample mass in milligrams [mg].
+
+- Y: array of initial mass fractions (or propositions) of compounds in the
+    sample; it will be normalized to ensure correctness and conservation.
+
+Other arguments provided to `Common.solve` interface for `ODEProblem` are
+passed directly to the solver without any check.
+"""
+function CommonSolve.solve(analysis::ThermalAnalysisModel, τ, m, Y;
+                           solver = nothing, param = [], kwargs...)
 	defaults = (abstol = 1.0e-12, reltol = 1.0e-08, dtmax = 0.001τ)
 	options = merge(defaults, kwargs)
+    model = analysis.ode
 
-    u0 = [model.ode.m => m, model.ode.H => 0, model.ode.Y => Y]
-	prob = ODEProblem(model.ode, u0, (0.0, τ), [])
+    if (n = length(Y)) != (N = n_species(analysis))
+        error("Array of species size $(n) does not match problem size $(N)")
+    end
+
+    u0 = [model.m => 1.0e-06m, model.H => 0, model.Y => Y ./ sum(Y)]
+	prob = ODEProblem(model, u0, (0.0, τ), param)
 
     return solve(prob, solver; options...)
 end
@@ -166,113 +246,24 @@ function tabulate(model::ThermalAnalysisModel, sol)
         "Specific heat [kJ/(kg.K)]" => sol[:c],
         "Heat input [mW]"           => 1e3sol[:qdot]
     )
-    
+
     DSC = (df[!, "Heat input [mW]"] / df[1, "Mass [mg]"])
     TGA = 100df[!, "Mass [mg]"] / df[1, "Mass [mg]"]
-    
+
     df[!, "DSC signal [W/g]"] = DSC
     df[!, "TGA signal [%wt]"] = TGA
-    
+
     df[!, "Enthalpy change [MJ/kg]"] = sol[:H] ./ df[!, "Mass [mg]"]
     df[!, "Energy consumption [MJ/kg]"] = 0.001cumul_integrate(sol[:t], DSC)
-    
+
     species = species_solution(model, sol)
     species = ["$(k) [%wt]" => 100v for (k, v) in species]
-    
+
     losses = losses_solution(model, sol)
     losses = ["$(k) [mg/s]" => 1e6v for (k, v) in losses]
-    
+
     insertcols!(df, species...)
     insertcols!(df, losses...)
 
     return df
-end
-
-function plot(model::ThermalAnalysisModel, sol; xticks = nothing)
-    species = species_solution(model, sol)
-    losses = losses_solution(model, sol)
-    
-    T = sol[:T]
-    m = sol[:m]
-    c = sol[:c]
-    q = sol[:qdot]
-
-    DSC = 1.0e-03 * (q ./ m[1])
-    TGA = 100m ./ maximum(m)
-
-    ΔH1 = 1e-06sol[:H] ./ m
-    ΔH2 = 1e-06cumul_integrate(sol[:t], 1000DSC)
-
-    function right_ticks_subplot(ax; color = :red)
-        ax.ygridcolor = :transparent
-        ax.yaxisposition = :right
-        ax.ylabelcolor = color
-    end
-
-    with_theme() do
-        f = Figure(size = (1200, 600))
-    
-        ax1 = Axis(f[1, 1]) # Species
-        ax2 = Axis(f[2, 1]) # TGA
-        ax3 = Axis(f[2, 1]) # Losses
-        
-        ax4 = Axis(f[1, 2]) # DSC
-        ax5 = Axis(f[1, 2]) # Enthalpy
-        ax6 = Axis(f[2, 2]) # Specific heat
-        
-        for (label, Y) in species
-            lines!(ax1, T, 100Y; label)
-        end
-    
-        lines!(ax2, T, TGA; color = :black, label = "TGA")
-
-        for (label, Y) in losses
-            lines!(ax3, T, -1000Y / m[1]; label)
-        end
-        
-        lx = [
-            lines!(ax4, T, DSC; color = :black),
-            lines!(ax5, T, ΔH1; color = :red),
-            lines!(ax5, T, ΔH2; color = :red, linestyle=:dash)
-        ]
-
-        lines!(ax6, T, 0.001c; color = :black, label = "Mixture")
-        
-        ax1.ylabel = "Mass content [%]"
-        ax2.ylabel = "Residual mass [%]"
-        ax3.ylabel = "Mass loss rate [g/(kg*.s)]"
-        ax4.ylabel = "Power input [mW/mg]"
-        ax5.ylabel = "Enthalpy change [MJ/kg]"
-        ax6.ylabel = "Specific heat [kJ/(kg.K)]"
-        
-        ax2.xlabel = "Temperature [K]"
-        ax6.xlabel = "Temperature [K]"
-    
-        right_ticks_subplot(ax3)
-        right_ticks_subplot(ax5)
-
-        # This should be the goal in most cases:
-        ax1.yticks = 0:25:100
-        
-        if !isnothing(xticks)
-            ax1.xticks = xticks
-            ax2.xticks = xticks
-            ax3.xticks = xticks
-            ax4.xticks = xticks
-            ax5.xticks = xticks
-            ax6.xticks = xticks
-
-            xlims!(ax1, extrema(xticks))
-            xlims!(ax2, extrema(xticks))
-            xlims!(ax3, extrema(xticks))
-            xlims!(ax4, extrema(xticks))
-            xlims!(ax5, extrema(xticks))
-            xlims!(ax6, extrema(xticks))
-        end
-
-        labels = ["DSC", "ΔH m(t)", "ΔH m(0)"]
-        axislegend(ax4, lx, labels, position = :lt, orientation = :vertical)
-        
-        f, [ax1, ax2, ax3, ax4, ax5, ax6], lx
-    end
 end

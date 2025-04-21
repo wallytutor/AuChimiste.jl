@@ -71,9 +71,9 @@ r_{i} = k_i(T)n_r=k_i(T)\frac{m_r}{M_r}=k_i(T)\frac{Y_r}{M_r}m
 
 The interface of `ThermalAnalysisData` requires the user to provide the following functions:
 
-- `reaction_rates`: species net production rate [kg/s]
-- `net_production_rates`: sample mass loss rate [kg/s]
-- `mass_loss_rate`: compute reaction rates [mol/s]
+- `reaction_rates`: compute reaction rates [mol/s]
+- `net_production_rates`: species net production rate [kg/s]
+- `mass_loss_rate`: sample mass loss rate [kg/s]
 - `heat_release_rate`: total heat release rate for reactions [W]
 
 The first three of them must return arrays as the implementation works with arbitrary sizes of mechanisms, while a scalar representing the heat release is returned by the last. Below we provide this functions with the expected interfaces, where `r` is the vector returned by `reaction_rates`, `T` is the temperature as usual, and `Y` the array of species mass fractions.
@@ -189,8 +189,8 @@ Now it is time to play and perform a numerical experiment. This will provide ins
 T_ini = 300.0
 T_end = 1500.0
 
-# Initial mass.
-m = 16.0e-06
+# Initial mass [mg].
+m = 16.0
 
 # Initial composition of the system.
 y0 = [0.005, 0.995, 0.0, 0.0, 0.0]

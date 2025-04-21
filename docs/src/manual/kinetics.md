@@ -8,7 +8,7 @@ CurrentModule = AuChimiste
 
 The general principle of thermal analysis is to provide heat to a given amount of material and follow some integral quantity. In the case of thermogravimetry - TGA, we are usually heating the material at a constant rate (generally coupled to differential scanning calorimetr - DSC) and following the mass changes. It is a useful materials characterization method for situations where drying of solids is present or some decomposition of the material is expected. For research purposes, other than determining the mass loss of materials, it is interesting to establish a kinetic model of phase changes; such models can then be studied and maybe integrated to process simulations when applicable.
 
-To help accelerating the testing of different kinetics, `AuChimiste` provides `ThermalAnalysisModel`. This class provides an ODE system built upon `ModelingToolkit` to simulate the change of mass ``m``, its integral enthalpy change ``H``, and the mass fractions of different components ``Y_k``. The modeled system - the sample material - is open in the sense it looses matter (generally water or decomposition by-products) to the environment - the carrier gas. Thus, it is necessary to add this contribution to the balance equations so that evaluated mass fractions remain right. From the definitions below
+To help accelerating the testing of different kinetics, `AuChimiste` provides [`ThermalAnalysisModel`](@ref). It provides an ODE system built upon `ModelingToolkit` to simulate the change of mass ``m``, its integral enthalpy change ``H``, and the mass fractions of different components ``Y_k``. The modeled system - the sample material - is open in the sense it looses matter (generally water or decomposition by-products) to the environment - the carrier gas. Thus, it is necessary to add this contribution to the balance equations so that evaluated mass fractions remain right. From the definitions below
 
 ```math
 \frac{dm}{dt} = \dot{m} = \sum\dot{m}_k
@@ -52,6 +52,20 @@ m\frac{dY_k}{dt} &= \dot{\omega}-\dot{m}Y_k
 \end{aligned}
 ```
 
-From a practical standpoint, a user needs to define a function for the computation the reaction rates of the different processes (units of ``\mathrm{mol\cdotp{}s^{-1}}``), which is provided to a user-provided balance function for the net production rates ``\dot{\omega}`` of sample compounds (``\mathrm{kg\cdotp{}s^{-1}}``) and the mass loss rates ``\dot{m}_k`` (``\mathrm{kg\cdotp{}s^{-1}}``), and the temperature dependent heat release rate ``\dot{h}`` (``\mathrm{J\cdotp{}s^{-1}}``).
+```@docs
+AuChimiste.ThermalAnalysisModel
+```
+
+From a practical standpoint, a user needs to define a function for the computation the reaction rates of the different processes (units of ``\mathrm{mol\cdotp{}s^{-1}}``), which is provided to a user-provided balance function for the net production rates ``\dot{\omega}`` of sample compounds (``\mathrm{kg\cdotp{}s^{-1}}``) and the mass loss rates ``\dot{m}_k`` (``\mathrm{kg\cdotp{}s^{-1}}``), and the temperature dependent heat release rate ``\dot{h}`` (``\mathrm{J\cdotp{}s^{-1}}``). Those elements are stored on [`ThermalAnalysisData`](@ref) for use in [`ThermalAnalysisModel`](@ref).
+
+```@docs
+AuChimiste.ThermalAnalysisData
+```
+
+Finally, a standard interface is provided for system solution:
+
+```@docs
+CommonSolve.solve(::ThermalAnalysisModel, τ, m, Y)
+```
 
 An application tutorial is provided [here](../tutorials/thermal-analysis.md); for development purposes or teaching the internals of the implementation, a tutorial independent of the implementation is [provided](../tutorials/thermal-analysis-manual.md).

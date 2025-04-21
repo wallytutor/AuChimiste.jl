@@ -56,9 +56,6 @@ AuChimiste.thermal_conductivity
 AuChimiste.viscosity
 ```
 
-## Kinetics
-
-
 ## Reactors
 
 

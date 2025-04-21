@@ -77,5 +77,5 @@ Integration of the model can be done directly with `Common.solve` interface for 
 
 ```@docs
 AuChimiste.solve_kramers_stack
-CommonSolve.solve
+CommonSolve.solve(::DrumMediumKramersChunk)
 ```
