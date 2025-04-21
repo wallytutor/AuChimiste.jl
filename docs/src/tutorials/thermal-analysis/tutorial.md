@@ -1,7 +1,7 @@
 # Thermal analysis simulation
 
 
-This tutorial illustrates how to model TGA/DSC analyses with a proposed kinetics mechanism. The ideas behind the implementation are presented in the [manual](../manual/kinetics.md), and a development guide in the sense of `ModelingToolkit` is provded [here](thermal-analysis-manual.md). In what follows we implement implementation to reproduce the kinetics of kaolinite calcination reported by Eskelinen *et al.* [Eskelinen2015](@cite). Neither their model nor their references properly provide the concentration units used in the rate laws, so that becomes an issue when trying to reproduce the results. Here we derive the equations for a complete mass and energy balance to simulate a coupled DSC/TGA analysis of the material in with different concentration units in the rate laws.
+This tutorial illustrates how to model TGA/DSC analyses with a proposed kinetics mechanism. The ideas behind the implementation are presented in the [manual](../../manual/kinetics.md), and a development guide in the sense of `ModelingToolkit` is provded [here](manual.md). In what follows we implement implementation to reproduce the kinetics of kaolinite calcination reported by Eskelinen *et al.* [Eskelinen2015](@cite). Neither their model nor their references properly provide the concentration units used in the rate laws, so that becomes an issue when trying to reproduce the results. Here we derive the equations for a complete mass and energy balance to simulate a coupled DSC/TGA analysis of the material in with different concentration units in the rate laws.
 
 ```@example tutorial
 using AuChimiste

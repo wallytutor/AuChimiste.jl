@@ -18,7 +18,7 @@ end
 
 # ╔═╡ 8446122d-f098-489f-90ae-b2d8578344e8
 begin
-    root = abspath("../../../../AuChimiste.jl")
+    root = abspath("../../../../../AuChimiste.jl")
     
     @info("Initializing toolbox...")
     using Pkg

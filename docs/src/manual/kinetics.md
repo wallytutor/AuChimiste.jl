@@ -68,4 +68,4 @@ Finally, a standard interface is provided for system solution:
 CommonSolve.solve(::ThermalAnalysisModel, τ, m, Y)
 ```
 
-An application tutorial is provided [here](../tutorials/thermal-analysis.md); for development purposes or teaching the internals of the implementation, a tutorial independent of the implementation is [provided](../tutorials/thermal-analysis-manual.md).
+An application tutorial is provided [here](../tutorials/thermal-analysis/tutorial.md); for development purposes or teaching the internals of the implementation, a tutorial independent of the implementation is [provided](../tutorials/thermal-analysis/manual.md).

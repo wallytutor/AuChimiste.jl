@@ -18,18 +18,16 @@ end
 
 # ╔═╡ 08f1bb01-5a39-473f-8c75-cd6ade835a77
 begin
+    root = abspath("../../../../../AuChimiste.jl")
+    
     @info("Initializing toolbox...")
     using Pkg
 
     open("pluto_init.log", "w") do logs
-        root = "D:/Kompanion/bin/pkgs/AuChimiste.jl"
         Pkg.activate(root; io=logs)
         Pkg.instantiate(; io=logs)
     end
 
-    # Pkg.add("SciMLBaseMLStyleExt")
-    # Pkg.status()
-    
     push!(LOAD_PATH, @__DIR__)
 
     using PlutoLinks

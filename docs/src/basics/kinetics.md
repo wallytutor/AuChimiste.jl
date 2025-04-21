@@ -98,7 +98,7 @@ ax[6].yticks = 0.8:0.02:0.9 # hide
 fig # hide
 ```
 
-For more details, please check the [manual](../manual/kinetics.md) or a more elaborated [tutorial](../tutorials/thermal-analysis.md).
+For more details, please check the [manual](../manual/kinetics.md) or a more elaborated [tutorial](../tutorials/thermal-analysis/tutorial.md).
 
 ## Database manipulations
 
