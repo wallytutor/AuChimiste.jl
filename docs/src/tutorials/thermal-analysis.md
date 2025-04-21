@@ -1,10 +1,11 @@
 # Thermal analysis simulation
 
 
-This tutorial illustrates how to model TGA/DSC analyses with a proposed kinetics mechanism. The ideas behind the implementation are presented [elsewhere](../manual/kinetics.md), and a development guide in the sense of `ModelingToolkit` is provded [here](thermal-analysis-manual.md). In what follows we implement implementation to reproduce the kinetics of kaolinite calcination reported by Eskelinen *et al.* [Eskelinen2015](@cite). Neither their model nor their references properly provide the concentration units used in the rate laws, so that becomes an issue when trying to reproduce the results. Here we derive the equations for a complete mass and energy balance to simulate a coupled DSC/TGA analysis of the material in with different concentration units in the rate laws.
+This tutorial illustrates how to model TGA/DSC analyses with a proposed kinetics mechanism. The ideas behind the implementation are presented in the [manual](../manual/kinetics.md), and a development guide in the sense of `ModelingToolkit` is provded [here](thermal-analysis-manual.md). In what follows we implement implementation to reproduce the kinetics of kaolinite calcination reported by Eskelinen *et al.* [Eskelinen2015](@cite). Neither their model nor their references properly provide the concentration units used in the rate laws, so that becomes an issue when trying to reproduce the results. Here we derive the equations for a complete mass and energy balance to simulate a coupled DSC/TGA analysis of the material in with different concentration units in the rate laws.
 
-```julia
+```@example tutorial
 using AuChimiste
+using CairoMakie
 using LinearAlgebra
 using ModelingToolkit
 ```
@@ -65,10 +66,21 @@ r_{i} = k_i(T)n_r=k_i(T)\frac{m_r}{M_r}=k_i(T)\frac{Y_r}{M_r}m
 ```
 
 
-## Species balances
+## User-defined functions
 
-```julia
-"Species net production rate [kg/s]"
+
+The interface of `ThermalAnalysisData` requires the user to provide the following functions:
+
+- `reaction_rates`: species net production rate [kg/s]
+- `net_production_rates`: sample mass loss rate [kg/s]
+- `mass_loss_rate`: compute reaction rates [mol/s]
+- `heat_release_rate`: total heat release rate for reactions [W]
+
+The first three of them must return arrays as the implementation works with arbitrary sizes of mechanisms, while a scalar representing the heat release is returned by the last. Below we provide this functions with the expected interfaces, where `r` is the vector returned by `reaction_rates`, `T` is the temperature as usual, and `Y` the array of species mass fractions.
+
+**NOTE:** in future releases it is expected that parsing of arbitrary kinetic mechanisms be done directly from the database file (YAML); this implementation is on-hold until all the desired coverage of parsing be determined.
+
+```@example tutorial
 function net_production_rates(data::ThermalAnalysisData, r)
     ν = [-1  0  0;  # WATER_L
           0 -1  0;  # KAOLINITE
@@ -80,18 +92,14 @@ end
 nothing; # hide
 ```
 
-```julia
-"Sample mass loss rate [kg/s]"
+```@example tutorial
 function mass_loss_rate(data::ThermalAnalysisData, r)
     return [-1data.losses.molar_masses[1] * (r[1] + 2r[2])]
 end
 nothing; # hide
 ```
 
-## Reaction kinetics
-
-```julia
-"Compute reaction rates [mol/s]."
+```@example tutorial
 function reaction_rates(data::ThermalAnalysisData, m, T, Y)
     # A: rate constant pre-exponential factor [1/s].
     # E: reaction rate activtation energies [J/(mol.K)].
@@ -106,8 +114,7 @@ end
 nothing; # hide
 ```
 
-```julia
-"Total heat release rate for reactions [W]."
+```@example tutorial
 function heat_release_rate(data::ThermalAnalysisData, r, T)
     # Reaction enthalpies per unit mass of reactant [J/kg].
     # ΔH = [2.2582e+06; 8.9100e+05; -2.1290e+05]
@@ -125,42 +132,33 @@ end
 nothing; # hide
 ```
 
-```julia
+For evaluation of reaction enthalpies the following additional utilities are provided.
+
+```@example tutorial
 function enthalpy_evaporation(T, h2o_l, h2o_g)
-    rp = AuChimiste.enthalpy_hess(h2o_g, T)
-    rr = AuChimiste.enthalpy_hess(h2o_l, T)
-    return rp - rr
+    args = [1], [1], [h2o_l], [h2o_g]
+    return AuChimiste.enthalpy_reaction(T, args...)
 end
 
 function enthalpy_dehydration(T, kaolinite, metakaolin, h2o_g)
-    rp = 1.0AuChimiste.enthalpy_hess(metakaolin, T)
-    rp += 2.0AuChimiste.enthalpy_hess(h2o_g, T)
-    rr = AuChimiste.enthalpy_hess(kaolinite, T)
-    return rp - rr
+    args = [1], [1, 2], [kaolinite], [metakaolin, h2o_g]
+    return AuChimiste.enthalpy_reaction(T, args...)
 end
 
 function enthalpy_decomposition(T, metakaolin, sio2, spinel)
-    # rp = 0.5AuChimiste.enthalpy_hess(sio2, T)
-    # rp += 0.5AuChimiste.enthalpy_hess(spinel, T)
-    # rr = AuChimiste.enthalpy_hess(metakaolin, T)
-    # return rp - rr
-    # TODO: fix spinel Hf to use the above.
-    return 0.22212607680000002 * -2.1290e+05
+    # TODO: fix spinel enthalpy of formation to use:
+    # args = [1], [0.5, 0.5], [metakaolin], [sio2, spinel]
+    # return AuChimiste.enthalpy_reaction(T, args...)
+    return -2.1290e+05molar_mass(metakaolin)
 end
 nothing; # hide
 ```
-
-## Experimental controls
-
-
-To wrap-up we provide the programmed thermal cycle and the computation of required heat input to produce a perfect heating curve. It must be emphasized that actual DSC machines use some sort of controllers to reach this, what introduces one source of stochastic behavior to the measurement.
-
 
 ## Model statement
 
 Below we load the required data with species properly ordered to work with the implemente functions.
 
-```julia
+```@example tutorial
 data = ThermalAnalysisData(;
     selected_species = [
         "WATER_L",
@@ -183,7 +181,7 @@ data = ThermalAnalysisData(;
 
 Now it is time to play and perform a numerical experiment. This will provide insights about the effects of some parameters over the expected results. The next cell provides the parameters for control of the *analysis* and the sample characteristics. Use the variables below to select their values.
 
-```julia
+```@example tutorial
 # Analysis heating rate.
 Θ = 20.0
 
@@ -196,65 +194,65 @@ m = 16.0e-06
 
 # Initial composition of the system.
 y0 = [0.005, 0.995, 0.0, 0.0, 0.0]
+nothing; # hide
 ```
 
 With these values in hand we are ready to simulate the TGA/DSC as follows:
 
-```julia
+```@example tutorial
 program_temperature = LinearProgramTemperature(T_ini, Θ)
 
-model = ThermalAnalysisModel(; data, program_temperature = (t)->program_temperature(t))
+model = ThermalAnalysisModel(; data,
+    program_temperature = (t)->program_temperature(t))
 
-sol = solve(model, (T_end-T_ini)*60/ Θ, m, y0)
+sol = solve(model, (T_end-T_ini) * 60/ Θ, m, y0)
 nothing; # hide
 ```
 
-A detailed table of results can be produced with `tabulate`; below we display the available columns.
+A detailed table of results can be produced with `tabulate`; below we display the available columns (as the table would be pretty large to render in a webpage).
 
-```julia
+```@example tutorial
 df = tabulate(model, sol)
 names(df)
 ```
 
 A default plot can also be generated; the `plot` function returns handles so that you can customize appearance.
 
-```julia
-let
-    fig, ax, lx = AuChimiste.plot(model, sol; xticks = T_ini:100:T_end)
-    # axislegend(ax[1]; position = :rt, orientation = :horizontal, nbanks=3)
-    # axislegend(ax[3]; position = :rt, orientation = :vertical)
-
-    # ax[1].yticks = 0:20:80
-    # ax[2].yticks = 70:5:100
-    # ax[3].yticks = 0:0.1:0.7
-    # ax[5].yticks = 0:0.5:3.5
-    # ax[6].yticks = 0.9:0.05:1.25
-
-    # ylims!(ax[1], (-1, 80))
-    # ylims!(ax[2], (70, 100))
-    # ylims!(ax[3], (-0.01, 0.7))
-    # ylims!(ax[4], (0, 4.5))
-    # ylims!(ax[5], (0, 3.5))
-    # ylims!(ax[6], (0.9, 1.25))
-
-    fig
-end
+```@example tutorial
+fig, ax, lx = AuChimiste.plot(model, sol; xticks = T_ini:100:T_end)
+# Please see the sources for details of hidden code here...
+axislegend(ax[1]; position = :lb, orientation = :vertical) # hide
+axislegend(ax[3]; position = :rt, orientation = :vertical) # hide
+ax[1].yticks = 0:20:100 # hide
+ax[2].yticks = 84:2:100 # hide
+ax[3].yticks = 0:0.1:0.5 # hide
+ax[4].yticks = -1:1:5 # hide
+ax[5].yticks = 0:0.5:3 # hide
+ax[6].yticks = 0.6:0.1:1.4 # hide
+ylims!(ax[1], (-1, 101)) # hide
+ylims!(ax[2], (84, 100)) # hide
+ylims!(ax[3], (-0.01, 0.5)) # hide
+ylims!(ax[4], (-1, 5.0)) # hide
+ylims!(ax[5], (0, 3)) # hide
+ylims!(ax[6], (0.6, 1.4)) # hide
+fig # hide
 ```
 
 If required, we can get the actual `equations` and `unknowns`:
 
-```julia
+```@example tutorial
 equations(model.ode)
 ```
 
-```julia
+```@example tutorial
 unknowns(model.ode)
 ```
 
-... and the `observed` quantities.
+... and the `observed` quantities (Documenter.jl will not render it!).
 
-```julia
-observed(model.ode)
+```@example tutorial
+# observed(model.ode)
+nothing; # hide
 ```
 
 Hope these notes provided you insights on DSC/TGA methods!
