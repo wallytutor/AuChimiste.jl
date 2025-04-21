@@ -206,47 +206,6 @@ function solve_kramers_stack(; grid, radius, beta, phiv, h, ω̇, α, kwargs...)
     return DrumMediumKramersSolution(solution)
 end
 
-function plot(model::DrumMediumKramersSolution; kwargs...)
-    defaults = (normz = true, normh = true, simple = true)
-    options = merge(defaults, kwargs)
-
-    if options.simple
-        return plot_simple(model, options)
-    end
-
-    error("Full plotting not available for `DrumMediumKramersSolution`!")
-end
-
-function plot_simple(model::DrumMediumKramersSolution, options)
-    z = model.z
-    h = model.h
-
-    z = options.normz ? (100z / maximum(z[end])) : z
-    h = options.normh ? (100h / maximum(h[end])) : 100h
-
-    η = @sprintf("%.1f", model.Η)
-    τ = @sprintf("%.1f", model.τ[end] / 60.0)
-
-    xlims = (options.normz) ? (0.0, 100.0) : (0.0, model.z[end])
-    ylims = (options.normh) ? (0.0, 100.0) : (0.0, round(maximum(h)+1))
-    
-    with_theme() do
-        fig = Figure()
-        ax = Axis(fig[1, 1])
-        
-        ax.title = "Loading $(η)% | Residence $(τ) min"
-        ax.xlabel = "Coordinate [$(options.normz ? "%" : "m")]"
-        ax.ylabel = "Bed height [$(options.normh ? "%" : "cm")]"
-        ax.xticks = range(xlims..., 6)
-        ax.yticks = range(ylims..., 6)
-        
-        lines!(ax, z, h, color = :red)
-        limits!(ax, xlims, ylims)
-
-        fig, ax
-    end
-end
-
 function drum_solution(sol::ODESolution)
     return sol.t, sol[:h], sol[:R], sol[:β], sol[:ϕ]
 end
