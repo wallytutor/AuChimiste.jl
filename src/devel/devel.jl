@@ -35,6 +35,6 @@ let h = 0
 end
 
 dbb = AuChimisteDatabase(; );
-_ = dbb.species.WATER_G.thermo.func.enthalpy(298.15)
-_ = dbb.species.WATER_G.thermo.data.h_ref
-_ = db.species.H2O.thermo.data.h_ref
+dbb.species.WATER_G.thermo.func.enthalpy(298.15)
+dbb.species.WATER_G.thermo.data.h_ref
+db.species.H2O.thermo.data.h_ref
