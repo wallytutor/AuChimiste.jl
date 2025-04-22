@@ -1,3 +1,4 @@
+using Revise
 using AuChimiste
 
 db = let
@@ -32,3 +33,8 @@ let h = 0
     h -= 1species.CO2.thermo.func.enthalpy(298.15)
     h -= 2species.H2O.thermo.func.enthalpy(298.15)
 end
+
+dbb = AuChimisteDatabase(; );
+_ = dbb.species.WATER_G.thermo.func.enthalpy(298.15)
+_ = dbb.species.WATER_G.thermo.data.h_ref
+_ = db.species.H2O.thermo.data.h_ref
