@@ -315,40 +315,6 @@ function [k_eff] = effective_thermal_conductivity(self, k_g, k_s)
     k_eff = (num ./ den) .* k_g;
 endfunction
 
-function [htc] = htc_cgb_tscheng(self, k_g, re_d, re_w)
-    n = self.local_loading;
-    de = self.diameter_eff;
-    a = [+0.46, +0.535, +0.104, -0.341];
-    nu = a(1) .* re_d.^a(2) .* re_w.^a(3) .* n.^a(4);
-    htc = (k_g ./ de) .* nu;
-endfunction
-
-function [htc] = htc_cgw_tscheng(self, k_g, re_d, re_w)
-    n = self.local_loading;
-    de = self.diameter_eff;
-    a = [+1.54, +0.575, -0.292, +0.000];
-    nu = a(1) .* re_d.^a(2) .* re_w.^a(3) .* n.^a(4);
-    htc = (k_g ./ de) .* nu;
-endfunction
-
-function [htc] = htc_cwb_hanein(self, k_g, k_b, w)
-    % Note: the equation is wrong in Hanein's paper (unit of
-    % rotation rate, it is not inversed but actually 1/htc,
-    % definition of theta not clear,...). Checking the original
-    % Li (2005) allowed to find the expected values!
-    chi = self.gas_film_thickness;
-    d_p = self.bed.particle_diameter;
-    rho_b = self.bed.density_mass;
-    cp_b = self.bed.specific_heat_mass(self.T_b, self.Y_b);
-    theta = self.central_angle / 2;
-    n = 60 .* self.rot_rate;
-
-    term1 = (chi * d_p) ./ k_g;
-    term2 = 2 .* k_b .* rho_b .* cp_b .* n ./ theta;
-
-    htc = 1 ./ (term1 + 0.5 ./ sqrt(term2));
-endfunction
-
 function [qdot] = fn_q_coat(self, T_wg, T_cr)
     % Heat flux accross internal coating [W].
     km = self.k_coat((T_wg + T_cr) / 2);
