@@ -1,39 +1,4 @@
 function build_heat_geometry(self)
-    % Initialize kiln heat transfer geometrical features.
-
-    % Areas for pair gas-wall: since the bed covers the central
-    % angle, theta=2pi-phi and areas are computed as follows.
-    self.P_cgw = (2 * pi - self.central_angle) .* self.R_cv;
-    self.P_rgw = (2 * pi - self.central_angle) .* self.R_cv;
-    self.A_cgw = self.P_cgw .* self.cell_length;
-    self.A_rgw = self.A_cgw;
-
-    % Areas for pair gas-bed: this area is as trapezoidal
-    % section because in fact bed is an inclined plane. Here,
-    % to avoid useless complications it is computed as a
-    % rectangle of exposed bed.
-    self.P_cgb = self.bed_cord_length;
-    self.P_rgb = self.bed_cord_length;
-    self.A_cgb = self.P_cgb .* self.cell_length;
-    self.A_rgb = self.A_cgb;
-
-    % Areas for pair wall-bed: in this case there are two
-    % different areas because radiation comes through the
-    % exposed surface and conduction from contact with wall.
-    % XXX: should'n the CWB be based on emitting surface?
-    self.P_cwb = self.central_angle .* self.R_cv;
-    self.P_rwb = self.bed_cord_length;
-    self.A_cwb = self.P_cwb .* self.cell_length;
-    self.A_rwb = self.P_rwb .* self.cell_length;
-
-    % External shell area.
-    self.P_env = 2 * pi .* self.R_sh;
-    self.A_env = self.P_env .* self.cell_length;
-
-    % View factor for RWB is the ratio of receiving bed
-    % surface to emitting walls (interface gas-wall).
-    self.omega = self.P_rwb ./ self.P_rgw;
-
     % Gorog's optical beam correlation used by Hanein (2016).
     D = 2 .* self.R_cv;
     self.beam = 0.95 .* D .* (1 - self.bed_height ./ D);
@@ -241,21 +206,6 @@ function rhs_finite_differences(self)
     self.dY_b = flatten(self.dY_b);
 endfunction
 
-function [hdot] = kramers_model(self, z, h, alpha, radius)
-    rho = self.bed.density_mass();
-    repose = self.bed.repose_angle();
-    vdot = self.feed_rate / rho;
-
-    R = radius(z);
-    alpha = alpha(z);
-
-    phi = (3/4) * vdot / (pi * self.rot_rate * R^3);
-    terml = tan(self.slope + alpha) / sin(repose);
-    termr = phi * ((2 - h / R) * h / R)^(-3/2);
-
-    hdot = -tan(repose) * (terml - termr);
-endfunction
-
 function [k_eff] = effective_thermal_conductivity(self, k_g, k_s)
     % Maxwell effective medium theory approximation.
     % NOTE: at first I had understood wrong on Hanein's paper. In
@@ -389,79 +339,3 @@ function [lhs] = lhs_system(self, x)
         self.dY_b    - self.cell_length .* self.Ydot_b  ...
     );
 endfunction
-
-function solve_system(self, opts)
-    tic();
-
-    % Initialize arrays of bounds.
-    % TODO parametrize mass boundaries.
-    mdot_max = self.mdot_g + self.mdot_b;
-    mdot_min = 0.000 * ones(self.nz, 1);
-    mdot_max = 5.000 * ones(self.nz, 1);
-    T_min = 200.0 .* ones(self.nz, 1);
-    T_max = 3000.0 .* ones(self.nz, 1);
-    Y_min_g = zeros(self.nz*self.gas.n_species, 1);
-    Y_max_g = ones(self.nz*self.gas.n_species, 1);
-    Y_min_b = zeros(self.nz*self.bed.n_species, 1);
-    Y_max_b = ones(self.nz*self.bed.n_species, 1);
-
-    % Copy arrays for specific modifications.
-    mdot_min_g = mdot_min;
-    mdot_min_b = mdot_min;
-    mdot_max_g = mdot_max;
-    mdot_max_b = mdot_max;
-    T_min_g = T_min;
-    T_min_b = T_min;
-    T_max_g = T_max;
-    T_max_b = T_max;
-
-    % Enforce B.C. in phase-specific arrays.
-    mdot_min_g(1)      = self.mdot_g(1);
-    mdot_max_g(1)      = self.mdot_g(1);
-    T_min_g(1)         = self.T_g(1);
-    T_max_g(1)         = self.T_g(1);
-    mdot_min_b(end)    = self.mdot_b(end);
-    mdot_max_b(end)    = self.mdot_b(end);
-    T_min_b(end)       = self.T_b(end);
-    T_max_b(end)       = self.T_b(end);
-    Y_min_g(1:6)       = self.Y_g(1, :);
-    Y_max_g(1:6)       = self.Y_g(1, :);
-
-    % if (self.devel)
-    %     Y_min_b(end-1:end) = self.Y_b(end, :);
-    %     Y_max_b(end-1:end) = self.Y_b(end, :);
-    % endif
-
-    M = [self.T_wg,          T_min,       T_max;      ...
-            self.T_cr,          T_min,       T_max;      ...
-            self.T_rs,          T_min,       T_max;      ...
-            self.T_sh,          T_min,       T_max;      ...
-            self.mdot_g,        mdot_min_g,  mdot_max_g; ...
-            self.mdot_b,        mdot_min_b,  mdot_max_b; ...
-            self.T_g,           T_min_g,     T_max_g;    ...
-            self.T_b,           T_min_b,     T_max_b;    ...
-            flatten(self.Y_g),  Y_min_g,       Y_max_g;  ...
-            flatten(self.Y_b),  Y_min_b,       Y_max_b;  ...
-    ];
-
-    results = self.solve_ipopt(
-        x0   = M(:, 1),
-        g    = @self.lhs_system,
-        lbx  = M(:, 2),
-        ubx  = M(:, 3),
-        opts = opts
-    );
-    self.unpack_parameters_system(results, finished=true);
-
-    self.evaluate_residence();
-
-    printf("\nSimulation took %.2f s\n", toc());
-endfunction
-
-function evaluate_residence(self)
-    tau_bed = self.bed.density_mass * self.bed_cross_area;
-    tau_bed = tau_bed .* self.cell_length ./ self.mdot_b;
-    tau_bed = cumtrapz(tau_bed) / 60.0;
-    tau_bed = tau_bed(end) - tau_bed;
-    self.tau(1:end) = tau_bed;
-end
