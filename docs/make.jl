@@ -17,6 +17,7 @@ pages = [
         "basics/components.md",
         "basics/thermodynamics.md",
         "basics/kinetics.md",
+        "basics/transport.md",
         "basics/hardcoded.md",
         "basics/drummers.md",
     ],
@@ -37,6 +38,7 @@ pages = [
     "Manual" => [
         "manual/users.md",
         "manual/kinetics.md",
+        "manual/transport.md",
         "manual/drummers.md",
         "manual/development.md",
     ],

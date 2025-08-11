@@ -11,3 +11,5 @@ abstract type AbstractThermalAnalysis end
 
 abstract type AbstractReactorModel end
 abstract type AbstractDrumBedModel <: AbstractReactorModel end
+
+abstract type AbstractViscosity end

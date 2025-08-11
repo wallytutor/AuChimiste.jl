@@ -133,3 +133,18 @@ function plot(model::ThermalAnalysisModel, sol; xticks = nothing)
         f, [ax1, ax2, ax3, ax4, ax5, ax6], lx
     end
 end
+
+function plot(model::FermiLikeViscosity, T)
+    with_theme() do
+        fig = Figure()
+        ax = Axis(fig[1, 1])
+    
+        lines!(ax, T, model.(T))
+        xlims!(ax, extrema(T))
+    
+        ax.xlabel = "Temperature [K]"
+        ax.ylabel = "Viscosity [Pa.s]"
+        
+        fig, ax
+    end
+end
