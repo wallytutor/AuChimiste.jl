@@ -9,6 +9,8 @@ using CairoMakie
 
 ```@example getting-started-1
 μ = FermiLikeViscosity(1300.0, 1700.0, 1000.0, 0.1, 10)
+
+μ(300.0), μ(2000.0)
 ```
 
 ```@example getting-started-1

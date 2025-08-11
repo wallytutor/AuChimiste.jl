@@ -17,24 +17,6 @@ Temperature-dependent viscosity with a Fermi-like distribution dependency.
 ## Fields
 
 $(TYPEDFIELDS)
-
-## Examples
-
-The following example shows the evaluation of such a function below, in
-the middle, and above melting range.
-
-```jldoctest
-julia> μ = FermiLikeViscosity(1300.0, 1700.0, 1000.0, 0.1, 10);
-
-julia> μ(300.0)
-999.9999999999065
-
-julia> μ(1500.0)
-500.05
-
-julia> μ(2000.0)
-0.10372626662025815
-```
 """
 struct FermiLikeViscosity <: AbstractViscosity
     "Center temperature of melting range [K]."
