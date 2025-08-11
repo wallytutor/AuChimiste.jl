@@ -16,6 +16,6 @@ using CairoMakie
 ```@example getting-started-1
 T = LinRange(500, 2000, 1000)
 
-fig, ax = plot(μ, T)
+fig, ax = AuChimiste.plot(μ, T)
 fig
 ```
